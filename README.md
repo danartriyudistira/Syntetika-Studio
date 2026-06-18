@@ -1,104 +1,37 @@
-[![Build Status](https://dev.azure.com/awwbees/Syntetika/_apis/build/status/Syntetika.Syntetika?branchName=main)](https://dev.azure.com/awwbees/Syntetika/_build/latest?definitionId=1&branchName=main)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
+# Synthetika Studio
 
+## Open Experience Composition Platform
 
-# Syntetika Synth
+Synthetika Studio lahir dari perjalanan saya sebagai seorang kreator yang bekerja di antara berbagai medium: audio, visual, ruang, dan teknologi.
 
-A software modular synth that I've been building for myself since 2011, and now you can use it!
+Perjalanan saya dimulai dari dunia visual. Saya berkarya sebagai visual jockey, mengembangkan video mapping, membangun sistem visual real-time, dan mengeksplorasi bagaimana sebuah ruang dapat diaktifkan melalui cahaya, gambar, dan interaksi. Seiring waktu, saya menyadari bahwa yang sebenarnya saya ciptakan bukanlah sekadar visual, melainkan pengalaman.
 
-[Nightly Build](https://github.com/Syntetika/Syntetika/releases/tag/Nightly) (updated every commit)
+Dalam setiap proyek, saya selalu menemukan tantangan yang sama. Audio berada di satu sistem. Visual berada di sistem lain. Spatial audio, interaksi, dan berbagai elemen pengalaman harus dirangkai menggunakan banyak perangkat dan perangkat lunak yang berbeda. Masing-masing bekerja dengan baik, tetapi sering kali tidak berbicara dalam bahasa yang sama.
 
-You can find the most recent builds for Mac/Windows/Linux at http://Syntetika.com, or in the [Releases](https://github.com/Syntetika/Syntetika/releases) section on GitHub.
+Dari situlah gagasan Synthetika Studio mulai terbentuk.
 
-Join the [Syntetika Discord](https://discord.gg/YdTMkvvpZZ) for support and to discuss with the community.
+Saya membayangkan sebuah platform di mana suara, visual, ruang, gerakan, dan peristiwa dapat diperlakukan sebagai bagian dari sistem yang sama. Sebuah lingkungan kreatif yang tidak memisahkan disiplin-disiplin tersebut, tetapi memungkinkan semuanya berinteraksi secara alami dalam satu komposisi.
 
+Bagi saya, sebuah trigger tidak harus menghasilkan suara saja. Trigger yang sama dapat memunculkan visual, menggerakkan objek dalam ruang, mengubah posisi audio secara spasial, atau mengaktifkan berbagai elemen lain yang membentuk sebuah pengalaman. Komposisi tidak lagi hanya tentang menyusun bunyi atau gambar, tetapi tentang menyusun hubungan di antara keduanya.
 
-## Documentation
+Synthetika Studio bukan saya bangun untuk menjadi DAW baru. Bukan pula untuk menjadi software VJ atau media server. Saya melihatnya sebagai sebuah Experience Composition Platform, tempat berbagai medium kreatif dapat bertemu dalam satu ekosistem yang terbuka dan dapat berkembang bersama.
 
-* [Official documentation](https://www.Syntetika.com/docs/)
-* [Searchable, community-written documentation](https://github.com/Syntetika/SyntetikaDocs/wiki)
+Saya memilih membangun proyek ini secara terbuka karena saya percaya banyak kreator menghadapi tantangan yang serupa. Saya ingin Synthetika menjadi ruang eksplorasi bersama bagi media artist, visual jockey, creative coder, musisi eksperimental, desainer pengalaman ruang, dan siapa pun yang tertarik pada pertemuan antara seni, teknologi, dan pengalaman manusia.
 
+Bagi saya, teknologi bukanlah tujuan.
 
-## Screenshot
+Visual bukanlah tujuan.
 
-![screenshot](screenshot-1.png)
+Audio bukanlah tujuan.
 
+Semuanya hanyalah medium.
 
-## Basic Overview/Tutorial Video
+Yang selalu menjadi pusat perhatian saya adalah bagaimana medium-medium tersebut dapat digunakan untuk membangun pengalaman yang bermakna bagi manusia yang mengalaminya.
 
-[![Syntetika Overview](https://img.youtube.com/vi/SYBc8X2IxqM/0.jpg)](https://www.youtube.com/watch?v=SYBc8X2IxqM)
-* https://youtu.be/SYBc8X2IxqM
+Synthetika Studio adalah upaya saya untuk terus mengeksplorasi gagasan tersebut. Sebuah platform yang lahir dari praktik, eksperimen, dan rasa ingin tahu yang terus berkembang. Sebuah fondasi terbuka yang saya harapkan dapat tumbuh bersama komunitas kreatif yang memiliki semangat yang sama: menciptakan pengalaman yang melampaui batas antara suara, visual, ruang, dan teknologi.
 
-### Quick Reference
+Synthetika Studio bukan sekadar perangkat lunak yang saya bangun.
 
-![quick reference](SYNTETIKA_quick_reference.png)
+Ia adalah cara saya memandang proses berkarya: bahwa pengalaman adalah medium terbesar, dan teknologi hanyalah salah satu cara untuk membentuknya.
 
-
-### Features
-
-* live-patchable environment, so you can build while the music is playing
-* VST, VST3, LV2 hosting
-* Python livecoding
-* MIDI & OSC controller mapping
-* Works on Windows, Mac, and Linux
-
-
-### License
-
-[GNU GPL v3](LICENSE)
-
-
-### Releases
-
-Sign up here to receive an email whenever I put out a new release: http://Syntetika.substack.com/
-
-
-### Contributing
-
-[See our contributing guidelines](CONTRIBUTING.md)
-
-
-### Building
-
-Building Syntetika from source is easy and fun! The basic cmake prescription gives you a completed
-executable which is ready to run on your system in many cases. If your system does not have `cmake` installed already you must do so.
-
-```shell
-git clone https://github.com/Syntetika/Syntetika   # replace this with your fork if you forked
-cd Syntetika
-git submodule update --init --recursive
-cmake -Bignore/build -DCMAKE_BUILD_TYPE=Release
-cmake --build ignore/build --parallel 4 --config Release
-```
-
-This will produce a release build in `ignore/build/Source/Syntetika_artefacts`.
-
-There are a few useful options to the *first* cmake command which many folks choose to use.
-
-* `-DSYNTETIKA_VST2_SDK_LOCATION=/path/to/sdk` will activate VST2 hosting support in your built
-  copy of Syntetika if you have access to the VST SDK
-* `-DSYNTETIKA_ASIO_SDK_LOCATION=/path/to/sdk` (windows only) will activate ASIO support on windows in your built copy of Syntetika if you have access to the ASIO SDK
-* `-DSYNTETIKA_SPACEMOUSE_SDK_LOCATION=/path/to/sdk` (windows only) will activate SpaceMouse canvas navigation support on windows in your built copy of Syntetika if you have access to the SpaceMouse SDK
-* `-DSYNTETIKA_PYTHON_ROOT=/...` will override the automatically detected python root. In some cases with M1 mac builds in homebrew this is useful.
-* `-DCMAKE_BUILD_TYPE=Debug` will produce a build with debug information available
-* `-A x64` (windows only) will force visual studio to build for 64 bit architectures, in the event this is not your default
-* `-GXcode` (mac only) will eject xcode project files rather than the default make files
-* `-DCMAKE_INSTALL_PREFIX=/usr` (only used on Linux) will set the `CMAKE_INSTALL_PREFIX` which guides both where your
-  built syntetika looks for resources and also where it installs. After a build on Linux with this configured, you can
-  do `sudo cmake --install ignore/build` and syntetika will install correctly into this directory. The cmake default is `/usr/local`.
-
-The directory name `ignore/build` is arbitrary. Syntetika is set up to `.gitignore` everything in the `ignore` directory but you
-can use any directory name you want for a build or have multiple builds also.
-
-To be able to build you will need a few things, depending on your OS
-
-* All systems require an install of git
-* On Windows:
-    * Install Visual Studio 2019 Community Edition. When you install Visual Studio, make sure to include CLI tools and CMake, which are included in
-      'Optional CLI support' and 'Toolset for Desktop' install bundles
-    * Python from python.org
-    * Run all commands from the visual studio command shell which will be available after you install VS.
-* On MacOS: install xcode; install xcode command line tools with `xcode-select --install` and install cmake with `brew install cmake` if you use homebrew or from cmake.org if not
-* On Linux you probably already have everything (gcc, git, etc...), but you will need to install required packages. The full list we
-  install on a fresh ubuntu 20 box are listed in the azure-pipelines.yml
-    * Some distributions may have slightly different package names like for instance Debian bookworm: You need to replace `alsa` and `alsa-tools` with `alsa-utils`
+## Compose Sound. Shape Space. Create Experience.
