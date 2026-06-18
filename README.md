@@ -1,37 +1,95 @@
-# Synthetika Studio
+# Tentang Synthetika Studio
 
-## Open Experience Composition Platform
+Synthetika Studio berawal dari sebuah eksperimen pribadi yang saya mulai melalui proyek **[Syntetika Engine (Web Version)](https://github.com/danartriyudistira/syntetika_engine?utm_source=chatgpt.com)**.
 
-Synthetika Studio lahir dari perjalanan saya sebagai seorang kreator yang bekerja di antara berbagai medium: audio, visual, ruang, dan teknologi.
+Pada tahap awal, fokus utama proyek tersebut adalah membangun sistem sequencer generatif berbasis web. Saya ingin mengeksplorasi bagaimana pola, probabilitas, dan algoritma dapat digunakan untuk menghasilkan komposisi musik secara dinamis. Syntetika Engine menjadi ruang eksperimen untuk membangun generator MIDI, sequencer generatif, dan berbagai pendekatan komputasional dalam proses penciptaan musik.
 
-Perjalanan saya dimulai dari dunia visual. Saya berkarya sebagai visual jockey, mengembangkan video mapping, membangun sistem visual real-time, dan mengeksplorasi bagaimana sebuah ruang dapat diaktifkan melalui cahaya, gambar, dan interaksi. Seiring waktu, saya menyadari bahwa yang sebenarnya saya ciptakan bukanlah sekadar visual, melainkan pengalaman.
+Namun seiring pengembangan berlangsung, saya mulai menyadari bahwa kebutuhan saya berkembang jauh melampaui sekadar membuat sequencer.
 
-Dalam setiap proyek, saya selalu menemukan tantangan yang sama. Audio berada di satu sistem. Visual berada di sistem lain. Spatial audio, interaksi, dan berbagai elemen pengalaman harus dirangkai menggunakan banyak perangkat dan perangkat lunak yang berbeda. Masing-masing bekerja dengan baik, tetapi sering kali tidak berbicara dalam bahasa yang sama.
+Sebagai seorang media artist yang bekerja di persimpangan audio, visual, ruang, dan teknologi, saya membutuhkan sebuah sistem yang tidak hanya mampu menghasilkan MIDI atau suara, tetapi juga mampu menghubungkan berbagai medium kreatif dalam satu lingkungan kerja yang terpadu.
 
-Dari situlah gagasan Synthetika Studio mulai terbentuk.
+Saya ingin sebuah trigger MIDI tidak hanya memicu suara.
 
-Saya membayangkan sebuah platform di mana suara, visual, ruang, gerakan, dan peristiwa dapat diperlakukan sebagai bagian dari sistem yang sama. Sebuah lingkungan kreatif yang tidak memisahkan disiplin-disiplin tersebut, tetapi memungkinkan semuanya berinteraksi secara alami dalam satu komposisi.
+Saya ingin trigger yang sama dapat memanggil visual, menggerakkan objek dalam ruang, mengontrol posisi audio spasial, memicu generative graphics, atau menjadi bagian dari sebuah pengalaman audiovisual yang utuh.
 
-Bagi saya, sebuah trigger tidak harus menghasilkan suara saja. Trigger yang sama dapat memunculkan visual, menggerakkan objek dalam ruang, mengubah posisi audio secara spasial, atau mengaktifkan berbagai elemen lain yang membentuk sebuah pengalaman. Komposisi tidak lagi hanya tentang menyusun bunyi atau gambar, tetapi tentang menyusun hubungan di antara keduanya.
+Pencarian tersebut akhirnya membawa saya pada **[Bespoke Synth](https://github.com/BespokeSynth/BespokeSynth?utm_source=chatgpt.com)**, sebuah modular synthesizer open-source berbasis node yang memiliki fondasi teknis yang sangat kuat untuk pengembangan sistem real-time.
 
-Synthetika Studio bukan saya bangun untuk menjadi DAW baru. Bukan pula untuk menjadi software VJ atau media server. Saya melihatnya sebagai sebuah Experience Composition Platform, tempat berbagai medium kreatif dapat bertemu dalam satu ekosistem yang terbuka dan dapat berkembang bersama.
+Alih-alih membangun seluruh infrastruktur dari nol, saya melihat Bespoke sebagai pondasi yang ideal untuk mengembangkan visi yang selama ini saya bayangkan.
 
-Saya memilih membangun proyek ini secara terbuka karena saya percaya banyak kreator menghadapi tantangan yang serupa. Saya ingin Synthetika menjadi ruang eksplorasi bersama bagi media artist, visual jockey, creative coder, musisi eksperimental, desainer pengalaman ruang, dan siapa pun yang tertarik pada pertemuan antara seni, teknologi, dan pengalaman manusia.
+Dari titik itulah lahir **Synthetika Studio**.
 
-Bagi saya, teknologi bukanlah tujuan.
+---
 
-Visual bukanlah tujuan.
+## Apa Itu Synthetika Studio?
 
-Audio bukanlah tujuan.
+Synthetika Studio adalah sebuah software audiovisual performance dan experience composition yang dibangun di atas pondasi Bespoke Synth.
 
-Semuanya hanyalah medium.
+Secara teknis, Synthetika Studio mewarisi kekuatan utama Bespoke:
 
-Yang selalu menjadi pusat perhatian saya adalah bagaimana medium-medium tersebut dapat digunakan untuk membangun pengalaman yang bermakna bagi manusia yang mengalaminya.
+- Node-based architecture
+- Real-time audio processing
+- Modular signal routing
+- MIDI ecosystem
+- Sequencer framework
+- Open-source development model
 
-Synthetika Studio adalah upaya saya untuk terus mengeksplorasi gagasan tersebut. Sebuah platform yang lahir dari praktik, eksperimen, dan rasa ingin tahu yang terus berkembang. Sebuah fondasi terbuka yang saya harapkan dapat tumbuh bersama komunitas kreatif yang memiliki semangat yang sama: menciptakan pengalaman yang melampaui batas antara suara, visual, ruang, dan teknologi.
+Di atas fondasi tersebut, saya mengembangkan lapisan baru yang berfokus pada integrasi berbagai medium kreatif.
 
-Synthetika Studio bukan sekadar perangkat lunak yang saya bangun.
+Visi jangka panjang Synthetika Studio adalah menghadirkan kategori node yang tidak hanya berisi Audio Node, tetapi juga:
 
-Ia adalah cara saya memandang proses berkarya: bahwa pengalaman adalah medium terbesar, dan teknologi hanyalah salah satu cara untuk membentuknya.
+```text
+Audio Nodes
+Visual Nodes
+Spatial Nodes
+Motion Nodes
+Utility Nodes
+```
 
-## Compose Sound. Shape Space. Create Experience.
+Dengan pendekatan ini, suara, visual, ruang, dan pergerakan dapat diperlakukan sebagai objek yang setara dalam satu graph yang sama.
+
+---
+
+## Dari Audio ke Experience Composition
+
+Sebagian besar software kreatif saat ini masih memisahkan berbagai medium ke dalam aplikasi yang berbeda.
+
+Musik dibuat di DAW.
+
+Visual dibuat di software VJ.
+
+Spatial audio menggunakan sistem lain.
+
+Interaksi menggunakan sistem yang berbeda lagi.
+
+Synthetika Studio berusaha menjembatani keterpisahan tersebut.
+
+Bagi saya, komposisi masa depan tidak hanya berbicara tentang nada dan ritme, tetapi juga tentang posisi, gerakan, visual, ruang, dan bagaimana semuanya membentuk pengalaman yang dirasakan manusia.
+
+Karena itu saya mendefinisikan Synthetika Studio bukan sebagai synthesizer, bukan sebagai DAW, dan bukan sebagai software VJ.
+
+Saya melihatnya sebagai:
+
+> **Open Experience Composition Platform**
+
+Sebuah platform terbuka yang memungkinkan kreator menyusun suara, visual, ruang, dan interaksi sebagai satu medium yang saling terhubung.
+
+---
+
+## Open Source sebagai Fondasi
+
+Synthetika Studio dibangun di atas semangat open source yang sama dengan Bespoke Synth.
+
+Saya memilih mengembangkan proyek ini secara terbuka karena saya percaya bahwa ekosistem kreatif tumbuh lebih kuat ketika pengetahuan, alat, dan eksperimen dapat dibagikan dan dikembangkan bersama.
+
+Tujuan saya bukan menciptakan produk tertutup.
+
+Tujuan saya adalah membangun fondasi yang dapat digunakan, dipelajari, dimodifikasi, dan dikembangkan oleh seniman media, visual jockey, creative coder, musisi eksperimental, dan para kreator yang memiliki ketertarikan yang sama terhadap persimpangan antara seni, teknologi, dan pengalaman manusia.
+
+Synthetika Studio adalah kelanjutan dari perjalanan tersebut.
+
+Sebuah evolusi dari Syntetika Engine menuju platform yang lebih terbuka, lebih modular, dan lebih dekat dengan visi saya tentang masa depan komposisi audiovisual dan spatial experience.
+
+---
+
+**Synthetika Studio**  
+*Compose Sound. Shape Space. Create Experience.*
