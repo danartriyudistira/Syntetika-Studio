@@ -1,0 +1,1 @@
+﻿xcrun stapler staple Syntetika-Mac.dmg

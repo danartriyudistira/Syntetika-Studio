@@ -1,0 +1,9 @@
+{
+  "title": "Syntetika",
+  "background": "background.png",
+  "icon-size": 80,
+  "contents": [
+    { "x": 192, "y": 338, "type": "file", "path": "Syntetika.app" },
+    { "x": 448, "y": 338, "type": "link", "path": "/Applications" }
+  ]
+}

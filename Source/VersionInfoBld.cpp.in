@@ -1,0 +1,13 @@
+#include "VersionInfo.h"
+
+// This file will get replaced with the CMAKE variables as below at build time
+namespace Syntetika
+{
+
+    const char* GIT_BRANCH = "@GIT_BRANCH@";
+    const char* GIT_HASH = "@GIT_COMMIT_HASH@";
+    const char* BUILD_ARCH = "@SYNTETIKA_BUILD_ARCH@";
+    const char* BUILD_DATE = "@SYNTETIKA_BUILD_DATE@";
+    const char* BUILD_TIME = "@SYNTETIKA_BUILD_TIME@";
+
+}
