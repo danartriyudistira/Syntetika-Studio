@@ -682,10 +682,7 @@ target_sources(Syntetika PRIVATE
      SpatialSource.h
       SpatialRender.cpp
       SpatialRender.h
-      Spatial2DSpace.cpp
-      Spatial2DSpace.h
-      SpatialObject.cpp
-      SpatialObject.h
+
      SpectralDisplay.cpp
     SpectralDisplay.h
     Splitter.cpp
