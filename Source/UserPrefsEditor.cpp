@@ -452,6 +452,29 @@ void UserPrefsEditor::FloatSliderUpdated(FloatSlider* slider, float oldVal, doub
       }
       if (slider == UserPrefs.cable_alpha.GetSlider())
          ModularSynth::sCableAlpha = UserPrefs.cable_alpha.Get();
+      if (slider == UserPrefs.grid_alpha.GetSlider())
+         ModularSynth::sGridAlpha = UserPrefs.grid_alpha.Get();
+      if (slider == UserPrefs.module_saturation.GetSlider() ||
+          slider == UserPrefs.module_brightness.GetSlider() ||
+          slider == UserPrefs.note_hue.GetSlider() ||
+          slider == UserPrefs.audio_hue.GetSlider() ||
+          slider == UserPrefs.synth_hue.GetSlider() ||
+          slider == UserPrefs.instrument_hue.GetSlider() ||
+          slider == UserPrefs.processor_hue.GetSlider() ||
+          slider == UserPrefs.processor_sat.GetSlider() ||
+          slider == UserPrefs.processor_bri.GetSlider() ||
+          slider == UserPrefs.modulator_hue.GetSlider() ||
+          slider == UserPrefs.modulator_sat.GetSlider() ||
+          slider == UserPrefs.modulator_bri.GetSlider() ||
+          slider == UserPrefs.pulse_hue.GetSlider() ||
+          slider == UserPrefs.pulse_sat.GetSlider() ||
+          slider == UserPrefs.pulse_bri.GetSlider() ||
+          slider == UserPrefs.visual_hue.GetSlider() ||
+          slider == UserPrefs.visual_sat.GetSlider() ||
+          slider == UserPrefs.visual_bri.GetSlider())
+      {
+         IDrawableModule::LoadCategoryColorsFromPrefs();
+      }
    }
 }
 

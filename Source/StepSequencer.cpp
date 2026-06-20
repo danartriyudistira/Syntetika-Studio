@@ -1,4 +1,4 @@
-﻿/**
+/**
     syntetika (experimental fork of bespoke synth), a software modular synthesizer
     Copyright (C) 2021 Ryan Challinor (contact: awwbees@gmail.com)
 
@@ -1124,9 +1124,7 @@ bool StepSequencer::SetPatternData(int idx, const std::vector<char>& in)
 
 void StepSequencer::SaveState(FileStreamOut& out)
 {
-   out << GetModuleSaveStateRev();
-
-   IDrawableModule::SaveState(out);
+      IDrawableModule::SaveState(out);
 
    mGrid->SaveState(out);
 

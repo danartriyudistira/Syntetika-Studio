@@ -1334,8 +1334,7 @@ void PatternMatrix::SetUpFromSaveData()
 
 void PatternMatrix::SaveState(FileStreamOut& out)
 {
-   out << GetModuleSaveStateRev();
-   IDrawableModule::SaveState(out);
+      IDrawableModule::SaveState(out);
 
    out << mNumTracks;
    out << mNumSlots;

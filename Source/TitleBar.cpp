@@ -340,12 +340,8 @@ void TitleBar::DrawModule()
    if (HiddenByZoom())
       return;
 
-   ofSetColor(255, 255, 255);
-
-   ofPushStyle();
-   if (gHoveredModule == this && mLeftCornerHovered)
-      ofSetColor(ofColor::lerp(ofColor::black, ofColor::white, ofMap(sin(gTime / 1000 * PI * 2), -1, 1, .7f, .9f)));
-   DrawTextBold("syntetika", 2, 28, 34);
+   ofSetColor(173, 255, 47);
+   DrawTextBold("SYNTETIKA", 2, 28, 28);
 #if SYNTETIKA_NIGHTLY && !SYNTETIKA_SUPPRESS_NIGHTLY_LABEL
    DrawTextNormal("nightly", 90, 35, 8);
 #endif
@@ -356,7 +352,6 @@ void TitleBar::DrawModule()
    ofSetColor(255, 0, 0);
    DrawTextBold("debug build", 17, 25, 17);
 #endif
-   ofPopStyle();
 
    std::string info;
    if (TheSynth->GetMoveModule())

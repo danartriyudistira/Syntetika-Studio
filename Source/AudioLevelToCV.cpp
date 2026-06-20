@@ -1,4 +1,4 @@
-﻿/**
+/**
     syntetika (experimental fork of bespoke synth), a software modular synthesizer
     Copyright (C) 2021 Ryan Challinor (contact: awwbees@gmail.com)
 
@@ -150,9 +150,7 @@ void AudioLevelToCV::SetUpFromSaveData()
 
 void AudioLevelToCV::SaveState(FileStreamOut& out)
 {
-   out << GetModuleSaveStateRev();
-
-   IDrawableModule::SaveState(out);
+      IDrawableModule::SaveState(out);
 }
 
 void AudioLevelToCV::LoadState(FileStreamIn& in, int rev)

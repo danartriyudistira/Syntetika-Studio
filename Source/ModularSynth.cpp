@@ -54,13 +54,14 @@ namespace
 
 //static
 bool ModularSynth::sShouldAutosave = false;
-float ModularSynth::sBackgroundLissajousR = 0.078f;
-float ModularSynth::sBackgroundLissajousG = 0.157f;
-float ModularSynth::sBackgroundLissajousB = 0.235f;
-float ModularSynth::sBackgroundR = 0.031f;
-float ModularSynth::sBackgroundG = 0.031f;
-float ModularSynth::sBackgroundB = 0.078f;
+float ModularSynth::sBackgroundLissajousR = 0.020f;
+float ModularSynth::sBackgroundLissajousG = 0.031f;
+float ModularSynth::sBackgroundLissajousB = 0.024f;
+float ModularSynth::sBackgroundR = 0.020f;
+float ModularSynth::sBackgroundG = 0.020f;
+float ModularSynth::sBackgroundB = 0.020f;
 float ModularSynth::sCableAlpha = 1.0f;
+float ModularSynth::sGridAlpha = 20;
 int ModularSynth::sLoadingFileSaveStateRev = ModularSynth::kSaveStateRev;
 int ModularSynth::sLastLoadedFileSaveStateRev = ModularSynth::kSaveStateRev;
 std::thread::id ModularSynth::sAudioThreadId;
@@ -263,6 +264,8 @@ void ModularSynth::Setup(juce::AudioDeviceManager* globalAudioDeviceManager, juc
    sBackgroundG = UserPrefs.background_g.Get();
    sBackgroundB = UserPrefs.background_b.Get();
    sCableAlpha = UserPrefs.cable_alpha.Get();
+   sGridAlpha = UserPrefs.grid_alpha.Get();
+   IDrawableModule::LoadCategoryColorsFromPrefs();
 
    Time time = Time::getCurrentTime();
    if (fabsf(sBackgroundR - UserPrefs.background_r.GetDefault()) < .001f && fabsf(sBackgroundG - UserPrefs.background_g.GetDefault()) < .001f && fabsf(sBackgroundB - UserPrefs.background_b.GetDefault()) < .001f && time.getMonth() + 1 == 10 && time.getDayOfMonth() == 31)
@@ -558,7 +561,7 @@ void ModularSynth::Draw(void* vg)
    {
       ofPushStyle();
       ofSetLineWidth(.5f);
-      ofSetColor(255, 255, 255, 40);
+      ofSetColor(216, 222, 230, 40);
       float gridSnapSize = UserPrefs.grid_snap_size.Get();
       int gridLinesVertical = (int)ceil((ofGetWidth() / gDrawScale) / gridSnapSize);
       for (int i = 0; i < gridLinesVertical; ++i)
@@ -813,14 +816,14 @@ void ModularSynth::Draw(void* vg)
       float tooltipBackgroundAlpha = 180;
 
       ofFill();
-      ofSetColor(50, 50, 50, tooltipBackgroundAlpha);
+      ofSetColor(17, 22, 29, tooltipBackgroundAlpha);
       ofRect(onscreenRectX, onscreenRectY, rect.width, rect.height);
 
       ofNoFill();
-      ofSetColor(255, 255, 255, tooltipBackgroundAlpha);
+      ofSetColor(48, 56, 68, tooltipBackgroundAlpha);
       ofRect(onscreenRectX, onscreenRectY, rect.width, rect.height);
 
-      ofSetColor(255, 255, 255);
+      ofSetColor(216, 222, 230);
       //DrawTextNormal(tooltip, x + 5, y + 12);
       gFont.DrawStringWrap(tooltip, fontSize, tooltipPos.x + (onscreenRectX - rect.x), tooltipPos.y + (onscreenRectY - rect.y), maxWidth);
 
@@ -897,7 +900,7 @@ void ModularSynth::DrawConsole()
       if (gHoveredUIControl != nullptr)
       {
          ofPushStyle();
-         ofSetColor(0, 255, 255);
+         ofSetColor(48, 56, 68);
          DrawTextNormal(gHoveredUIControl->Path(), 0, consoleY - 4);
          ofPopStyle();
       }
@@ -907,7 +910,7 @@ void ModularSynth::DrawConsole()
    {
       ofPushStyle();
       float pulse = ofMap(sin(gTime / 500 * PI * 2), -1, 1, .5f, 1);
-      ofSetColor(255 * pulse, 255 * pulse, 0);
+      ofSetColor(217, 164, 65);
       DrawTextNormal("circular dependency detected", 0, consoleY + 20);
       ofPopStyle();
    }
@@ -920,7 +923,7 @@ void ModularSynth::DrawConsole()
       if (outputLines > 0)
       {
          ofPushStyle();
-         ofSetColor(0, 0, 0, 150);
+         ofSetColor(7, 10, 13, 180);
          ofFill();
          float titleBarW, titleBarH;
          TheTitleBar->GetDimensions(titleBarW, titleBarH);
@@ -931,12 +934,12 @@ void ModularSynth::DrawConsole()
       for (auto it = mEvents.begin(); it != mEvents.end(); ++it)
       {
          ofPushStyle();
-         if (it->type == kLogEventType_Error)
-            ofSetColor(255, 0, 0);
-         else if (it->type == kLogEventType_Warning)
-            ofSetColor(255, 255, 0);
-         else
-            ofSetColor(255, 255, 255);
+          if (it->type == kLogEventType_Error)
+             ofSetColor(217, 74, 74);
+          else if (it->type == kLogEventType_Warning)
+             ofSetColor(217, 164, 65);
+          else
+             ofSetColor(137, 147, 160);
          gFontFixedWidth.DrawString(it->text, 13, 10, consoleY);
          std::vector<std::string> lines = ofSplitString(it->text, "\n");
          ofPopStyle();
@@ -2031,6 +2034,8 @@ void ModularSynth::AudioOut(float* const* output, int bufferSize, int nChannels)
       sFirst = false;
    }
 
+   ScopedMutex mutex(&mAudioThreadMutex, "audioOut()");
+
    if (mAudioPaused)
    {
       for (int ch = 0; ch < nChannels; ++ch)
@@ -2040,8 +2045,6 @@ void ModularSynth::AudioOut(float* const* output, int bufferSize, int nChannels)
       }
       return;
    }
-
-   ScopedMutex mutex(&mAudioThreadMutex, "audioOut()");
 
    /////////// AUDIO PROCESSING STARTS HERE /////////////
    mNoteOutputQueue->Process();
@@ -2113,10 +2116,10 @@ void ModularSynth::AudioOut(float* const* output, int bufferSize, int nChannels)
 
 void ModularSynth::AudioIn(const float* const* input, int bufferSize, int nChannels)
 {
+   ScopedMutex mutex(&mAudioThreadMutex, "audioIn()");
+
    if (mAudioPaused)
       return;
-
-   ScopedMutex mutex(&mAudioThreadMutex, "audioIn()");
 
    int oversampling = UserPrefs.oversampling.Get();
 
@@ -2883,6 +2886,7 @@ void ModularSynth::SaveState(std::string file, bool autosave)
    }
 
    mAudioThreadMutex.Lock("SaveState()");
+   LockRender(true);
 
    //write to a temp file first, so we don't corrupt data if we crash mid-save
    std::string tmpFilePath = ofToDataPath("tmp");
@@ -2900,6 +2904,7 @@ void ModularSynth::SaveState(std::string file, bool autosave)
    juce::File targetFile(file);
    writtenFile.copyFileTo(targetFile);
 
+   LockRender(false);
    mAudioThreadMutex.Unlock();
 }
 
@@ -2933,8 +2938,6 @@ void ModularSynth::LoadState(std::string file)
    LockRender(true);
    mAudioPaused = true;
    mIsLoadingState = true;
-   LockRender(false);
-   mAudioThreadMutex.Unlock();
 
    //TODO(Ryan) here's a little hack to allow older BSK files that were saved in 32-bit to load.
    //I guess this could bite me if someone ever has a very massive json. the number corresponds to a long-standing sanity check in FileStreamIn::operator>>(std::string &var), so this shouldn't break any current behavior.
@@ -2966,8 +2969,6 @@ void ModularSynth::LoadState(std::string file)
    std::string filename = savePath.getFileName().toStdString();
    mMainComponent->getTopLevelComponent()->setName("syntetika synth - " + filename);
 
-   mAudioThreadMutex.Lock("LoadState()");
-   LockRender(true);
    mAudioPaused = false;
    mIsLoadingState = false;
    LockRender(false);

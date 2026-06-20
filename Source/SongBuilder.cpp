@@ -881,7 +881,7 @@ void SongBuilder::SaveState(FileStreamOut& out)
       }
    }
 
-   IDrawableModule::SaveState(out);
+   SaveStateBase(out);
 }
 
 void SongBuilder::LoadState(FileStreamIn& in, int rev)

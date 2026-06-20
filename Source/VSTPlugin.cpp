@@ -1280,7 +1280,7 @@ void VSTPlugin::SaveState(FileStreamOut& out)
       out << false;
    }
 
-   IDrawableModule::SaveState(out);
+       SaveStateBase(out);
 }
 
 void VSTPlugin::LoadState(FileStreamIn& in, int rev)

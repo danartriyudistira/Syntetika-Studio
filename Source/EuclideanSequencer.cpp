@@ -1,4 +1,4 @@
-﻿/**
+/**
     syntetika (experimental fork of bespoke synth), a software modular synthesizer
     Copyright (C) 2021 Ryan Challinor (contact: awwbees@gmail.com)
 
@@ -347,9 +347,7 @@ void EuclideanSequencer::SetUpFromSaveData()
 
 void EuclideanSequencer::SaveState(FileStreamOut& out)
 {
-   out << GetModuleSaveStateRev();
-
-   IDrawableModule::SaveState(out);
+      IDrawableModule::SaveState(out);
 
    float width, height;
    GetModuleDimensions(width, height);

@@ -452,6 +452,7 @@ void DisplayManager::ResolveSources()
 void DisplayManager::SaveState(FileStreamOut& out)
 {
    out << GetModuleSaveStateRev();
+
    out << mGridRows;
    out << mGridCols;
    out << mActiveCell;
@@ -463,7 +464,8 @@ void DisplayManager::SaveState(FileStreamOut& out)
    out << (int)mCellPriority.size();
    for (int p : mCellPriority)
       out << p;
-   IDrawableModule::SaveState(out);
+
+   SaveStateBase(out);
 }
 
 void DisplayManager::LoadState(FileStreamIn& in, int rev)

@@ -1,4 +1,4 @@
-﻿/**
+/**
     syntetika (experimental fork of bespoke synth), a software modular synthesizer
     Copyright (C) 2021 Ryan Challinor (contact: awwbees@gmail.com)
 
@@ -149,9 +149,7 @@ void CircleSequencer::SetUpFromSaveData()
 
 void CircleSequencer::SaveState(FileStreamOut& out)
 {
-   out << GetModuleSaveStateRev();
-
-   IDrawableModule::SaveState(out);
+      IDrawableModule::SaveState(out);
 
    out << (int)mCircleSequencerRings.size();
    for (size_t i = 0; i < mCircleSequencerRings.size(); ++i)

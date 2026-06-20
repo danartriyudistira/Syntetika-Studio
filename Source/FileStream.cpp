@@ -179,10 +179,7 @@ FileStreamIn& FileStreamIn::operator>>(std::string& var)
       mStream->read(&len64, sizeof(len64));
    }
 
-   if (TheSynth->IsLoadingModule())
-      LoadStateValidate(len64 < sMaxStringLength); //probably garbage beyond this point
-   else
-      assert(len64 < sMaxStringLength); //probably garbage beyond this point
+   LoadStateValidate(len64 < sMaxStringLength); //probably garbage beyond this point
 
    size_t len = len64;
    var.resize(len);

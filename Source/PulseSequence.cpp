@@ -1,4 +1,4 @@
-﻿/**
+/**
     syntetika (experimental fork of bespoke synth), a software modular synthesizer
     Copyright (C) 2021 Ryan Challinor (contact: awwbees@gmail.com)
 
@@ -290,9 +290,7 @@ void PulseSequence::GridUpdated(UIGrid* grid, int col, int row, float value, flo
 
 void PulseSequence::SaveState(FileStreamOut& out)
 {
-   out << GetModuleSaveStateRev();
-
-   IDrawableModule::SaveState(out);
+      IDrawableModule::SaveState(out);
 
    mVelocityGrid->SaveState(out);
    out << mHasExternalPulseSource;

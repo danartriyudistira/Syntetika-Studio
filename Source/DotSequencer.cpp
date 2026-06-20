@@ -1,4 +1,4 @@
-﻿/**
+/**
     syntetika (experimental fork of bespoke synth), a software modular synthesizer
     Copyright (C) 2023 Ryan Challinor (contact: awwbees@gmail.com)
 
@@ -341,9 +341,7 @@ void DotSequencer::SetUpFromSaveData()
 
 void DotSequencer::SaveState(FileStreamOut& out)
 {
-   out << GetModuleSaveStateRev();
-
-   IDrawableModule::SaveState(out);
+      IDrawableModule::SaveState(out);
 
    out << (int)mInterval;
    out << mHasExternalPulseSource;

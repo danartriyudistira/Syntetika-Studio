@@ -627,8 +627,8 @@ void ModuleContainer::SaveState(FileStreamOut& out)
       if (module->IsSaveable())
       {
          //ofLog() << "Saving " << module->Name();
-         out << std::string(module->Name());
-         module->SaveState(out);
+          out << std::string(module->Name());
+          module->SaveState(out);
          for (int i = 0; i < GetModuleSeparatorLength(); ++i)
             out << GetModuleSeparator()[i];
       }
@@ -649,7 +649,7 @@ void ModuleContainer::LoadState(FileStreamIn& in)
 
    int header;
    in >> header;
-   assert(header <= ModularSynth::kSaveStateRev);
+   LoadStateValidate(header <= ModularSynth::kSaveStateRev);
    ModularSynth::sLoadingFileSaveStateRev = header;
    ModularSynth::sLastLoadedFileSaveStateRev = header;
 
@@ -691,7 +691,8 @@ void ModuleContainer::LoadState(FileStreamIn& in)
                }
                ofLog() << nextFewChars;
             }
-            assert(separatorChar == GetModuleSeparator()[j]);
+            if (separatorChar != GetModuleSeparator()[j])
+               throw LoadStateException();
          }
       }
       catch (LoadStateException& e)

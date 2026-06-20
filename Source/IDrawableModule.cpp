@@ -47,12 +47,47 @@
 #include "UserPrefs.h"
 #include "Prefab.h"
 
-float IDrawableModule::sHueNote = 128;
-float IDrawableModule::sHueAudio = 120;
-float IDrawableModule::sHueInstrument = 124;
-float IDrawableModule::sHueNoteSource = 135;
-float IDrawableModule::sSaturation = 200;
-float IDrawableModule::sBrightness = 180;
+float IDrawableModule::sHueNote = 101;
+float IDrawableModule::sHueAudio = 96;
+float IDrawableModule::sHueInstrument = 101;
+float IDrawableModule::sHueNoteSource = 106;
+float IDrawableModule::sSaturation = 224;
+float IDrawableModule::sBrightness = 175;
+float IDrawableModule::sHueProcessor = 130;
+float IDrawableModule::sSatProcessor = 200;
+float IDrawableModule::sBriProcessor = 165;
+float IDrawableModule::sHueModulator = 165;
+float IDrawableModule::sSatModulator = 180;
+float IDrawableModule::sBriModulator = 155;
+float IDrawableModule::sHuePulse = 50;
+float IDrawableModule::sSatPulse = 224;
+float IDrawableModule::sBriPulse = 175;
+float IDrawableModule::sHueVisual = 240;
+float IDrawableModule::sSatVisual = 150;
+float IDrawableModule::sBriVisual = 155;
+
+//static
+void IDrawableModule::LoadCategoryColorsFromPrefs()
+{
+   sHueNote = UserPrefs.note_hue.Get();
+   sHueAudio = UserPrefs.audio_hue.Get();
+   sHueInstrument = UserPrefs.synth_hue.Get();
+   sHueNoteSource = UserPrefs.instrument_hue.Get();
+   sSaturation = UserPrefs.module_saturation.Get();
+   sBrightness = UserPrefs.module_brightness.Get();
+   sHueProcessor = UserPrefs.processor_hue.Get();
+   sSatProcessor = UserPrefs.processor_sat.Get();
+   sBriProcessor = UserPrefs.processor_bri.Get();
+   sHueModulator = UserPrefs.modulator_hue.Get();
+   sSatModulator = UserPrefs.modulator_sat.Get();
+   sBriModulator = UserPrefs.modulator_bri.Get();
+   sHuePulse = UserPrefs.pulse_hue.Get();
+   sSatPulse = UserPrefs.pulse_sat.Get();
+   sBriPulse = UserPrefs.pulse_bri.Get();
+   sHueVisual = UserPrefs.visual_hue.Get();
+   sSatVisual = UserPrefs.visual_sat.Get();
+   sBriVisual = UserPrefs.visual_bri.Get();
+}
 
 IDrawableModule::IDrawableModule()
 {
@@ -548,13 +583,13 @@ ofColor IDrawableModule::GetColor(ModuleCategory type)
    if (type == kModuleCategory_Instrument)
       color.setHsb(sHueNoteSource, sSaturation, sBrightness);
     if (type == kModuleCategory_Processor)
-       color.setHsb(156, 200, 200);
+        color.setHsb(sHueProcessor, sSatProcessor, sBriProcessor);
     if (type == kModuleCategory_Modulator)
-       color.setHsb(163, 180, 180);
+        color.setHsb(sHueModulator, sSatModulator, sBriModulator);
      if (type == kModuleCategory_Pulse)
-        color.setHsb(43, 200, 180);
+         color.setHsb(sHuePulse, sSatPulse, sBriPulse);
      if (type == kModuleCategory_Visual)
-        color.setHsb(280, 180, 200);
+         color.setHsb(sHueVisual, sSatVisual, sBriVisual);
    return color;
 }
 
@@ -1238,6 +1273,11 @@ void IDrawableModule::SaveState(FileStreamOut& out)
 
    out << GetModuleSaveStateRev();
 
+   SaveStateBase(out);
+}
+
+void IDrawableModule::SaveStateBase(FileStreamOut& out)
+{
    out << kBaseSaveStateRev;
 
    out << mPinned;
@@ -1373,7 +1413,8 @@ void IDrawableModule::LoadState(FileStreamIn& in, int rev)
                }
                ofLog() << nextFewChars;
             }
-            assert(separatorChar == kControlSeparator[j]);
+            if (separatorChar != kControlSeparator[j])
+               throw LoadStateException();
          }
       }
       catch (UnknownUIControlException& e)
@@ -1419,9 +1460,9 @@ void IDrawableModule::LoadState(FileStreamIn& in, int rev)
          std::string childName;
          in >> childName;
          //ofLog() << "Loading " << childName;
-         IDrawableModule* child = FindChild(childName, true);
-         LoadStateValidate(child);
-         child->LoadState(in, child->LoadModuleSaveStateRev(in));
+          IDrawableModule* child = FindChild(childName, false);
+          LoadStateValidate(child);
+          child->LoadState(in, child->LoadModuleSaveStateRev(in));
       }
    }
 

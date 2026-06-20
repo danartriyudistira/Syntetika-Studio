@@ -1,4 +1,4 @@
-﻿/**
+/**
     syntetika (experimental fork of bespoke synth), a software modular synthesizer
     Copyright (C) 2021 Ryan Challinor (contact: awwbees@gmail.com)
 
@@ -312,9 +312,7 @@ void Push2Control::SaveLayout(ofxJSONElement& moduleInfo)
 
 void Push2Control::SaveState(FileStreamOut& out)
 {
-   out << GetModuleSaveStateRev();
-
-   IDrawableModule::SaveState(out);
+      IDrawableModule::SaveState(out);
 
    out << (int)mBookmarkSlots.size();
    for (size_t i = 0; i < mBookmarkSlots.size(); ++i)
@@ -342,7 +340,7 @@ void Push2Control::LoadState(FileStreamIn& in, int rev)
    if (!ModuleContainer::DoesModuleHaveMoreSaveData(in))
       return; //this was saved before we added versioning, bail out
 
-   LoadStateValidate(rev >= GetModuleSaveStateRev());
+   LoadStateValidate(rev <= GetModuleSaveStateRev());
 
    int numBookmarks;
    in >> numBookmarks;

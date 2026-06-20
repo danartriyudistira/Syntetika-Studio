@@ -405,9 +405,8 @@ public:
    void DrawBackgroundGrid(NVGcontext* vg, float width, float height)
    {
       const float kGridSpacing = 48.0f;
-      const int kGridAlpha = 12;
 
-      nvgStrokeColor(vg, nvgRGBA(0, 255, 242, kGridAlpha));
+      nvgStrokeColor(vg, nvgRGBA(27, 34, 42, (int)ModularSynth::sGridAlpha));
       nvgStrokeWidth(vg, 1.0f);
 
       for (float x = 0; x < width; x += kGridSpacing)

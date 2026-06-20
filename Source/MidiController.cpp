@@ -1,4 +1,4 @@
-﻿/**
+/**
     syntetika (experimental fork of bespoke synth), a software modular synthesizer
     Copyright (C) 2021 Ryan Challinor (contact: awwbees@gmail.com)
 
@@ -2589,9 +2589,7 @@ void MidiController::SaveLayout(ofxJSONElement& moduleInfo)
 
 void MidiController::SaveState(FileStreamOut& out)
 {
-   out << GetModuleSaveStateRev();
-
-   IDrawableModule::SaveState(out);
+      IDrawableModule::SaveState(out);
 
    bool hasNonstandardController = (mNonstandardController != nullptr);
    out << hasNonstandardController;

@@ -1525,7 +1525,7 @@ void ScriptModule::SaveState(FileStreamOut& out)
 
    out << (int)mExtraNoteOutputs.size();
 
-   IDrawableModule::SaveState(out);
+   SaveStateBase(out);
 
    out << mWidth;
    out << mHeight;

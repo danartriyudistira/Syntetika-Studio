@@ -286,6 +286,7 @@ public:
    static float sBackgroundG;
    static float sBackgroundB;
    static float sCableAlpha;
+   static float sGridAlpha;
 
    static int sLoadingFileSaveStateRev;
    static int sLastLoadedFileSaveStateRev;

@@ -168,6 +168,8 @@
 #include "RadioSequencer.h"
 #include "TakeRecorder.h"
 #include "AudioSplitter.h"
+#include "SpatialSource.h"
+#include "SpatialRender.h"
 #include "Splitter.h"
 #include "Panner.h"
 #include "SamplePlayer.h"
@@ -203,6 +205,7 @@
 #include "DCOffset.h"
 #include "SignalClamp.h"
 #include "Waveshaper.h"
+#include "ModelDSynth.h"
 #include "ModulatorSubtract.h"
 #include "NoteHocket.h"
 #include "NoteRangeFilter.h"
@@ -294,6 +297,7 @@ ModuleFactory::ModuleFactory()
    REGISTER(StepSequencer, drumsequencer, kModuleCategory_Instrument);
    REGISTER(LaunchpadKeyboard, gridkeyboard, kModuleCategory_Instrument);
    REGISTER(FMSynth, fmsynth, kModuleCategory_Synth);
+   REGISTER(ModelDSynth, modeldsynth, kModuleCategory_Synth);
    REGISTER(MidiController, midicontroller, kModuleCategory_Instrument);
    REGISTER(ScaleDetect, scaledetect, kModuleCategory_Note);
    REGISTER(KarplusStrong, karplusstrong, kModuleCategory_Synth);
@@ -391,8 +395,10 @@ ModuleFactory::ModuleFactory()
    REGISTER(RadioSequencer, radiosequencer, kModuleCategory_Other);
    REGISTER(AudioSplitter, audiosplitter, kModuleCategory_Audio);
    REGISTER(Splitter, splitter, kModuleCategory_Audio);
-   REGISTER(Panner, panner, kModuleCategory_Audio);
-   REGISTER(SamplePlayer, sampleplayer, kModuleCategory_Synth);
+    REGISTER(Panner, panner, kModuleCategory_Audio);
+     REGISTER(SpatialSource, spatialsource, kModuleCategory_Audio);
+     REGISTER(SpatialRender, spatialrender, kModuleCategory_Audio);
+    REGISTER(SamplePlayer, sampleplayer, kModuleCategory_Synth);
    REGISTER(AudioSend, send, kModuleCategory_Audio);
    REGISTER(EnvelopeModulator, envelope, kModuleCategory_Modulator);
    REGISTER(AudioToCV, audiotocv, kModuleCategory_Modulator);
@@ -823,6 +829,12 @@ std::string ModuleFactory::FixUpTypeName(std::string name)
 
    if (name == "arpsequencer")
       return "rhythmsequencer";
+
+   if (name == "spatialobject")
+      return "spatialsource";
+
+   if (name == "spatial2dspace")
+      return "spatialrender";
 
    return name;
 }

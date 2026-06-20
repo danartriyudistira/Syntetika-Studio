@@ -1,4 +1,4 @@
-﻿/**
+/**
     syntetika (experimental fork of bespoke synth), a software modular synthesizer
     Copyright (C) 2021 Ryan Challinor (contact: awwbees@gmail.com)
 
@@ -457,9 +457,7 @@ void SamplerGrid::CheckboxUpdated(Checkbox* checkbox, double time)
 
 void SamplerGrid::SaveState(FileStreamOut& out)
 {
-   out << GetModuleSaveStateRev();
-
-   IDrawableModule::SaveState(out);
+      IDrawableModule::SaveState(out);
 
    for (int i = 0; i < mCols * mRows; ++i)
    {

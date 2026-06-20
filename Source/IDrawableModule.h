@@ -177,6 +177,7 @@ public:
    virtual bool IsSaveable() { return true; }
    ModuleSaveData& GetSaveData() { return mModuleSaveData; }
    virtual void SaveState(FileStreamOut& out);
+   void SaveStateBase(FileStreamOut& out);
    virtual void LoadState(FileStreamIn& in, int rev);
    int LoadModuleSaveStateRev(FileStreamIn& in);
    virtual int GetModuleSaveStateRev() const { return -1; }
@@ -209,6 +210,20 @@ public:
    static float sHueNoteSource;
    static float sSaturation;
    static float sBrightness;
+   static float sHueProcessor;
+   static float sSatProcessor;
+   static float sBriProcessor;
+   static float sHueModulator;
+   static float sSatModulator;
+   static float sBriModulator;
+   static float sHuePulse;
+   static float sSatPulse;
+   static float sBriPulse;
+   static float sHueVisual;
+   static float sSatVisual;
+   static float sBriVisual;
+
+   static void LoadCategoryColorsFromPrefs();
 
    bool mDrawDebug{ false };
 

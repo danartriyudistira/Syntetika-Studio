@@ -6,13 +6,13 @@
             Name="Syntetika" Version="$(var.ProductVersion)" Manufacturer="Ryan Challinor" Language="1033">
       <Package InstallerVersion="200" Compressed="yes" Comments="Windows Installer Package"/>
       <Media Id="1" Cabinet="product.cab" EmbedCab="yes"/>
-      <Icon Id="ProductIcon" SourceFile="..\ignore\build\Source\Syntetika_artefacts\JuceLibraryCode\icon.ico"/>
+      <Icon Id="ProductIcon" SourceFile="..\build\Source\Syntetika_artefacts\JuceLibraryCode\icon.ico"/>
       <Property Id="ARPPRODUCTICON" Value="ProductIcon"/>
       <Property Id="ARPHELPLINK" Value="http://www.Syntetika.com"/>
       <Property Id="ARPURLINFOABOUT" Value="http://www.Syntetika.com"/>
       <Property Id="ARPNOREPAIR" Value="1"/>
       <Upgrade Id="$(var.ProductUpgradeCode)">
-         <UpgradeVersion Minimum="$(var.ProductVersion)" OnlyDetect="yes" Property="NEWERVERSIONDETECTED"/>
+          <UpgradeVersion Minimum="$(var.ProductVersion)" OnlyDetect="yes" IncludeMinimum="no" Property="NEWERVERSIONDETECTED"/>
          <UpgradeVersion Minimum="0.0.0" Maximum="$(var.ProductVersion)" IncludeMinimum="yes" IncludeMaximum="no" 
                          Property="OLDERVERSIONBEINGUPGRADED"/>	  
       </Upgrade>
@@ -22,7 +22,7 @@
          <Directory Id="ProgramFiles64Folder">
             <Directory Id="INSTALLDIR" Name="Syntetika">
                <Component Id="ApplicationFiles" Guid="0a2563f0-5f49-4ae8-acda-143a019f73a2">
-                  <File Id="MainExecutable" Source="..\ignore\build\Source\Syntetika_artefacts\Release\Syntetika.exe"/>
+                   <File Id="MainExecutable" Source="..\build\Source\Syntetika_artefacts\Release\Syntetika.exe"/>
                   <File Id="Readme" Source="readme.txt"/>
                </Component>
                <Directory Id="RESOURCE_DIR_REF" Name="resource">

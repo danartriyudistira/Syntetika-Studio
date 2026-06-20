@@ -322,9 +322,13 @@ target_sources(Syntetika PRIVATE
     MainComponent.cpp
     MathUtils.cpp
     MathUtils.h
-    Metronome.cpp
-    Metronome.h
-    MidiCapturer.cpp
+     Metronome.cpp
+     Metronome.h
+     ModelDVoice.cpp
+     ModelDVoice.h
+     ModelDSynth.cpp
+     ModelDSynth.h
+     MidiCapturer.cpp
     MidiCapturer.h
     MidiClockIn.cpp
     MidiClockIn.h
@@ -674,7 +678,15 @@ target_sources(Syntetika PRIVATE
     SongBuilder.h
     SpaceMouseControl.cpp
     SpaceMouseControl.h
-    SpectralDisplay.cpp
+     SpatialSource.cpp
+     SpatialSource.h
+      SpatialRender.cpp
+      SpatialRender.h
+      Spatial2DSpace.cpp
+      Spatial2DSpace.h
+      SpatialObject.cpp
+      SpatialObject.h
+     SpectralDisplay.cpp
     SpectralDisplay.h
     Splitter.cpp
     Splitter.h

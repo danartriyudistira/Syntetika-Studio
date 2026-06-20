@@ -1,4 +1,4 @@
-﻿/**
+/**
     syntetika (experimental fork of bespoke synth), a software modular synthesizer
     Copyright (C) 2021 Ryan Challinor (contact: awwbees@gmail.com)
 
@@ -767,9 +767,7 @@ void Scale::SetUpFromSaveData()
 
 void Scale::SaveState(FileStreamOut& out)
 {
-   out << GetModuleSaveStateRev();
-
-   IDrawableModule::SaveState(out);
+      IDrawableModule::SaveState(out);
 
    out << mIntonation;
    out << mSclContents;
@@ -785,7 +783,7 @@ void Scale::LoadState(FileStreamIn& in, int rev)
 
    if (ModularSynth::sLoadingFileSaveStateRev < 423)
       in >> rev;
-   LoadStateValidate(rev >= GetModuleSaveStateRev());
+   LoadStateValidate(rev <= GetModuleSaveStateRev());
 
    int inton;
    in >> inton;
