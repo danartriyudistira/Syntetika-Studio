@@ -405,6 +405,12 @@ cmake-build*
 ignore/*
 instrumentscli0.trace/*
 
+build_output*.txt
+header_file.txt
+
+syntetika_windows_installer/Syntetika-Windows-x64.msi
+syntetika_windows_installer/Syntetika-Windows-x64.wixpdb
+
 run_cmake*.bat
 run_cmake*.sh
 

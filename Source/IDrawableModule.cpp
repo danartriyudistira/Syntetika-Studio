@@ -1353,6 +1353,13 @@ void IDrawableModule::LoadState(FileStreamIn& in, int rev)
    int baseRev;
    in >> baseRev;
 
+   if (ModularSynth::sLoadingFileSaveStateRev < 427)
+   {
+      int realBaseRev;
+      in >> realBaseRev;
+      baseRev = realBaseRev;
+   }
+
    if (baseRev > 2)
    {
       in >> mPinned;
