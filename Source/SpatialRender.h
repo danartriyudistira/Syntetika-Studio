@@ -7,6 +7,7 @@
 #include "DropdownList.h"
 #include "Transport.h"
 #include "PatchCableSource.h"
+#include <mutex>
 
 class SpatialSource;
 
@@ -97,8 +98,13 @@ private:
    float mCombL1[kReverbBufSize]{}, mCombL2[kReverbBufSize]{}, mApL[kReverbBufSize]{};
    float mCombR1[kReverbBufSize]{}, mCombR2[kReverbBufSize]{}, mApR[kReverbBufSize]{};
    int mReverbIdx{ 0 };
+   static const int kMaxProcessBufSize = 2048;
+   float mDirectL[kMaxProcessBufSize]{}, mDirectR[kMaxProcessBufSize]{};
+   float mBinauralL[kMaxProcessBufSize]{}, mBinauralR[kMaxProcessBufSize]{};
+   float mSpeakerSignal[16][kMaxProcessBufSize]{};
 
    std::vector<RegisteredSource> mSources;
+   mutable std::recursive_mutex mSourceMutex;
 
    FloatSlider* mRoomWidthSlider{ nullptr };
    FloatSlider* mRoomDepthSlider{ nullptr };

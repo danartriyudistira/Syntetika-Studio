@@ -29,10 +29,13 @@ void SpatialRender::Init()
 SpatialRender::~SpatialRender()
 {
    TheTransport->RemoveAudioPoller(this);
-   for (auto& s : mSources)
    {
-      if (s.src)
-         s.src->mRegisteredRender = nullptr;
+      std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
+      for (auto& s : mSources)
+      {
+         if (s.src)
+            s.src->mRegisteredRender = nullptr;
+      }
    }
 }
 
@@ -91,44 +94,54 @@ void SpatialRender::Process(double time)
 
    GetBuffer()->Reset();
    int bufferSize = gBufferSize;
-   assert(bufferSize <= 2048);
+   assert(bufferSize <= kMaxProcessBufSize);
    int numSpk = (int)mSpeakerPositions.size();
-   int numSrc = (int)mSources.size();
 
-   float directL[2048]{}, directR[2048]{};
-   float binauralL[2048]{}, binauralR[2048]{};
-   float speakerSignal[16][2048]{};
+   memset(mDirectL, 0, kMaxProcessBufSize * sizeof(float));
+   memset(mDirectR, 0, kMaxProcessBufSize * sizeof(float));
+   memset(mBinauralL, 0, kMaxProcessBufSize * sizeof(float));
+   memset(mBinauralR, 0, kMaxProcessBufSize * sizeof(float));
+   for (int i = 0; i < 16; ++i)
+      memset(mSpeakerSignal[i], 0, kMaxProcessBufSize * sizeof(float));
 
-   for (auto& src : mSources)
-      if (src.isInternal)
-         src.hasAudio = false;
+   int numSrc;
+   {
+      std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
+      numSrc = (int)mSources.size();
+      for (auto& src : mSources)
+         if (src.isInternal)
+            src.hasAudio = false;
+   }
 
    ChannelBuffer* input = GetBuffer();
    int numInputCh = input->NumActiveChannels();
    for (int ch = 0; ch < numInputCh && ch < 2; ++ch)
    {
       RegisteredSource* internalSrc = nullptr;
-      for (auto& s : mSources)
       {
-         if (s.isInternal && s.internalChannel == ch)
+         std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
+         for (auto& s : mSources)
          {
-            internalSrc = &s;
-            break;
+            if (s.isInternal && s.internalChannel == ch)
+            {
+               internalSrc = &s;
+               break;
+            }
+         }
+         if (!internalSrc)
+         {
+            RegisteredSource rs;
+            rs.isInternal = true;
+            rs.internalChannel = ch;
+            rs.x = 0.0f;
+            rs.y = -200.0f;
+            rs.z = 100.0f;
+            mSources.push_back(rs);
+            internalSrc = &mSources.back();
          }
       }
-      if (!internalSrc)
-      {
-         RegisteredSource rs;
-         rs.isInternal = true;
-         rs.internalChannel = ch;
-         rs.x = 0.0f;
-         rs.y = -200.0f;
-         rs.z = 100.0f;
-         mSources.push_back(rs);
-         internalSrc = &mSources.back();
-      }
       const float* chData = input->GetChannel(ch);
-      if (chData)
+      if (chData && internalSrc)
       {
          int copySize = std::min(input->BufferSize(), (int)(sizeof(internalSrc->audioBuffer) / sizeof(float)));
          for (int i = 0; i < copySize; ++i)
@@ -138,55 +151,58 @@ void SpatialRender::Process(double time)
       }
    }
 
-   for (int si = 0; si < numSrc; ++si)
    {
-      auto& src = mSources[si];
-      if (!src.hasAudio)
-         continue;
-
-      float dx = src.x - mUserX;
-      float dy = src.y - mUserY;
-      float dz = src.z - 170.0f;
-      float dist = std::sqrt(dx * dx + dy * dy + dz * dz);
-      float distAttn = 1.0f / (1.0f + dist * 0.002f);
-      float objAngle = std::atan2(dy, dx);
-      float splGain = std::pow(10.0f, (mSPL - 85.0f) / 20.0f);
-
-      for (int s = 0; s < bufferSize; ++s)
+      std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
+      for (int si = 0; si < numSrc; ++si)
       {
-         float sample = src.audioBuffer[s];
+         auto& src = mSources[si];
+         if (!src.hasAudio)
+            continue;
 
-         bool routeToDirect = (mDirectSource == -1 || mDirectSource == si);
-         if (routeToDirect)
+         float dx = src.x - mUserX;
+         float dy = src.y - mUserY;
+         float dz = src.z - 170.0f;
+         float dist = std::sqrt(dx * dx + dy * dy + dz * dz);
+         float distAttn = 1.0f / (1.0f + dist * 0.002f);
+         float objAngle = std::atan2(dy, dx);
+         float splGain = std::pow(10.0f, (mSPL - 85.0f) / 20.0f);
+
+         for (int s = 0; s < bufferSize; ++s)
          {
-            directL[s] += sample;
-            directR[s] += sample;
-         }
+            float sample = src.audioBuffer[s];
 
-         for (int spk = 0; spk < numSpk; ++spk)
-         {
-            float spkDx = mSpeakerPositions[spk].x - mUserX;
-            float spkDy = mSpeakerPositions[spk].y - mUserY;
-            float spkAngle = std::atan2(spkDy, spkDx);
-            float angleDiff = objAngle - spkAngle;
-            while (angleDiff > FPI) angleDiff -= 2 * FPI;
-            while (angleDiff < -FPI) angleDiff += 2 * FPI;
-            float vbapGain = std::max(0.0f, std::cos(angleDiff * 0.5f));
-            vbapGain = std::pow(vbapGain, 1.5f);
+            bool routeToDirect = (mDirectSource == -1 || mDirectSource == si);
+            if (routeToDirect)
+            {
+               mDirectL[s] += sample;
+               mDirectR[s] += sample;
+            }
 
-            float spkDist = std::sqrt(spkDx * spkDx + spkDy * spkDy);
-            float spkDistAttn = 1.0f / (1.0f + spkDist * 0.002f);
-            float spkSPL = (spk < (int)mSpeakerSPL.size()) ? mSpeakerSPL[spk] : mSPL;
-            float spkSplGain = std::pow(10.0f, (spkSPL - 85.0f) / 20.0f);
+            for (int spk = 0; spk < numSpk; ++spk)
+            {
+               float spkDx = mSpeakerPositions[spk].x - mUserX;
+               float spkDy = mSpeakerPositions[spk].y - mUserY;
+               float spkAngle = std::atan2(spkDy, spkDx);
+               float angleDiff = objAngle - spkAngle;
+               while (angleDiff > FPI) angleDiff -= 2 * FPI;
+               while (angleDiff < -FPI) angleDiff += 2 * FPI;
+               float vbapGain = std::max(0.0f, std::cos(angleDiff * 0.5f));
+               vbapGain = std::pow(vbapGain, 1.5f);
 
-            speakerSignal[spk][s] += sample * distAttn * vbapGain * splGain * spkSplGain * spkDistAttn;
+               float spkDist = std::sqrt(spkDx * spkDx + spkDy * spkDy);
+               float spkDistAttn = 1.0f / (1.0f + spkDist * 0.002f);
+               float spkSPL = (spk < (int)mSpeakerSPL.size()) ? mSpeakerSPL[spk] : mSPL;
+               float spkSplGain = std::pow(10.0f, (spkSPL - 85.0f) / 20.0f);
+
+               mSpeakerSignal[spk][s] += sample * distAttn * vbapGain * splGain * spkSplGain * spkDistAttn;
+            }
          }
       }
    }
 
    for (int spk = 0; spk < numSpk; ++spk)
    {
-       int outCh = (spk < mNumSpeakers) ? mSpeakerChannels[spk] : 0;
+        int outCh = (spk < mNumSpeakers) ? mSpeakerChannels[spk] : 0;
       if (outCh == 0)
       {
          float speakerPan = ofClamp(mSpeakerPositions[spk].x / (mRoomWidth * 0.4f), -1, 1);
@@ -195,8 +211,8 @@ void SpatialRender::Process(double time)
          float sinPan = std::sin(panAngle);
          for (int s = 0; s < bufferSize; ++s)
          {
-            binauralL[s] += speakerSignal[spk][s] * cosPan;
-            binauralR[s] += speakerSignal[spk][s] * sinPan;
+            mBinauralL[s] += mSpeakerSignal[spk][s] * cosPan;
+            mBinauralR[s] += mSpeakerSignal[spk][s] * sinPan;
          }
       }
       else
@@ -207,7 +223,7 @@ void SpatialRender::Process(double time)
             ChannelBuffer* out = spkTarget->GetBuffer();
             out->SetNumActiveChannels(1);
             for (int s = 0; s < bufferSize; ++s)
-               out->GetChannel(0)[s] += speakerSignal[spk][s];
+               out->GetChannel(0)[s] += mSpeakerSignal[spk][s];
          }
       }
    }
@@ -219,7 +235,7 @@ void SpatialRender::Process(double time)
       ChannelBuffer* out = dirLTarget->GetBuffer();
       out->SetNumActiveChannels(1);
       for (int s = 0; s < bufferSize; ++s)
-         out->GetChannel(0)[s] += directL[s];
+         out->GetChannel(0)[s] += mDirectL[s];
    }
 
    // Index 1: Direct R
@@ -229,7 +245,7 @@ void SpatialRender::Process(double time)
       ChannelBuffer* out = dirRTarget->GetBuffer();
       out->SetNumActiveChannels(1);
       for (int s = 0; s < bufferSize; ++s)
-         out->GetChannel(0)[s] += directR[s];
+         out->GetChannel(0)[s] += mDirectR[s];
    }
 
    // Index 2: Binaural L, Index 3: Binaural R
@@ -250,7 +266,7 @@ void SpatialRender::Process(double time)
 
          for (int s = 0; s < bufferSize; ++s)
          {
-            float mono = (binauralL[s] + binauralR[s]) * 0.5f;
+            float mono = (mBinauralL[s] + mBinauralR[s]) * 0.5f;
             int idx = mReverbIdx;
 
             int cL1 = (idx - combDL1 + kReverbBufSize) % kReverbBufSize;
@@ -263,7 +279,7 @@ void SpatialRender::Process(double time)
             mCombL2[idx] = mono + combL2 * feedback;
             float apLDelayed = mApL[aL];
             mApL[idx] = combSumL + apLDelayed * kApGain;
-            binauralL[s] += (apLDelayed - combSumL * kApGain) * wetMix;
+            mBinauralL[s] += (apLDelayed - combSumL * kApGain) * wetMix;
 
             int cR1 = (idx - combDR1 + kReverbBufSize) % kReverbBufSize;
             int cR2 = (idx - combDR2 + kReverbBufSize) % kReverbBufSize;
@@ -275,7 +291,7 @@ void SpatialRender::Process(double time)
             mCombR2[idx] = mono + combR2 * feedback;
             float apRDelayed = mApR[aR];
             mApR[idx] = combSumR + apRDelayed * kApGain;
-            binauralR[s] += (apRDelayed - combSumR * kApGain) * wetMix;
+            mBinauralR[s] += (apRDelayed - combSumR * kApGain) * wetMix;
 
             mReverbIdx = (idx + 1) % kReverbBufSize;
          }
@@ -287,7 +303,7 @@ void SpatialRender::Process(double time)
          ChannelBuffer* out = binLTarget->GetBuffer();
          out->SetNumActiveChannels(1);
          for (int s = 0; s < bufferSize; ++s)
-            out->GetChannel(0)[s] += binauralL[s];
+            out->GetChannel(0)[s] += mBinauralL[s];
       }
 
       IAudioReceiver* binRTarget = GetTarget(3);
@@ -296,7 +312,7 @@ void SpatialRender::Process(double time)
          ChannelBuffer* out = binRTarget->GetBuffer();
          out->SetNumActiveChannels(1);
          for (int s = 0; s < bufferSize; ++s)
-            out->GetChannel(0)[s] += binauralR[s];
+            out->GetChannel(0)[s] += mBinauralR[s];
       }
    }
 }
@@ -307,47 +323,57 @@ void SpatialRender::OnTransportAdvanced(float amount)
 
 void SpatialRender::RegisterSource(SpatialSource* src)
 {
-   for (auto& s : mSources)
    {
-      if (s.src == src)
-         return;
+      std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
+      for (auto& s : mSources)
+      {
+         if (s.src == src)
+            return;
+      }
+      RegisteredSource rs;
+      rs.src = src;
+      rs.x = src->GetPositionX();
+      rs.y = src->GetPositionY();
+      rs.z = src->GetPositionZ();
+      rs.hasAudio = false;
+      rs.bufferSize = 0;
+      mSources.push_back(rs);
    }
-   RegisteredSource rs;
-   rs.src = src;
-   rs.x = src->GetPositionX();
-   rs.y = src->GetPositionY();
-   rs.z = src->GetPositionZ();
-   rs.hasAudio = false;
-   rs.bufferSize = 0;
-   mSources.push_back(rs);
    RebuildDropdowns();
 }
 
 void SpatialRender::UnregisterSource(SpatialSource* src)
 {
-   for (auto it = mSources.begin(); it != mSources.end(); ++it)
+   bool found = false;
    {
-      if (it->src == src)
+      std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
+      for (auto it = mSources.begin(); it != mSources.end(); ++it)
       {
-         int idx = (int)(it - mSources.begin());
-         mSources.erase(it);
-         auto fix = [&](int& sel)
+         if (it->src == src)
          {
-            if (sel == idx) sel = -1;
-            else if (sel > idx) sel--;
-         };
-         fix(mDirectSource);
-         fix(mBinauralSource);
-         for (int i = 0; i < 16; ++i)
-            fix(mSpeakerSources[i]);
-         RebuildDropdowns();
-         return;
+            int idx = (int)(it - mSources.begin());
+            mSources.erase(it);
+            auto fix = [&](int& sel)
+            {
+               if (sel == idx) sel = -1;
+               else if (sel > idx) sel--;
+            };
+            fix(mDirectSource);
+            fix(mBinauralSource);
+            for (int i = 0; i < 16; ++i)
+               fix(mSpeakerSources[i]);
+            found = true;
+            break;
+         }
       }
    }
+   if (found)
+      RebuildDropdowns();
 }
 
 void SpatialRender::NotifySourceMoved(SpatialSource* src)
 {
+   std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
    for (auto& s : mSources)
    {
       if (s.src == src)
@@ -362,6 +388,7 @@ void SpatialRender::NotifySourceMoved(SpatialSource* src)
 
 void SpatialRender::AcceptSourceAudio(SpatialSource* src, float* buffer, int bufferSize)
 {
+   std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
    for (auto& s : mSources)
    {
       if (s.src == src)
@@ -426,6 +453,7 @@ void SpatialRender::RebuildSpeakers()
 
 void SpatialRender::RebuildDropdowns()
 {
+   std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
    int numSrc = (int)mSources.size();
 
    mDirectSourceSelector->Clear();
@@ -842,7 +870,7 @@ void SpatialRender::OnClicked(float x, float y, bool right)
       for (int i = 0; i < (int)mSources.size(); ++i)
       {
          ofVec2f op = PosToCanvas(mSources[i].x, mSources[i].y);
-         if (std::sqrt(ofVec2f(x - op.x, y - op.y).lengthSquared()) < 8)
+          if (ofVec2f(x - op.x, y - op.y).lengthSquared() < 64)
          {
             mDragTarget = 1000 + i;
             mDragging = true;
@@ -852,7 +880,7 @@ void SpatialRender::OnClicked(float x, float y, bool right)
       }
 
       ofVec2f up = PosToCanvas(mUserX, mUserY);
-      if (std::sqrt(ofVec2f(x - up.x, y - up.y).lengthSquared()) < 10)
+      if (ofVec2f(x - up.x, y - up.y).lengthSquared() < 100)
       {
          mDragTarget = -2;
          mDragging = true;
@@ -863,7 +891,7 @@ void SpatialRender::OnClicked(float x, float y, bool right)
       for (int i = 0; i < mNumSpeakers; ++i)
       {
          ofVec2f sp = PosToCanvas(mSpeakerPositions[i].x, mSpeakerPositions[i].y);
-         if (std::sqrt(ofVec2f(x - sp.x, y - sp.y).lengthSquared()) < 12)
+         if (ofVec2f(x - sp.x, y - sp.y).lengthSquared() < 144)
          {
             mDragTarget = i;
             mDragging = true;
@@ -888,7 +916,7 @@ bool SpatialRender::MouseMoved(float x, float y)
    if (x >= canvasX && x < canvasX + canvasW && y >= canvasY && y < canvasY + canvasH)
    {
       ofVec2f up = PosToCanvas(mUserX, mUserY);
-      if (std::sqrt(ofVec2f(x - up.x, y - up.y).lengthSquared()) < 10)
+      if (ofVec2f(x - up.x, y - up.y).lengthSquared() < 100)
       {
          mHoverTarget = -2;
          return false;
@@ -897,7 +925,7 @@ bool SpatialRender::MouseMoved(float x, float y)
       for (int i = 0; i < mNumSpeakers; ++i)
       {
          ofVec2f sp = PosToCanvas(mSpeakerPositions[i].x, mSpeakerPositions[i].y);
-         if (std::sqrt(ofVec2f(x - sp.x, y - sp.y).lengthSquared()) < 12)
+         if (ofVec2f(x - sp.x, y - sp.y).lengthSquared() < 144)
          {
             mHoverTarget = i;
             return false;
@@ -1014,6 +1042,8 @@ void SpatialRender::SetUpFromSaveData()
    mBinauralSource = mModuleSaveData.GetInt("binaurausource");
    mModuleWidth = mModuleSaveData.GetFloat("modulewidth");
    mModuleHeight = mModuleSaveData.GetFloat("moduleheight");
+
+   mReverbIdx = 0;
 
    RebuildSpeakers();
 
