@@ -115,39 +115,22 @@ void SpatialRender::Process(double time)
 
    ChannelBuffer* input = GetBuffer();
    int numInputCh = input->NumActiveChannels();
-   for (int ch = 0; ch < numInputCh && ch < 2; ++ch)
+   if (numInputCh > 0)
    {
-      RegisteredSource* internalSrc = nullptr;
+      int copySize = std::min(input->BufferSize(), kMaxProcessBufSize);
+      for (int ch = 0; ch < numInputCh && ch < 2; ++ch)
       {
-         std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
-         for (auto& s : mSources)
+         const float* chData = input->GetChannel(ch);
+         if (!chData)
+            continue;
+         for (int s = 0; s < bufferSize; ++s)
          {
-            if (s.isInternal && s.internalChannel == ch)
-            {
-               internalSrc = &s;
-               break;
-            }
+            float sample = chData[s];
+            mDirectL[s] += sample;
+            mDirectR[s] += sample;
+            for (int spk = 0; spk < numSpk; ++spk)
+               mSpeakerSignal[spk][s] += sample / std::max(numSpk, 1);
          }
-         if (!internalSrc)
-         {
-            RegisteredSource rs;
-            rs.isInternal = true;
-            rs.internalChannel = ch;
-            rs.x = 0.0f;
-            rs.y = -200.0f;
-            rs.z = 100.0f;
-            mSources.push_back(rs);
-            internalSrc = &mSources.back();
-         }
-      }
-      const float* chData = input->GetChannel(ch);
-      if (chData && internalSrc)
-      {
-         int copySize = std::min(input->BufferSize(), (int)(sizeof(internalSrc->audioBuffer) / sizeof(float)));
-         for (int i = 0; i < copySize; ++i)
-            internalSrc->audioBuffer[i] = chData[i];
-         internalSrc->bufferSize = copySize;
-         internalSrc->hasAudio = true;
       }
    }
 
@@ -728,8 +711,9 @@ void SpatialRender::DrawModule()
       ofFill();
       ofCircle(op.x, op.y, 5);
       ofSetColor(255, 255, 255);
+      const char* name = src.src ? src.src->Name() : "src";
+      DrawTextNormal(name, (int)op.x - 10, (int)op.y - 10);
       DrawTextNormal("S", (int)op.x - 3, (int)op.y + 4);
-      DrawTextNormal(ofToString((int)src.z) + "cm", (int)op.x - 10, (int)op.y - 10);
    }
 
    auto drawDim = [&](float x, float y, const char* text)
@@ -788,9 +772,8 @@ void SpatialRender::DrawModule()
       DrawTextNormal(label, 8, sy + 12);
 
       ofSetColor(140, 140, 160);
-      DrawTextNormal(("x:" + ofToString((int)src.x)).c_str(), 140, sy + 12);
-      DrawTextNormal(("y:" + ofToString((int)src.y)).c_str(), 190, sy + 12);
-      DrawTextNormal(("z:" + ofToString((int)src.z) + "cm").c_str(), 240, sy + 12);
+      DrawTextNormal(("x:" + ofToString((int)src.x)).c_str(), 170, sy + 12);
+      DrawTextNormal(("y:" + ofToString((int)src.y)).c_str(), 220, sy + 12);
 
       sy += kRowH;
    }

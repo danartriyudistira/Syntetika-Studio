@@ -27,7 +27,7 @@ public:
    void GetModuleDimensions(float& w, float& h) override;
 
    void ButtonClicked(ClickButton* button, double time) override;
-   void FloatSliderUpdated(FloatSlider* slider, float oldVal, double time) override {}
+   void FloatSliderUpdated(FloatSlider* slider, float oldVal, double time) override;
 
    //ICodeEntryListener
    void ExecuteCode() override;
@@ -42,7 +42,7 @@ public:
    void SetUpFromSaveData() override;
    void SaveState(FileStreamOut& out) override;
    void LoadState(FileStreamIn& in, int rev) override;
-   int GetModuleSaveStateRev() const override { return 0; }
+   int GetModuleSaveStateRev() const override { return 1; }
 
    bool IsEnabled() const override { return true; }
 
@@ -64,6 +64,7 @@ private:
    FloatSlider* mSliderB{ nullptr };
    FloatSlider* mSliderC{ nullptr };
    FloatSlider* mSliderD{ nullptr };
+   FloatSlider* mResolutionSlider{ nullptr };
 
    // Shader
    unsigned int mProgramId{ 0 };
@@ -84,4 +85,5 @@ private:
    float mSliderBValue{ 0 };
    float mSliderCValue{ 0 };
    float mSliderDValue{ 0 };
+   float mResolutionScale{ 1.0f };
 };

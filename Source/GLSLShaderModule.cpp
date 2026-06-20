@@ -7,10 +7,20 @@
 using namespace juce::gl;
 
 #include <string>
+#include <random>
 
 
 
 extern NVGcontext* gNanoVG;
+
+namespace
+{
+   constexpr float kCodeY = 32;
+   float ComputeCodeH(float mH)
+   {
+      return ofClamp(mH * 0.35f, 60.0f, mH - 180.0f);
+   }
+}
 
 GLSLShaderModule::GLSLShaderModule()
 {
@@ -36,19 +46,28 @@ void GLSLShaderModule::CreateUIControls()
    IDrawableModule::CreateUIControls();
 
    mOutputCable = new PatchCableSource(this, kConnectionType_Special);
-   mOutputCable->SetManualPosition(170, 10);
+   mOutputCable->SetManualPosition(mWidth - 15, mHeight / 2);
+   mOutputCable->SetManualSide(PatchCableSource::Side::kRight);
    AddPatchCableSource(mOutputCable);
 
-   mCodeEntry = new CodeEntry(this, "code", 3, 32, 394, 140);
+   float codeH = ComputeCodeH(mHeight);
+   mCodeEntry = new CodeEntry(this, "code", 3, kCodeY, mWidth - 6, codeH);
    mCodeEntry->SetText(GetDefaultShader());
 
-   mCompileButton = new ClickButton(this, "compile", 3, 178);
-   mRandomButton = new ClickButton(this, "random", 103, 178);
+   float buttonY = kCodeY + codeH + 4;
+   mCompileButton = new ClickButton(this, "compile", 3, buttonY);
+   mRandomButton = new ClickButton(this, "random", 103, buttonY);
 
-   mSliderA = new FloatSlider(this, "a", 3, 204, 190, 18, &mSliderAValue, 0, 1);
-   mSliderB = new FloatSlider(this, "b", 3, 224, 190, 18, &mSliderBValue, 0, 1);
-   mSliderC = new FloatSlider(this, "c", 203, 204, 190, 18, &mSliderCValue, 0, 1);
-   mSliderD = new FloatSlider(this, "d", 203, 224, 190, 18, &mSliderDValue, 0, 1);
+   float colW = (mWidth - 9) / 2;
+   float sliderAY = buttonY + 20;
+   float sliderBY = sliderAY + 20;
+   mSliderA = new FloatSlider(this, "slider_a", 3, sliderAY, colW, 18, &mSliderAValue, 0, 1);
+   mSliderB = new FloatSlider(this, "slider_b", 3, sliderBY, colW, 18, &mSliderBValue, 0, 1);
+   mSliderC = new FloatSlider(this, "slider_c", mWidth / 2 + 3, sliderAY, colW, 18, &mSliderCValue, 0, 1);
+   mSliderD = new FloatSlider(this, "slider_d", mWidth / 2 + 3, sliderBY, colW, 18, &mSliderDValue, 0, 1);
+
+   float resY = sliderBY + 20;
+   mResolutionSlider = new FloatSlider(this, "res", 3, resY, mWidth - 6, 15, &mResolutionScale, 0.25f, 2.0f);
 
    mCodeEntry->Publish();
    mShaderDirty = true;
@@ -112,11 +131,100 @@ gl_FragColor = vec4(
    1.0
 );
 )",
+   // Plasma
+   R"(
+vec2 p = uv - 0.5;
+float c = sin(length(p*8.0) + u_time*2.0)
+        + sin(p.x*12.0 - u_time*1.5 + p.y*8.0)
+        + sin(p.y*10.0 + u_time*1.2 + p.x*6.0);
+c = c * 0.25 + 0.5;
+gl_FragColor = vec4(
+   0.5 + 0.5*sin(c*6.0 + 0.0),
+   0.5 + 0.5*sin(c*6.0 + 2.0),
+   0.5 + 0.5*sin(c*6.0 + 4.0),
+   1.0
+);
+)",
+   // Water ripple
+   R"(
+vec2 p = (uv - 0.5) * 8.0;
+float r = length(p);
+float wave = sin(r*10.0 - u_time*3.0) * 0.5 + 0.5;
+float ripple = 0.5 + 0.5*sin(r*20.0 - u_time*5.0);
+gl_FragColor = vec4(
+   wave * ripple,
+   wave * (1.0 - ripple),
+   0.3 + 0.3*sin(r*8.0 + u_time*2.0),
+   1.0
+);
+)",
+   // Kaleidoscope
+   R"(
+vec2 p = uv - 0.5;
+float a = atan(p.y, p.x);
+float r = length(p);
+float segments = 6.0;
+a = mod(a, 6.2832/segments);
+a = abs(a - 3.1416/segments);
+p = vec2(cos(a)*r, sin(a)*r) + 0.5;
+vec3 col = vec3(
+   0.5 + 0.5*sin(p.x*20.0 + u_time),
+   0.5 + 0.5*sin(p.y*20.0 + u_time*1.3),
+   0.5 + 0.5*sin((p.x+p.y)*10.0 - u_time*0.7)
+);
+col *= 0.8 + 0.2*sin(r*15.0 - u_time);
+gl_FragColor = vec4(col, 1.0);
+)",
+   // Hex grid
+   R"(
+vec2 p = uv * 15.0;
+vec2 i = floor(p);
+vec2 f = fract(p) - 0.5;
+float d = length(f - vec2(0.0, 0.0));
+float glow = 0.02 / (d*d + 0.02);
+float pulse = 0.5 + 0.5*sin(i.x*3.0 + i.y*7.0 + u_time*2.0);
+gl_FragColor = vec4(
+   glow * pulse,
+   glow * (1.0 - pulse),
+   glow * 0.5,
+   1.0
+);
+)",
+   // Color wave
+   R"(
+vec2 p = uv - 0.5;
+float d = length(p);
+float angle = atan(p.y, p.x);
+vec3 col;
+col.r = 0.5 + 0.5*sin(d*12.0 - u_time*2.0 + angle);
+col.g = 0.5 + 0.5*sin(d*10.0 - u_time*1.7 + angle*2.0 + 2.0);
+col.b = 0.5 + 0.5*sin(d*8.0 - u_time*1.3 + angle*3.0 + 4.0);
+col *= 0.7 + 0.3*sin(d*5.0 - u_time);
+gl_FragColor = vec4(col, 1.0);
+)",
+   // Morphing Mandala
+   R"(
+vec2 p = uv - 0.5;
+float a = atan(p.y, p.x);
+float r = length(p);
+float pattern = sin(r*20.0 - u_time) + sin(a*8.0 + u_time*1.5) + cos((r*12.0 + a*4.0) + u_time*0.7);
+pattern = pattern * 0.25 + 0.5;
+float mask = 1.0 - smoothstep(0.4, 0.5, r);
+gl_FragColor = vec4(
+   pattern * mask,
+   pattern * mask * 0.6,
+   (1.0 - pattern) * mask * 0.8,
+   1.0
+);
+)",
 };
 
 void GLSLShaderModule::RandomizeShader()
 {
-   int idx = rand() % (sizeof(sShaderBodies)/sizeof(sShaderBodies[0]));
+   static std::mt19937 rng(std::random_device{}());
+   int numShaders = sizeof(sShaderBodies) / sizeof(sShaderBodies[0]);
+   std::uniform_int_distribution<int> dist(0, numShaders - 1);
+   int idx = dist(rng);
    mCodeEntry->SetText(std::string(sShaderBodies[idx]) + "\n");
    mCodeEntry->Publish();
    mShaderDirty = true;
@@ -135,6 +243,18 @@ void GLSLShaderModule::ButtonClicked(ClickButton* button, double time)
    }
 }
 
+void GLSLShaderModule::FloatSliderUpdated(FloatSlider* slider, float oldVal, double time)
+{
+   if (slider == mResolutionSlider)
+   {
+      if (mFBO)
+      {
+         delete mFBO;
+         mFBO = nullptr;
+      }
+   }
+}
+
 void GLSLShaderModule::ExecuteCode()
 {
    mShaderDirty = true;
@@ -145,7 +265,9 @@ void GLSLShaderModule::CreateFBO()
    if (mFBO)
       delete mFBO;
    mFBO = new VisualFBO();
-   mFBO->Create(400, 300);
+   int fboW = std::max(64, (int)(mWidth * mResolutionScale));
+   int fboH = std::max(64, (int)(mHeight * mResolutionScale));
+   mFBO->Create(fboW, fboH);
 }
 
 void GLSLShaderModule::CompileShader()
@@ -279,42 +401,55 @@ void main() {
 
 void GLSLShaderModule::DrawModule()
 {
-    // Draw module background
-    ofSetColor(40, 40, 40);
-    ofFill();
-    ofRect(0, 0, mWidth, mHeight);
+   ofSetColor(40, 40, 40);
+   ofFill();
+   ofRect(0, 0, mWidth, mHeight);
 
-    // Draw UI controls
-    if (mCodeEntry)
-       mCodeEntry->Draw();
-    if (mCompileButton)
-       mCompileButton->Draw();
-    if (mRandomButton)
-       mRandomButton->Draw();
-    if (mSliderA)
-       mSliderA->Draw();
-    if (mSliderB)
-       mSliderB->Draw();
-    if (mSliderC)
-       mSliderC->Draw();
-    if (mSliderD)
-       mSliderD->Draw();
+   if (mCodeEntry)
+      mCodeEntry->Draw();
+   if (mCompileButton)
+      mCompileButton->Draw();
+   if (mRandomButton)
+      mRandomButton->Draw();
+   if (mSliderA)
+      mSliderA->Draw();
+   if (mSliderB)
+      mSliderB->Draw();
+   if (mSliderC)
+      mSliderC->Draw();
+   if (mSliderD)
+      mSliderD->Draw();
+   if (mResolutionSlider)
+      mResolutionSlider->Draw();
 
-    // Draw preview area (FBO or black rect)
-   float previewY = 248;
-   float previewH = mHeight - previewY - 2;
-   if (mFBO && mFBO->IsValid() && mProgramId && mLastError.empty())
+   float codeH = ComputeCodeH(mHeight);
+   float buttonY = kCodeY + codeH + 4;
+   float sliderAY = buttonY + 20;
+   float sliderBY = sliderAY + 20;
+   float resY = sliderBY + 20;
+   float previewY = resY + 18;
+   float previewH = mHeight - previewY - 4;
+
+   if (previewH > 0)
    {
-      mFBO->Draw(1, previewY, mWidth - 2, previewH);
-   }
-   else
-   {
-      ofSetColor(0, 0, 0);
-      ofFill();
-      ofRect(1, previewY, mWidth - 2, previewH);
+      if (mFBO && mFBO->IsValid() && mProgramId && mLastError.empty())
+      {
+         mFBO->Draw(1, previewY, mWidth - 2, previewH);
+      }
+      else
+      {
+         ofSetColor(0, 0, 0);
+         ofFill();
+         ofRect(1, previewY, mWidth - 2, previewH);
+
+         ofSetColor(80, 80, 80);
+         nvgFontSize(gNanoVG, 12);
+         nvgTextAlign(gNanoVG, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+         nvgText(gNanoVG, mWidth / 2, previewY + previewH / 2, "preview", nullptr);
+         nvgTextAlign(gNanoVG, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
+      }
    }
 
-   // Draw shader compile error text if any
    if (!mLastError.empty())
    {
       nvgBeginPath(gNanoVG);
@@ -388,27 +523,51 @@ void GLSLShaderModule::GetModuleDimensions(float& w, float& h)
 
 void GLSLShaderModule::Resize(float w, float h)
 {
+   bool sizeChanged = (mWidth != w || mHeight != h);
    mWidth = w;
    mHeight = h;
+
+   float colW = (mWidth - 9) / 2;
+   float codeH = ComputeCodeH(mHeight);
+   float buttonY = kCodeY + codeH + 4;
+   float sliderAY = buttonY + 20;
+   float sliderBY = sliderAY + 20;
+   float resY = sliderBY + 20;
+
    if (mOutputCable)
-      mOutputCable->SetManualPosition(mWidth * 0.5f - 30, 10);
+   {
+      mOutputCable->SetManualPosition(mWidth - 15, mHeight / 2);
+      mOutputCable->SetManualSide(PatchCableSource::Side::kRight);
+   }
    if (mCodeEntry)
    {
-      mCodeEntry->SetPosition(3, 32);
-      mCodeEntry->SetDimensions(mWidth - 6, 140);
+      mCodeEntry->SetPosition(3, kCodeY);
+      mCodeEntry->SetDimensions(mWidth - 6, codeH);
    }
    if (mCompileButton)
-      mCompileButton->SetPosition(3, 178);
+      mCompileButton->SetPosition(3, buttonY);
    if (mRandomButton)
-      mRandomButton->SetPosition(103, 178);
+      mRandomButton->SetPosition(103, buttonY);
    if (mSliderA)
-      mSliderA->SetPosition(3, 204);
+      mSliderA->SetPosition(3, sliderAY);
    if (mSliderB)
-      mSliderB->SetPosition(3, 224);
+      mSliderB->SetPosition(3, sliderBY);
    if (mSliderC)
-      mSliderC->SetPosition(mWidth / 2 + 3, 204);
+      mSliderC->SetPosition(mWidth / 2 + 3, sliderAY);
    if (mSliderD)
-      mSliderD->SetPosition(mWidth / 2 + 3, 224);
+      mSliderD->SetPosition(mWidth / 2 + 3, sliderBY);
+   if (mResolutionSlider)
+   {
+      mResolutionSlider->SetPosition(3, resY);
+      mResolutionSlider->SetDimensions(mWidth - 6, 15);
+   }
+
+   // Only recreate FBO if size actually changed
+   if (sizeChanged && mFBO)
+   {
+      delete mFBO;
+      mFBO = nullptr;
+   }
 }
 
 void GLSLShaderModule::LoadLayout(const ofxJSONElement& moduleInfo)
@@ -419,6 +578,9 @@ void GLSLShaderModule::LoadLayout(const ofxJSONElement& moduleInfo)
 
 void GLSLShaderModule::SaveLayout(ofxJSONElement& moduleInfo)
 {
+   if (mCodeEntry)
+      mModuleSaveData.SetString("code", mCodeEntry->GetText(true));
+   mModuleSaveData.Save(moduleInfo);
 }
 
 void GLSLShaderModule::SetUpFromSaveData()
@@ -440,6 +602,7 @@ void GLSLShaderModule::SaveState(FileStreamOut& out)
    IDrawableModule::SaveState(out);
    if (mCodeEntry) out << mCodeEntry->GetText(true);
    else out << std::string();
+   out << mResolutionScale;
 }
 
 void GLSLShaderModule::LoadState(FileStreamIn& in, int rev)
@@ -452,5 +615,14 @@ void GLSLShaderModule::LoadState(FileStreamIn& in, int rev)
       mCodeEntry->SetText(code);
       mCodeEntry->Publish();
       mShaderDirty = true;
+   }
+   if (rev >= 1)
+   {
+      in >> mResolutionScale;
+      if (mFBO)
+      {
+         delete mFBO;
+         mFBO = nullptr;
+      }
    }
 }

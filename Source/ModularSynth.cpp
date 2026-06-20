@@ -2888,11 +2888,9 @@ void ModularSynth::SaveState(std::string file, bool autosave)
    mAudioThreadMutex.Lock("SaveState()");
    LockRender(true);
 
-   //write to a temp file first, so we don't corrupt data if we crash mid-save
-   std::string tmpFilePath = ofToDataPath("tmp");
-
+   juce::MemoryBlock memBlock;
    {
-      FileStreamOut out(tmpFilePath);
+      FileStreamOut out(memBlock);
 
       mZoomer.WriteCurrentLocation(-1);
       out << GetLayout().getRawString(true);
@@ -2900,12 +2898,25 @@ void ModularSynth::SaveState(std::string file, bool autosave)
       mUILayerModuleContainer.SaveState(out);
    }
 
+   LockRender(false);
+   mAudioThreadMutex.Unlock();
+
+   //write to a temp file first, so we don't corrupt data if we crash mid-save
+   std::string tmpFilePath = ofToDataPath("tmp");
+
+   {
+      juce::File tmpFile(tmpFilePath);
+      auto tmpOut = tmpFile.createOutputStream();
+      if (tmpOut)
+      {
+         tmpOut->write(memBlock.getData(), memBlock.getSize());
+         tmpOut->flush();
+      }
+   }
+
    juce::File writtenFile(tmpFilePath);
    juce::File targetFile(file);
    writtenFile.copyFileTo(targetFile);
-
-   LockRender(false);
-   mAudioThreadMutex.Unlock();
 }
 
 void ModularSynth::SetStartupSaveStateFile(std::string bskPath)
@@ -2926,7 +2937,16 @@ void ModularSynth::LoadState(std::string file)
    if (mInitialized)
       TitleBar::sShowInitialHelpOverlay = false; //don't show initial help popup
 
-   FileStreamIn in(ofToDataPath(file));
+   //read file into memory first, outside the audio mutex
+   juce::File bskFile(ofToDataPath(file));
+   juce::MemoryBlock memBlock;
+   if (!bskFile.loadFileAsData(memBlock))
+   {
+      LogEvent("Could not read file: " + file, kLogEventType_Error);
+      return;
+   }
+
+   FileStreamIn in(memBlock);
 
    if (in.Eof())
    {
@@ -3337,20 +3357,36 @@ void ModularSynth::ReconnectMidiDevices()
 
 void ModularSynth::SaveOutput()
 {
-   ScopedMutex mutex(&mAudioThreadMutex, "SaveOutput()");
+   //copy recording data under the mutex, then write file outside it
+   std::vector<float> leftData;
+   std::vector<float> rightData;
+   int recordingLength;
+   {
+      ScopedMutex mutex(&mAudioThreadMutex, "SaveOutput()");
+
+      assert(mRecordingLength <= mGlobalRecordBuffer->Size());
+      recordingLength = mRecordingLength;
+
+      leftData.resize(recordingLength);
+      rightData.resize(recordingLength);
+      for (int i = 0; i < recordingLength; ++i)
+      {
+         leftData[i] = mGlobalRecordBuffer->GetSample(recordingLength - 1 - i, 0);
+         rightData[i] = mGlobalRecordBuffer->GetSample(recordingLength - 1 - i, 1);
+      }
+
+      mGlobalRecordBuffer->ClearBuffer();
+      mRecordingLength = 0;
+   }
 
    std::string save_prefix = "recording_";
    if (!mCurrentSaveStatePath.empty())
    {
-      // This assumes that mCurrentSaveStatePath always has a valid filename at the end
       std::string filename = File(mCurrentSaveStatePath).getFileNameWithoutExtension().toStdString();
       save_prefix = filename + "_";
    }
 
    std::string filename = ofGetTimestampString(UserPrefs.recordings_path.Get() + save_prefix + "%Y-%m-%d_%H-%M.wav");
-   //string filenamePos = ofGetTimestampString("recordings/pos_%Y-%m-%d_%H-%M.wav");
-
-   assert(mRecordingLength <= mGlobalRecordBuffer->Size());
 
    int channels = 2;
    auto wavFormat = std::make_unique<juce::WavAudioFormat>();
@@ -3361,25 +3397,24 @@ void ModularSynth::SaveOutput()
    bool b1{ false };
    auto writer = std::unique_ptr<juce::AudioFormatWriter>(wavFormat->createWriterFor(outputTo.release(), gSampleRate, channels, 16, b1, 0));
 
-   int samplesRemaining = mRecordingLength;
    const int chunkSize = 256;
    float leftChannel[chunkSize];
    float rightChannel[chunkSize];
    float* chunk[2]{ leftChannel, rightChannel };
+   int samplesRemaining = recordingLength;
+   int readPos = 0;
    while (samplesRemaining > 0)
    {
       int numSamples = MIN(chunkSize, samplesRemaining);
       for (int i = 0; i < numSamples; ++i)
       {
-         chunk[0][i] = mGlobalRecordBuffer->GetSample(samplesRemaining - 1, 0);
-         chunk[1][i] = mGlobalRecordBuffer->GetSample(samplesRemaining - 1, 1);
-         --samplesRemaining;
+         chunk[0][i] = leftData[readPos];
+         chunk[1][i] = rightData[readPos];
+         ++readPos;
       }
       writer->writeFromFloatArrays(chunk, channels, numSamples);
+      samplesRemaining -= numSamples;
    }
-
-   mGlobalRecordBuffer->ClearBuffer();
-   mRecordingLength = 0;
 
    TheTitleBar->DisplayTemporaryMessage("wrote " + filename);
 }

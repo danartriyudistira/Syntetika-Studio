@@ -292,7 +292,13 @@ void DisplayManager::PlayNote(double time, int pitch, int velocity, int voiceIdx
          if (mActiveCell == cellIndex)
             mActiveCell = -1;
       }
-      mNoteVelocity = 0;
+      bool anyHeld = false;
+      for (bool h : mCellHeld)
+      {
+         if (h) { anyHeld = true; break; }
+      }
+      if (!anyHeld)
+         mNoteVelocity = 0;
    }
 }
 
@@ -415,10 +421,16 @@ void DisplayManager::OnClicked(float x, float y, bool right)
 
       if (x >= cx && x <= cx + cellW && y >= cy && y <= cy + cellH)
       {
-         mActiveCell = (mActiveCell == i) ? -1 : i;
          if (mAutoSwitch)
          {
             std::fill(mCellHeld.begin(), mCellHeld.end(), false);
+            if (i < (int)mCellHeld.size())
+               mCellHeld[i] = true;
+            AutoSelect();
+         }
+         else
+         {
+            mActiveCell = (mActiveCell == i) ? -1 : i;
          }
          break;
       }
@@ -435,7 +447,7 @@ void DisplayManager::Resize(float w, float h)
 
 void DisplayManager::ResolveSources()
 {
-   for (size_t i = 0; i < mInputCables.size(); ++i)
+   for (size_t i = 0; i < mInputCables.size() && i < mSources.size(); ++i)
    {
       if (mInputCables[i] && !mInputCables[i]->GetPatchCables().empty())
       {
