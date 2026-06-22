@@ -9,6 +9,10 @@ class VisualFBO
 {
 public:
    VisualFBO() = default;
+   VisualFBO(const VisualFBO&) = delete;
+   VisualFBO& operator=(const VisualFBO&) = delete;
+   VisualFBO(VisualFBO&&) = delete;
+   VisualFBO& operator=(VisualFBO&&) = delete;
    ~VisualFBO() { Destroy(); }
 
    void Create(int width, int height, int flags = 0);

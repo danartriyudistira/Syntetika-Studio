@@ -9,6 +9,7 @@
 #include "ClickButton.h"
 #include "Checkbox.h"
 #include <vector>
+#include <mutex>
 
 class VisualFBO;
 
@@ -82,6 +83,8 @@ private:
    Checkbox* mAutoSwitchCheckbox{ nullptr };
 
    PatchCableSource* mOutputCable{ nullptr };
+
+   mutable std::recursive_mutex mDataMutex;
 
    float mModuleWidth{ 280 };
    float mModuleHeight{ 240 };

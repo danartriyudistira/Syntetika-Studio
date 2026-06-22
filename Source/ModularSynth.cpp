@@ -2988,9 +2988,8 @@ void ModularSynth::SaveState(std::string file, bool autosave)
    LockRender(false);
    mAudioThreadMutex.Unlock();
 
-   //write to target file
+   //write to target file (replaceWithData is atomic via temp+rename, no deleteFile needed)
    File targetFile(file);
-   targetFile.deleteFile();
    targetFile.replaceWithData(memBlock.getData(), (int)memBlock.getSize());
 }
 

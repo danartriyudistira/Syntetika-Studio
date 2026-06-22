@@ -1,7 +1,0 @@
-workflow:
-  steps:
-    - trigger_services:
-         project: home:Syntetika
-         package: Syntetika-nightly
-  filters:
-         event: push

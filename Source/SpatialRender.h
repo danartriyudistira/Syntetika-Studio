@@ -74,7 +74,7 @@ private:
       SpatialSource* src{ nullptr };
       bool isInternal{ false };
       int internalChannel{ 0 };
-      float audioBuffer[2048];
+      float audioBuffer[4096];
       int bufferSize{ 0 };
       float x{ 0.0f }, y{ 0.0f }, z{ 100.0f };
       bool hasAudio{ false };

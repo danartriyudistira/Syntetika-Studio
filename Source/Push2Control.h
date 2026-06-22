@@ -81,6 +81,7 @@ public:
    static NVGcontext* sVG;
    static NVGLUframebuffer* sFB;
    static void CreateStaticFramebuffer(); //windows was having trouble creating a nanovg context and fbo on the fly
+   static void DestroyStaticFramebuffer();
    static IUIControl* sBindToUIControl;
 
    bool IsEnabled() const override { return true; }

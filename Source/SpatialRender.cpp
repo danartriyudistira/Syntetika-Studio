@@ -95,7 +95,34 @@ void SpatialRender::Process(double time)
    GetBuffer()->Reset();
    int bufferSize = gBufferSize;
    assert(bufferSize <= kMaxProcessBufSize);
-   int numSpk = (int)mSpeakerPositions.size();
+
+   //snapshot UI-controlled data to avoid data race with UI thread
+   std::vector<ofVec2f> speakerPositions;
+   int numSpk = 0;
+   float userX, userY;
+   float roomW, roomD, roomH;
+   int directSrc, binauralSrc;
+   float spl;
+   float reverbMixVal;
+   bool roomEffect;
+   int speakerChan[16];
+   {
+      std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
+      speakerPositions = mSpeakerPositions;
+      numSpk = (int)mSpeakerPositions.size();
+      userX = mUserX;
+      userY = mUserY;
+      roomW = mRoomWidth;
+      roomD = mRoomDepth;
+      roomH = mRoomHeight;
+      directSrc = mDirectSource;
+      binauralSrc = mBinauralSource;
+      spl = mSPL;
+      reverbMixVal = mReverbMix;
+      roomEffect = mRoomEffectEnabled;
+      for (int i = 0; i < 16; ++i)
+         speakerChan[i] = mSpeakerChannels[i];
+   }
 
    memset(mDirectL, 0, kMaxProcessBufSize * sizeof(float));
    memset(mDirectR, 0, kMaxProcessBufSize * sizeof(float));
@@ -142,29 +169,29 @@ void SpatialRender::Process(double time)
          if (!src.hasAudio)
             continue;
 
-         float dx = src.x - mUserX;
-         float dy = src.y - mUserY;
-         float dz = src.z - 170.0f;
-         float dist = std::sqrt(dx * dx + dy * dy + dz * dz);
-         float distAttn = 1.0f / (1.0f + dist * 0.002f);
-         float objAngle = std::atan2(dy, dx);
-         float splGain = std::pow(10.0f, (mSPL - 85.0f) / 20.0f);
+          float dx = src.x - userX;
+          float dy = src.y - userY;
+          float dz = src.z - 170.0f;
+          float dist = std::sqrt(dx * dx + dy * dy + dz * dz);
+          float distAttn = 1.0f / (1.0f + dist * 0.002f);
+          float objAngle = std::atan2(dy, dx);
+          float splGainVal = std::pow(10.0f, (spl - 85.0f) / 20.0f);
 
-         for (int s = 0; s < bufferSize; ++s)
-         {
-            float sample = src.audioBuffer[s];
+          for (int s = 0; s < bufferSize; ++s)
+          {
+             float sample = src.audioBuffer[s];
 
-            bool routeToDirect = (mDirectSource == -1 || mDirectSource == si);
-            if (routeToDirect)
-            {
-               mDirectL[s] += sample;
-               mDirectR[s] += sample;
-            }
+             bool routeToDirect = (directSrc == -1 || directSrc == si);
+             if (routeToDirect)
+             {
+                mDirectL[s] += sample;
+                mDirectR[s] += sample;
+             }
 
-            for (int spk = 0; spk < numSpk; ++spk)
-            {
-               float spkDx = mSpeakerPositions[spk].x - mUserX;
-               float spkDy = mSpeakerPositions[spk].y - mUserY;
+             for (int spk = 0; spk < numSpk; ++spk)
+             {
+                float spkDx = speakerPositions[spk].x - userX;
+                float spkDy = speakerPositions[spk].y - userY;
                float spkAngle = std::atan2(spkDy, spkDx);
                float angleDiff = objAngle - spkAngle;
                while (angleDiff > FPI) angleDiff -= 2 * FPI;
@@ -177,7 +204,7 @@ void SpatialRender::Process(double time)
                float spkSPL = (spk < (int)mSpeakerSPL.size()) ? mSpeakerSPL[spk] : mSPL;
                float spkSplGain = std::pow(10.0f, (spkSPL - 85.0f) / 20.0f);
 
-               mSpeakerSignal[spk][s] += sample * distAttn * vbapGain * splGain * spkSplGain * spkDistAttn;
+                mSpeakerSignal[spk][s] += sample * distAttn * vbapGain * splGainVal * spkSplGain * spkDistAttn;
             }
          }
       }
@@ -185,10 +212,10 @@ void SpatialRender::Process(double time)
 
    for (int spk = 0; spk < numSpk; ++spk)
    {
-        int outCh = (spk < mNumSpeakers) ? mSpeakerChannels[spk] : 0;
+         int outCh = (spk < numSpk) ? speakerChan[spk] : 0;
       if (outCh == 0)
       {
-         float speakerPan = ofClamp(mSpeakerPositions[spk].x / (mRoomWidth * 0.4f), -1, 1);
+         float speakerPan = ofClamp(speakerPositions[spk].x / (roomW * 0.4f), -1, 1);
          float panAngle = (speakerPan + 1.0f) * FPI / 4.0f;
          float cosPan = std::cos(panAngle);
          float sinPan = std::sin(panAngle);
@@ -233,19 +260,19 @@ void SpatialRender::Process(double time)
 
    // Index 2: Binaural L, Index 3: Binaural R
    {
-      float roomVolume = mRoomWidth * mRoomDepth * mRoomHeight;
+      float roomVolume = roomW * roomD * roomH;
       float volumeNorm = roomVolume / 90000000.0f;
       float feedback = ofClamp(0.4f + volumeNorm * 0.3f, 0.25f, 0.8f);
 
-      if (mRoomEffectEnabled)
+      if (roomEffect)
       {
-         int combDL1 = (int)(kCombL1Default * mRoomWidth / 600.0f);
-         int combDL2 = (int)(kCombL2Default * mRoomDepth / 500.0f);
-         int combDR1 = (int)(kCombR1Default * mRoomWidth / 600.0f);
-         int combDR2 = (int)(kCombR2Default * mRoomDepth / 500.0f);
+         int combDL1 = (int)(kCombL1Default * roomW / 600.0f);
+         int combDL2 = (int)(kCombL2Default * roomD / 500.0f);
+         int combDR1 = (int)(kCombR1Default * roomW / 600.0f);
+         int combDR2 = (int)(kCombR2Default * roomD / 500.0f);
          int apDL = kApLDefault;
          int apDR = kApRDefault;
-         float wetMix = mReverbMix * ofClamp(0.3f + volumeNorm * 0.5f, 0.15f, 1.0f);
+         float wetMix = reverbMixVal * ofClamp(0.3f + volumeNorm * 0.5f, 0.15f, 1.0f);
 
          for (int s = 0; s < bufferSize; ++s)
          {
@@ -618,6 +645,8 @@ void SpatialRender::DrawModule()
 {
    if (Minimized() || IsVisible() == false)
       return;
+
+   std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
 
    mRoomWidthSlider->Draw();
    mRoomDepthSlider->Draw();

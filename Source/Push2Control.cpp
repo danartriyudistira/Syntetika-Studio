@@ -134,6 +134,8 @@ Push2Control::Push2Control()
 
 Push2Control::~Push2Control()
 {
+   delete[] mPixels;
+   mPixels = nullptr;
 }
 
 void Push2Control::Exit()
@@ -381,6 +383,21 @@ void Push2Control::CreateStaticFramebuffer()
 
    sFB = nvgluCreateFramebuffer(sVG, width * pixelRatio, height * pixelRatio, 0);
    assert(sFB);
+}
+
+//static
+void Push2Control::DestroyStaticFramebuffer()
+{
+   if (sFB)
+   {
+      nvgluDeleteFramebuffer(sFB);
+      sFB = nullptr;
+   }
+   if (sVG)
+   {
+      nvgDeleteGLES2(sVG);
+      sVG = nullptr;
+   }
 }
 
 bool Push2Control::Initialize()

@@ -71,6 +71,8 @@ void DisplayManager::DrawModule()
    if (Minimized() || !mEnabled)
       return;
 
+   std::lock_guard<std::recursive_mutex> lock(mDataMutex);
+
    ResolveSources();
 
    float headerH = 20;
@@ -257,6 +259,8 @@ void DisplayManager::PlayNote(double time, int pitch, int velocity, int voiceIdx
    if (!mEnabled)
       return;
 
+   std::lock_guard<std::recursive_mutex> lock(mDataMutex);
+
    int channel = voiceIdx + 1;
    if (mMidiChannel >= 0 && channel != mMidiChannel)
       return;
@@ -307,6 +311,8 @@ void DisplayManager::OnPulse(double time, float velocity, int flags)
 {
    if (!mEnabled)
       return;
+
+   std::lock_guard<std::recursive_mutex> lock(mDataMutex);
 
    int numCells = mGridRows * mGridCols;
    if (numCells == 0)

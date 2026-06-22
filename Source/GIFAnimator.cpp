@@ -1,7 +1,8 @@
 #include "GIFAnimator.h"
+
 #include <cstring>
 #include <algorithm>
-
+#include <cstdint>
 GIFAnimator::GIFAnimator()
    : mReadPos(0)
    , mCanvasWidth(0)
@@ -356,6 +357,13 @@ struct LZWDecoder
 
    int ReadLZWByte()
    {
+      auto pushStack = [&](int val) -> bool
+      {
+         if (sp >= stack + 8192) return false;
+         *sp++ = val;
+         return true;
+      };
+
       if (fresh)
       {
          fresh = false;
@@ -411,20 +419,21 @@ struct LZWDecoder
 
          int incode = code;
 
-         if (code >= maxCode)
-         {
-            *sp++ = firstcode;
-            code = oldcode;
-         }
+          if (code >= maxCode)
+          {
+             if (!pushStack(firstcode)) return -2;
+             code = oldcode;
+          }
 
-         while (code >= clearCode)
-         {
-            *sp++ = table1[code];
-            if (code == table0[code]) return -2;
-            code = table0[code];
-         }
+          while (code >= clearCode)
+          {
+             if (!pushStack(table1[code])) return -2;
+             if (code == table0[code]) return -2;
+             code = table0[code];
+          }
 
-         *sp++ = firstcode = table1[code];
+          if (!pushStack(table1[code])) return -2;
+          firstcode = table1[code];
 
          if ((code = maxCode) < 4096)
          {
@@ -523,8 +532,8 @@ bool GIFAnimator::LZWDecompress(const FrameInfo& finfo, const std::vector<Palett
       int index = dec.ReadLZWByte();
       if (index < 0) break;
 
-      int pixelIdx = (dec.ypos * frameW + dec.xpos);
-      if (pixelIdx >= 0 && pixelIdx < frameW * frameH && index < palSize)
+       int64_t pixelIdx = (int64_t)dec.ypos * frameW + dec.xpos;
+      if (pixelIdx >= 0 && pixelIdx < (int64_t)frameW * frameH && index < palSize)
       {
          framePixels[pixelIdx * 4 + 0] = pal[index].r;
          framePixels[pixelIdx * 4 + 1] = pal[index].g;

@@ -1,3 +1,6 @@
+# Obsidian workspace settings
+.obs/
+
 # Syntetika stuff
 Release/Syntetika.app/*
 **/data/savestate/*

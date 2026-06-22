@@ -31,6 +31,7 @@
 #include "DropdownList.h"
 #include "Checkbox.h"
 #include "IAudioPoller.h"
+#include <mutex>
 
 class ITimeListener
 {
@@ -229,6 +230,7 @@ private:
 
    std::list<TransportListenerInfo> mListeners;
    std::list<IAudioPoller*> mAudioPollers;
+   mutable std::mutex mAudioPollersMutex;
 };
 
 extern Transport* TheTransport;

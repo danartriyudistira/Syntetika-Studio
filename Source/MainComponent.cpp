@@ -326,6 +326,7 @@ public:
 
    void shutdown() override
    {
+      Push2Control::DestroyStaticFramebuffer();
       nvgDeleteGLES2(mVG);
       nvgDeleteGLES2(mFontBoundsVG);
    }

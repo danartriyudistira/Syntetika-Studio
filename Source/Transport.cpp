@@ -151,10 +151,10 @@ void Transport::Advance(double ms)
 
    UpdateListeners(ms);
 
-   for (std::list<IAudioPoller*>::iterator i = mAudioPollers.begin(); i != mAudioPollers.end(); ++i)
    {
-      IAudioPoller* poller = *i;
-      poller->OnTransportAdvanced(amount);
+      std::lock_guard<std::mutex> lock(mAudioPollersMutex);
+      for (auto& poller : mAudioPollers)
+         poller->OnTransportAdvanced(amount);
    }
 }
 
@@ -350,12 +350,14 @@ void Transport::AddAudioPoller(IAudioPoller* poller)
       assert(module->IsInitialized());
 #endif
 
+   std::lock_guard<std::mutex> lock(mAudioPollersMutex);
    if (!ListContains(poller, mAudioPollers))
       mAudioPollers.push_front(poller);
 }
 
 void Transport::RemoveAudioPoller(IAudioPoller* poller)
 {
+   std::lock_guard<std::mutex> lock(mAudioPollersMutex);
    mAudioPollers.remove(poller);
 }
 
