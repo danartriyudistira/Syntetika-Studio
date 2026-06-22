@@ -142,14 +142,17 @@ void TitleBar::CreateUIControls()
    BUTTON_STYLE(mPlayPauseButton, "play/pause", ButtonDisplayStyle::kPause);
    UIBLOCK_SHIFTRIGHT();
    UIBLOCK_SHIFTX(10);
-   BUTTON(mLoadStateButton, "load");
-   UIBLOCK_SHIFTRIGHT();
-   BUTTON(mSaveStateButton, "save");
-   UIBLOCK_SHIFTRIGHT();
-   BUTTON(mSaveStateAsButton, "save as");
-   UIBLOCK_SHIFTRIGHT();
-   UIBLOCK_SHIFTX(10);
-   BUTTON(mWriteAudioButton, "write audio");
+    BUTTON(mLoadStateButton, "load");
+    UIBLOCK_SHIFTRIGHT();
+    BUTTON(mSaveStateButton, "save");
+    UIBLOCK_SHIFTRIGHT();
+    BUTTON(mSaveStateAsButton, "save as");
+    UIBLOCK_SHIFTRIGHT();
+    UIBLOCK_SHIFTX(10);
+    BUTTON(mImportBespokeButton, "import");
+    UIBLOCK_SHIFTRIGHT();
+    UIBLOCK_SHIFTX(10);
+    BUTTON(mWriteAudioButton, "write audio");
    UIBLOCK_NEWLINE();
    BUTTON(mResetLayoutButton, "new patch");
    UIBLOCK_SHIFTRIGHT();
@@ -367,6 +370,7 @@ void TitleBar::DrawModule()
    mSaveStateButton->Draw();
    mSaveStateAsButton->Draw();
    mLoadStateButton->Draw();
+   mImportBespokeButton->Draw();
    mWriteAudioButton->Draw();
    mLoadLayoutDropdown->Draw();
    mResetLayoutButton->Draw();
@@ -584,9 +588,11 @@ void TitleBar::ButtonClicked(ClickButton* button, double time)
       TheSynth->SaveCurrentState();
    if (button == mSaveStateAsButton)
       TheSynth->SaveStatePopup();
-   if (button == mLoadStateButton)
-      TheSynth->LoadStatePopup();
-   if (button == mWriteAudioButton)
+    if (button == mLoadStateButton)
+       TheSynth->LoadStatePopup();
+    if (button == mImportBespokeButton)
+       TheSynth->ImportBespokePopup();
+    if (button == mWriteAudioButton)
       TheSynth->SaveOutput();
    if (button == mDisplayHelpButton)
    {

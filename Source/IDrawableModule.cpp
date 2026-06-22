@@ -959,9 +959,9 @@ void IDrawableModule::AddUIControl(IUIControl* control)
             {
                //we're duplicating the name of a non-saving ui control, assume that we are also not saving (hopefully that's true), and this is fine
             }
-            else
+             else
             {
-               assert(false); //can't have multiple ui controls with the same name!
+               TheSynth->LogEvent("Error: duplicate UI control name \"" + name + "\"", kLogEventType_Error);
             }
          }
       }

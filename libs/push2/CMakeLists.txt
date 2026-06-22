@@ -51,6 +51,7 @@ if(SYNTETIKA_PUSH2_SUPPORT)
         target_compile_definitions(${PROJECT_NAME} PRIVATE
             HAVE_STRUCT_TIMESPEC
             THREADS_WINDOWS
+            WIN32
             )
     else()
         find_package(PkgConfig)

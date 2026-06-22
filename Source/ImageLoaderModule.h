@@ -4,6 +4,7 @@
 #include "IVisualSource.h"
 #include "PatchCableSource.h"
 #include "ClickButton.h"
+#include "GIFAnimator.h"
 
 class VisualFBO;
 
@@ -36,6 +37,7 @@ public:
 
 private:
    void DoLoadImage();
+   void UpdateGIFAnimation();
 
    std::string mPendingPath;
    std::string mLoadedPath;
@@ -48,6 +50,13 @@ private:
    int mImageWidth{ 0 };
    int mImageHeight{ 0 };
    bool mPendingLoad{ false };
+
+   void ResetGIFState();
+   void UploadRGBAToFBO(unsigned char* data, int w, int h);
+
+   GIFAnimator mGIFAnimator;
+   int mGIFCurrentFrame{ 0 };
+   double mGIFLastFrameTime{ 0 };
 
    float mWidth{ 280 };
    float mHeight{ 240 };

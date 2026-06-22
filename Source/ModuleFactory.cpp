@@ -116,6 +116,8 @@
 #include "DisplayManager.h"
 #include "GLSLShaderModule.h"
 #include "ImageLoaderModule.h"
+#include "LayerComposition.h"
+
 #include "MonitorModule.h"
 #include "StutterControl.h"
 #include "CircleSequencer.h"
@@ -348,8 +350,10 @@ ModuleFactory::ModuleFactory()
      REGISTER(CommentDisplay, comment, kModuleCategory_Visual);
      REGISTER(DisplayManager, displaymanager, kModuleCategory_Visual);
       REGISTER(GLSLShaderModule, glslshader, kModuleCategory_Visual);
-      REGISTER(ImageLoaderModule, imageloader, kModuleCategory_Visual);
-      REGISTER(MonitorModule, monitor, kModuleCategory_Visual);
+REGISTER(ImageLoaderModule, imageloader, kModuleCategory_Visual);
+   REGISTER(LayerComposition, layercomposition, kModuleCategory_Visual);
+
+       REGISTER(MonitorModule, monitor, kModuleCategory_Visual);
      REGISTER(LabelDisplay, label, kModuleCategory_Visual);
    REGISTER(StutterControl, stutter, kModuleCategory_Audio);
    REGISTER(CircleSequencer, circlesequencer, kModuleCategory_Instrument);

@@ -25,13 +25,17 @@ public:
    int GetHeight() const { return mHeight; }
    bool IsValid() const { return mFB != nullptr; }
    NVGcontext* GetNVGContext() const { return mNVG; }
+   unsigned int GetTexture() const;
 
 private:
    NVGcontext* mNVG{ nullptr };
    NVGLUframebuffer* mFB{ nullptr };
    NVGcontext* mSavedNVG{ nullptr };
+   int mSavedViewport[4]{};
    int mWidth{ 0 };
    int mHeight{ 0 };
    int mDisplayImage{ -1 };
    bool mBound{ false };
+public:
+   void ReleaseDisplayImage() { mDisplayImage = -1; }
 };

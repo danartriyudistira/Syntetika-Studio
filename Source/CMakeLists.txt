@@ -19,6 +19,10 @@ juce_add_gui_app(Syntetika
     PLUGINHOST_AU                 TRUE
     )
 
+# Unity build disabled: codebase has anonymous namespace conflicts across files
+# set_property(TARGET Syntetika PROPERTY UNITY_BUILD ON)
+# set_property(TARGET Syntetika PROPERTY UNITY_BUILD_BATCH_SIZE 16)
+
 syntetika_buildtime_version_info(Syntetika)
 
 if(MSVC)
@@ -149,8 +153,13 @@ target_sources(Syntetika PRIVATE
     DisplayManager.h
     DistortionEffect.cpp
     DistortionEffect.h
+    GIFAnimator.cpp
     ImageLoaderModule.cpp
+    LayerComposition.cpp
+
+    GIFAnimator.h
     ImageLoaderModule.h
+    LayerComposition.h
     DotGrid.cpp
     DotGrid.h
     DotSequencer.cpp
@@ -744,6 +753,7 @@ target_sources(Syntetika PRIVATE
     ValueSetter.h
     ValueStream.cpp
     ValueStream.h
+
     VisualFBO.cpp
     VisualFBO.h
     VisualNodeBase.cpp
@@ -790,6 +800,19 @@ endif()
 if(SYNTETIKA_PORTABLE)
     set_source_files_properties(ScriptModule.cpp PROPERTIES
         COMPILE_DEFINITIONS SYNTETIKA_PORTABLE_PYTHON="$<IF:$<BOOL:${WIN32}>,python.exe,bin/python>"
+        )
+endif()
+
+if(WIN32)
+    add_custom_command(TARGET Syntetika POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo ""
+        COMMAND ${CMAKE_COMMAND} -E echo "*******************************"
+        COMMAND ${CMAKE_COMMAND} -E echo "  Video playback requires ffmpeg.exe"
+        COMMAND ${CMAKE_COMMAND} -E echo "  Place ffmpeg.exe next to Syntetika.exe"
+        COMMAND ${CMAKE_COMMAND} -E echo "  Download from: https://ffmpeg.org/download.html"
+        COMMAND ${CMAKE_COMMAND} -E echo "  Or install via: winget install ffmpeg"
+        COMMAND ${CMAKE_COMMAND} -E echo "*******************************"
+        COMMAND ${CMAKE_COMMAND} -E echo ""
         )
 endif()
 
@@ -865,6 +888,20 @@ if (APPLE)
     endif()
 elseif (WIN32)
     target_compile_definitions(Syntetika PRIVATE SYNTETIKA_WINDOWS=1)
+
+    target_link_libraries(Syntetika PRIVATE windowscodecs)
+
+    # Copy Python DLLs to output directory (required for Windows Store Python)
+    get_filename_component(PYTHON_DLL_DIR "${Python_EXECUTABLE}" DIRECTORY)
+    add_custom_command(TARGET Syntetika POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${PYTHON_DLL_DIR}/python3.dll"
+        "$<TARGET_FILE_DIR:Syntetika>/python3.dll"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${PYTHON_DLL_DIR}/python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}.dll"
+        "$<TARGET_FILE_DIR:Syntetika>/python${Python_VERSION_MAJOR}${Python_VERSION_MINOR}.dll"
+        COMMENT "Copying Python DLLs"
+        )
 
     IF (MINGW)
         target_link_libraries(Syntetika PRIVATE iphlpapi)

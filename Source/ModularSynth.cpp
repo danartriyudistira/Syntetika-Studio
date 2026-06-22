@@ -2167,7 +2167,7 @@ void ModularSynth::FilesDropped(std::vector<std::string> files, int intX, int in
       float y = GetMouseY(&mModuleContainer, intY);
       IDrawableModule* target = GetModuleAtCursor();
 
-      if (files.size() == 1 && juce::String(files[0]).endsWith(".bsk"))
+      if (files.size() == 1 && (juce::String(files[0]).endsWith(".bsk") || juce::String(files[0]).endsWith(".bskt")))
       {
          LoadState(files[0]);
          return;
@@ -2875,6 +2875,93 @@ void ModularSynth::LoadStatePopupImp()
       LoadState(chooser.getResult().getFullPathName().toStdString());
 }
 
+void ModularSynth::ImportBespokePopup()
+{
+   FileChooser chooser("Import Bespoke file", File(ofToDataPath("savestate")), "*.bsk;*.bskt", true, false, GetFileChooserParent());
+   if (chooser.browseForFileToOpen())
+      ImportBespoke(chooser.getResult().getFullPathName().toStdString());
+}
+
+int ModularSynth::ImportBespoke(const std::string& file)
+{
+   // read file and parse JSON outside locks
+   juce::File bskFile(file);
+   juce::MemoryBlock memBlock;
+   if (!bskFile.loadFileAsData(memBlock))
+   {
+      LogEvent("Could not read file: " + file, kLogEventType_Error);
+      return 0;
+   }
+
+   FileStreamIn in(memBlock);
+   if (in.Eof())
+   {
+      LogEvent("File is empty: " + file, kLogEventType_Error);
+      return 0;
+   }
+
+   uint64_t firstLength[1];
+   in.Peek(firstLength, sizeof(uint64_t));
+   if (firstLength[0] >= FileStreamIn::sMaxStringLength)
+      FileStreamIn::s32BitMode = true;
+
+   std::string jsonString;
+   in >> jsonString;
+   FileStreamIn::s32BitMode = false;
+
+   ofxJSONElement root;
+   if (!root.parse(jsonString))
+   {
+      LogEvent("Couldn't parse json from " + file, kLogEventType_Error);
+      return 0;
+   }
+
+   // log what we found
+   LogEvent("Import found " + ofToString(root["modules"].size()) + " modules", kLogEventType_Verbose);
+   for (int i = 0; i < root["modules"].size(); ++i)
+      LogEvent("  " + root["modules"][i]["type"].asString() + " \"" + root["modules"][i]["name"].asString() + "\"", kLogEventType_Verbose);
+
+   bool audioLocked = false;
+   bool renderLocked = false;
+   try
+   {
+      mAudioThreadMutex.Lock("ImportBespoke()");
+      audioLocked = true;
+      LockRender(true);
+      renderLocked = true;
+
+      // use LoadLayout (standard path: ResetLayout + LoadModules + ArrangeAudioSourceDependencies)
+      // LoadLayout also locks internally via ScopedMutex, but recursive_mutex handles nested locks
+      LoadLayout(root);
+
+      TheTransport->Reset();
+      TheTitleBar->DisplayTemporaryMessage("imported " + ofToString(root["modules"].size()) + " modules");
+
+      LockRender(false);
+      renderLocked = false;
+      mAudioThreadMutex.Unlock();
+      audioLocked = false;
+
+      LogEvent("Import successful from " + file, kLogEventType_Verbose);
+   }
+   catch (std::exception& e)
+   {
+      LogEvent(std::string("Import exception: ") + e.what(), kLogEventType_Error);
+      if (renderLocked) { try { LockRender(false); } catch (...) {} }
+      if (audioLocked) { try { mAudioThreadMutex.Unlock(); } catch (...) {} }
+      return 0;
+   }
+   catch (...)
+   {
+      LogEvent("Import unknown exception", kLogEventType_Error);
+      if (renderLocked) { try { LockRender(false); } catch (...) {} }
+      if (audioLocked) { try { mAudioThreadMutex.Unlock(); } catch (...) {} }
+      return 0;
+   }
+
+   return (int)root["modules"].size();
+}
+
 void ModularSynth::SaveState(std::string file, bool autosave)
 {
    if (!autosave)
@@ -2901,22 +2988,10 @@ void ModularSynth::SaveState(std::string file, bool autosave)
    LockRender(false);
    mAudioThreadMutex.Unlock();
 
-   //write to a temp file first, so we don't corrupt data if we crash mid-save
-   std::string tmpFilePath = ofToDataPath("tmp");
-
-   {
-      juce::File tmpFile(tmpFilePath);
-      auto tmpOut = tmpFile.createOutputStream();
-      if (tmpOut)
-      {
-         tmpOut->write(memBlock.getData(), memBlock.getSize());
-         tmpOut->flush();
-      }
-   }
-
-   juce::File writtenFile(tmpFilePath);
-   juce::File targetFile(file);
-   writtenFile.copyFileTo(targetFile);
+   //write to target file
+   File targetFile(file);
+   targetFile.deleteFile();
+   targetFile.replaceWithData(memBlock.getData(), (int)memBlock.getSize());
 }
 
 void ModularSynth::SetStartupSaveStateFile(std::string bskPath)
@@ -2958,41 +3033,52 @@ void ModularSynth::LoadState(std::string file)
    LockRender(true);
    mAudioPaused = true;
    mIsLoadingState = true;
+   LockRender(false);
+   mAudioThreadMutex.Unlock();
 
-   //TODO(Ryan) here's a little hack to allow older BSK files that were saved in 32-bit to load.
-   //I guess this could bite me if someone ever has a very massive json. the number corresponds to a long-standing sanity check in FileStreamIn::operator>>(std::string &var), so this shouldn't break any current behavior.
-   //this should definitely be removed if anything about the structure of the BSK format changes.
-   uint64_t firstLength[1];
-   in.Peek(firstLength, sizeof(uint64_t));
-   if (firstLength[0] >= FileStreamIn::sMaxStringLength)
-      FileStreamIn::s32BitMode = true;
-
-   std::string jsonString;
-   in >> jsonString;
-   bool layoutLoaded = LoadLayoutFromString(jsonString);
-
-   if (layoutLoaded)
+   try
    {
-      mIsLoadingModule = true;
-      mModuleContainer.LoadState(in);
-      if (ModularSynth::sLastLoadedFileSaveStateRev >= 424)
-         mUILayerModuleContainer.LoadState(in);
-      mIsLoadingModule = false;
+      //TODO(Ryan) here's a little hack to allow older BSK files that were saved in 32-bit to load.
+      //I guess this could bite me if someone ever has a very massive json. the number corresponds to a long-standing sanity check in FileStreamIn::operator>>(std::string &var), so this shouldn't break any current behavior.
+      //this should definitely be removed if anything about the structure of the BSK format changes.
+      uint64_t firstLength[1];
+      in.Peek(firstLength, sizeof(uint64_t));
+      if (firstLength[0] >= FileStreamIn::sMaxStringLength)
+         FileStreamIn::s32BitMode = true;
 
-      TheTransport->Reset();
+      std::string jsonString;
+      in >> jsonString;
+      bool layoutLoaded = LoadLayoutFromString(jsonString);
+
+      if (layoutLoaded)
+      {
+         mIsLoadingModule = true;
+         mModuleContainer.LoadState(in);
+         if (ModularSynth::sLastLoadedFileSaveStateRev >= 424)
+            mUILayerModuleContainer.LoadState(in);
+         mIsLoadingModule = false;
+
+         TheTransport->Reset();
+      }
+
+      FileStreamIn::s32BitMode = false;
+
+      mCurrentSaveStatePath = file;
+      File savePath(mCurrentSaveStatePath);
+      std::string filename = savePath.getFileName().toStdString();
+      mMainComponent->getTopLevelComponent()->setName("syntetika synth - " + filename);
    }
-
-   FileStreamIn::s32BitMode = false;
-
-   mCurrentSaveStatePath = file;
-   File savePath(mCurrentSaveStatePath);
-   std::string filename = savePath.getFileName().toStdString();
-   mMainComponent->getTopLevelComponent()->setName("syntetika synth - " + filename);
+   catch (std::exception& e)
+   {
+      LogEvent(std::string("Error loading state: ") + e.what(), kLogEventType_Error);
+   }
+   catch (...)
+   {
+      LogEvent("Unknown error loading state", kLogEventType_Error);
+   }
 
    mAudioPaused = false;
    mIsLoadingState = false;
-   LockRender(false);
-   mAudioThreadMutex.Unlock();
 }
 
 bool ModularSynth::IsCurrentSaveStateATemplate() const

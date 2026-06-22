@@ -266,6 +266,8 @@ public:
    void SaveCurrentState();
    void SaveStatePopup();
    void LoadStatePopup();
+   void ImportBespokePopup();
+   int ImportBespoke(const std::string& file);
    void ToggleQuickSpawn();
    QuickSpawnMenu* GetQuickSpawn() { return mQuickSpawn; }
    std::string GetLastSavePath() { return mCurrentSaveStatePath; }

@@ -207,6 +207,16 @@ Synthetika Studio adalah kelanjutan dari perjalanan tersebut. Sebuah evolusi dar
 
 ---
 
+## AI-Driven Development
+
+Synthetika Studio dikembangkan dengan bantuan **OpenCode** berbasis model **DeepSeek V4** sebagai AI coding assistant.
+
+Proyek ini adalah eksperimen pribadi untuk mengeksplorasi bagaimana AI dapat mempercepat pengembangan perangkat lunak kreatif yang kompleks — mulai dari refactoring kode C++17, debugging sistem real-time audio/visual, hingga membangun modul baru seperti LayerComposition dan GIFAnimator.
+
+Pendekatan ini memungkinkan satu pengembang untuk mengerjakan fondasi teknis yang biasanya membutuhkan tim besar.
+
+---
+
 ## Lisensi
 
 Synthetika Studio adalah open source, dilisensikan di bawah **GNU General Public License v3.0**.

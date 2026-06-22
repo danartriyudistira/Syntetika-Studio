@@ -50,10 +50,10 @@ public:
          {
             std::cout << "A modular DAW for Mac, Windows, and Linux.\n"
                       << "\n"
-                      << "Usage: Syntetika [OPTIONS] [path].json [path].bsk(t)\n"
+                       << "Usage: Syntetika [OPTIONS] [path].json [path].bsk\n"
                       << "\n"
                       << "Arguments:\n"
-                      << "  [path].bsk(t)   the project file to open (must end in .bsk or .bskt)\n"
+                       << "  [path].bsk      the project file to open (must end in .bsk)\n"
                       << "  [path].json     path to userprefs.json (must end in .json)\n"
                       << "\n"
                       << "Options:\n"
@@ -133,7 +133,7 @@ public:
       // the other instance's command-line arguments were.
 
       // This is also called when opening the app with a file.
-      if (commandLine.isNotEmpty() && commandLine.endsWith(".bsk"))
+      if (commandLine.isNotEmpty() && (commandLine.endsWith(".bsk") || commandLine.endsWith(".bskt")))
          SetStartupSaveStateFile(commandLine, mainWindow->getContentComponent());
    }
 

@@ -112,14 +112,37 @@ void MonitorModule::DrawModule()
    DrawTextNormal(modeText, mWidth - 80, (int)mHeight - 12, 11);
    ofPopStyle();
 
+   // Method 1: check our input cable
+   mSource = nullptr;
    if (mInputCable && !mInputCable->GetPatchCables().empty())
    {
       auto* target = mInputCable->GetPatchCables()[0]->GetTarget();
       mSource = dynamic_cast<IVisualSource*>(target);
    }
-   else
+
+   // Method 2: check for cables targeting THIS module (body drop)
+   if (!mSource)
    {
-      mSource = nullptr;
+      std::vector<IDrawableModule*> allModules;
+      TheSynth->GetAllModules(allModules);
+      IClickable* me = dynamic_cast<IClickable*>(this);
+      for (auto* mod : allModules)
+      {
+         if (mod == this) continue;
+         for (auto* source : mod->GetPatchCableSources())
+         {
+            for (auto* cable : source->GetPatchCables())
+            {
+               if (cable->GetTarget() && cable->GetTarget() == me)
+               {
+                  mSource = dynamic_cast<IVisualSource*>(mod);
+                  if (mSource) break;
+               }
+            }
+            if (mSource) break;
+         }
+         if (mSource) break;
+      }
    }
 
    float contentTop = headerH + 3;

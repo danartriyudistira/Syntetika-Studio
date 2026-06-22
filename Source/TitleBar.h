@@ -166,6 +166,7 @@ private:
    ClickButton* mSaveStateButton{ nullptr };
    ClickButton* mSaveStateAsButton{ nullptr };
    ClickButton* mLoadStateButton{ nullptr };
+   ClickButton* mImportBespokeButton{ nullptr };
    ClickButton* mWriteAudioButton{ nullptr };
    DropdownList* mLoadLayoutDropdown{ nullptr };
    ClickButton* mDisplayHelpButton{ nullptr };

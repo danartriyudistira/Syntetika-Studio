@@ -312,7 +312,7 @@ public:
       for (int i = 0; i < JUCEApplication::getCommandLineParameterArray().size(); ++i)
       {
          juce::String argument = JUCEApplication::getCommandLineParameterArray()[i];
-         if (argument.endsWith(".bsk") || argument.endsWith(".bskt"))
+          if (argument.endsWith(".bsk") || argument.endsWith(".bskt"))
          {
             mSynth.SetStartupSaveStateFile(argument.toStdString());
             TitleBar::sShowInitialHelpOverlay = false; //don't show initial help popup, a user who uses the command line arguments likely doesn't need it

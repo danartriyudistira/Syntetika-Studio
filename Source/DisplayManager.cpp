@@ -4,6 +4,7 @@
 #include "SynthGlobals.h"
 #include "OpenFrameworksPort.h"
 #include "PatchCable.h"
+#include "ModuleSaveDataPanel.h"
 
 #include <algorithm>
 
@@ -396,8 +397,19 @@ void DisplayManager::AutoSelect()
 
 void DisplayManager::OnClicked(float x, float y, bool right)
 {
+   IDrawableModule::OnClicked(x, y, right);
+
    if (right)
+   {
+      if (y >= 0 && IsSaveable())
+      {
+         if (TheSaveDataPanel->GetModule() == this)
+            TheSaveDataPanel->SetModule(nullptr);
+         else
+            TheSaveDataPanel->SetModule(this);
+      }
       return;
+   }
 
    float headerH = 20;
    float contentTop = headerH + 3;
@@ -447,6 +459,7 @@ void DisplayManager::Resize(float w, float h)
 
 void DisplayManager::ResolveSources()
 {
+   // Method 1: check our own input cables
    for (size_t i = 0; i < mInputCables.size() && i < mSources.size(); ++i)
    {
       if (mInputCables[i] && !mInputCables[i]->GetPatchCables().empty())
@@ -457,6 +470,36 @@ void DisplayManager::ResolveSources()
       else
       {
          mSources[i] = nullptr;
+      }
+   }
+
+   // Method 2: scan all modules for cables targeting THIS module (body drop)
+   std::vector<IDrawableModule*> allModules;
+   TheSynth->GetAllModules(allModules);
+   IClickable* me = dynamic_cast<IClickable*>(this);
+   for (auto* mod : allModules)
+   {
+      if (mod == this) continue;
+      for (auto* source : mod->GetPatchCableSources())
+      {
+         for (auto* cable : source->GetPatchCables())
+         {
+            if (cable->GetTarget() && cable->GetTarget() == me)
+            {
+               auto* vis = dynamic_cast<IVisualSource*>(mod);
+               if (vis)
+               {
+                  for (size_t i = 0; i < mSources.size(); ++i)
+                  {
+                     if (mSources[i] == nullptr)
+                     {
+                        mSources[i] = vis;
+                        break;
+                     }
+                  }
+               }
+            }
+         }
       }
    }
 }
@@ -536,32 +579,49 @@ void DisplayManager::LoadState(FileStreamIn& in, int rev)
 
 void DisplayManager::ApplyGridSize()
 {
-   for (auto* cable : mInputCables)
+   int newTotal = mGridRows * mGridCols;
+   if (newTotal < 1) newTotal = 1;
+   int oldTotal = (int)mInputCables.size();
+
+   if (newTotal > oldTotal)
    {
-      if (cable)
-         cable->Clear();
-      RemovePatchCableSource(cable);
+      mInputCables.resize(newTotal, nullptr);
+      mSources.resize(newTotal, nullptr);
+      mCellPriority.resize(newTotal, 0);
+      mCellHeld.resize(newTotal, false);
+
+      for (int i = oldTotal; i < newTotal; ++i)
+      {
+         mInputCables[i] = new PatchCableSource(this, kConnectionType_Special);
+         mInputCables[i]->SetManualPosition(0, 25 + i * 18);
+         mInputCables[i]->SetManualSide(PatchCableSource::Side::kLeft);
+         AddPatchCableSource(mInputCables[i]);
+      }
    }
-   mInputCables.clear();
-   mSources.clear();
-
-   int total = mGridRows * mGridCols;
-   if (total < 1) total = 1;
-
-   mInputCables.resize(total, nullptr);
-   mSources.resize(total, nullptr);
-   mCellPriority.resize(total, 0);
-   mCellHeld.resize(total, false);
-
-   for (int i = 0; i < total; ++i)
+   else if (newTotal < oldTotal)
    {
-      mInputCables[i] = new PatchCableSource(this, kConnectionType_Special);
-      mInputCables[i]->SetManualPosition(0, 25 + i * 18);
-      mInputCables[i]->SetManualSide(PatchCableSource::Side::kLeft);
-      AddPatchCableSource(mInputCables[i]);
+      for (int i = newTotal; i < oldTotal; ++i)
+      {
+         if (mInputCables[i])
+         {
+            mInputCables[i]->Clear();
+            RemovePatchCableSource(mInputCables[i]);
+         }
+      }
+      mInputCables.resize(newTotal);
+      mSources.resize(newTotal);
+      mCellPriority.resize(newTotal);
+      mCellHeld.resize(newTotal);
    }
 
-   mActiveCell = -1;
+   for (int i = 0; i < newTotal; ++i)
+   {
+      if (mInputCables[i])
+         mInputCables[i]->SetManualPosition(0, 25 + i * 18);
+   }
+
+   if (mActiveCell >= newTotal)
+      mActiveCell = -1;
    mEditingPriority = 0;
 
    if (mOutputCable)

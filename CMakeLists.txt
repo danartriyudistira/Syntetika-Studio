@@ -42,6 +42,10 @@ add_compile_options(
     $<$<CXX_COMPILER_ID:MSVC>:/MP>
     # Set source and executable charsets to UTF-8. Required for building on CJK Windows.
     $<$<CXX_COMPILER_ID:MSVC>:/utf-8>
+    # Enable C++ exceptions (required by JUCE)
+    $<$<CXX_COMPILER_ID:MSVC>:/EHsc>
+    # Enable RTTI (required by JUCE)
+    $<$<CXX_COMPILER_ID:MSVC>:/GR>
     )
 
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")

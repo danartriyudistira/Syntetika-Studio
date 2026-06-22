@@ -63,6 +63,7 @@ void VisualFBO::Bind()
    gDrawingToFBO = true;
 
    nvgluBindFramebuffer(mFB);
+   glGetIntegerv(GL_VIEWPORT, mSavedViewport);
    glViewport(0, 0, mWidth, mHeight);
    glClearColor(0, 0, 0, 0);
    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -77,6 +78,7 @@ void VisualFBO::Unbind()
 
    nvgEndFrame(mNVG);
    nvgluBindFramebuffer(nullptr);
+   glViewport(mSavedViewport[0], mSavedViewport[1], mSavedViewport[2], mSavedViewport[3]);
 
    gDrawingToFBO = false;
    gNanoVG = mSavedNVG;
@@ -91,7 +93,9 @@ std::vector<uint8_t> VisualFBO::ReadPixels() const
       return {};
 
    int prevFB = 0;
+   GLint prevViewport[4];
    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFB);
+   glGetIntegerv(GL_VIEWPORT, prevViewport);
 
    nvgluBindFramebuffer(mFB);
    glViewport(0, 0, mWidth, mHeight);
@@ -100,8 +104,14 @@ std::vector<uint8_t> VisualFBO::ReadPixels() const
    glReadPixels(0, 0, mWidth, mHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
 
    glBindFramebuffer(GL_FRAMEBUFFER, prevFB);
+   glViewport(prevViewport[0], prevViewport[1], prevViewport[2], prevViewport[3]);
 
    return pixels;
+}
+
+unsigned int VisualFBO::GetTexture() const
+{
+   return mFB ? mFB->texture : 0;
 }
 
 void VisualFBO::Draw(float x, float y, float w, float h)

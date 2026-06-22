@@ -415,3 +415,30 @@ run_cmake*.bat
 run_cmake*.sh
 
 scripts/installer_macOS/Syntetika-Mac.dmg
+
+# Local build scripts
+run.cmd
+run_cmake*.bat
+run_cmake*.sh
+build_and_run.cmd
+build_release.cmd
+
+# Local build directories
+build_ninja/
+build_ninja_release/
+
+# Development notes
+current-summary.md
+
+# WebView2 dependency (removed from build)
+libs/webview2/
+
+# Dead source files (removed from build)
+Source/MediaPlayerModule.cpp
+Source/MediaPlayerModule.h
+Source/ParallaxWebPlayerModule.cpp
+Source/ParallaxWebPlayerModule.h
+Source/VideoDecoder.cpp
+Source/VideoDecoder.h
+Source/WebView2Capture.cpp
+Source/WebView2Capture.h

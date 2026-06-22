@@ -98,7 +98,7 @@ private:
    float mCombL1[kReverbBufSize]{}, mCombL2[kReverbBufSize]{}, mApL[kReverbBufSize]{};
    float mCombR1[kReverbBufSize]{}, mCombR2[kReverbBufSize]{}, mApR[kReverbBufSize]{};
    int mReverbIdx{ 0 };
-   static const int kMaxProcessBufSize = 2048;
+   static const int kMaxProcessBufSize = 4096;
    float mDirectL[kMaxProcessBufSize]{}, mDirectR[kMaxProcessBufSize]{};
    float mBinauralL[kMaxProcessBufSize]{}, mBinauralR[kMaxProcessBufSize]{};
    float mSpeakerSignal[16][kMaxProcessBufSize]{};

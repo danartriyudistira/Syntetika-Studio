@@ -6,6 +6,8 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
+#include <algorithm>
+
 ImageLoaderModule::ImageLoaderModule()
 {
 }
@@ -23,7 +25,7 @@ void ImageLoaderModule::CreateUIControls()
    AddUIControl(mBrowseButton);
 
    mOutputCable = new PatchCableSource(this, kConnectionType_Special);
-   mOutputCable->SetManualPosition(mWidth - 15, 10);
+   mOutputCable->SetManualPosition(mWidth, 10);
    mOutputCable->SetManualSide(PatchCableSource::Side::kRight);
    AddPatchCableSource(mOutputCable);
 }
@@ -84,6 +86,8 @@ void ImageLoaderModule::PostRender()
       mPendingLoad = false;
       DoLoadImage();
    }
+
+   UpdateGIFAnimation();
 }
 
 void ImageLoaderModule::GetModuleDimensions(float& width, float& height)
@@ -97,14 +101,14 @@ void ImageLoaderModule::Resize(float w, float h)
    mWidth = std::max(kMinWidth, w);
    mHeight = std::max(kMinHeight, h);
    if (mOutputCable)
-      mOutputCable->SetManualPosition(mWidth - 15, 10);
+      mOutputCable->SetManualPosition(mWidth, 10);
 }
 
 void ImageLoaderModule::ButtonClicked(ClickButton* button, double time)
 {
    if (button == mBrowseButton)
    {
-      auto pattern = "*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.tga;*.psd";
+      auto pattern = "*.png;*.jpg;*.jpeg;*.gif";
       juce::FileChooser chooser("Load Image", juce::File(), pattern, true, false, TheSynth->GetFileChooserParent());
       if (chooser.browseForFileToOpen())
       {
@@ -113,6 +117,43 @@ void ImageLoaderModule::ButtonClicked(ClickButton* button, double time)
          mPendingLoad = true;
       }
    }
+}
+
+void ImageLoaderModule::ResetGIFState()
+{
+   mGIFAnimator = GIFAnimator{};
+   mGIFCurrentFrame = 0;
+   mGIFLastFrameTime = 0;
+}
+
+void ImageLoaderModule::UploadRGBAToFBO(unsigned char* data, int w, int h)
+{
+   if (mImageHandle >= 0 && mFBO)
+   {
+      NVGcontext* oldNvg = mFBO->GetNVGContext();
+      if (oldNvg)
+         nvgDeleteImage(oldNvg, mImageHandle);
+      mImageHandle = -1;
+   }
+
+   if (!mFBO)
+      mFBO = new VisualFBO();
+   mFBO->Create(w, h);
+
+   {
+      NVGcontext* savedNvg = gNanoVG;
+      gNanoVG = mFBO->GetNVGContext();
+      mImageHandle = nvgCreateImageRGBA(gNanoVG, w, h, 0, data);
+      gNanoVG = savedNvg;
+   }
+
+   mFBO->Bind();
+   NVGpaint imgPaint = nvgImagePattern(gNanoVG, 0, 0, w, h, 0.0f, mImageHandle, 1.0f);
+   nvgBeginPath(gNanoVG);
+   nvgRect(gNanoVG, 0, 0, w, h);
+   nvgFillPaint(gNanoVG, imgPaint);
+   nvgFill(gNanoVG);
+   mFBO->Unbind();
 }
 
 void ImageLoaderModule::DoLoadImage()
@@ -124,32 +165,60 @@ void ImageLoaderModule::DoLoadImage()
    if (!file.existsAsFile())
       return;
 
+   mLoadedPath = mPendingPath;
+   mPendingPath.clear();
+
+   std::string ext = file.getFileExtension().toLowerCase().toStdString();
+   bool isGif = (ext == ".gif");
+
+   if (isGif)
+   {
+      ResetGIFState();
+      std::string path = file.getFullPathName().toStdString();
+      if (!mGIFAnimator.Load(path))
+      {
+         mLoadedPath.clear();
+         return;
+      }
+
+      mImageWidth = mGIFAnimator.GetCanvasWidth();
+      mImageHeight = mGIFAnimator.GetCanvasHeight();
+
+      // Upload first frame
+      int numFrames = mGIFAnimator.GetNumFrames();
+      if (numFrames > 0)
+      {
+         const auto* frameData = mGIFAnimator.GetFrameRGBA(0);
+         if (!frameData)
+         {
+            mLoadedPath.clear();
+            return;
+         }
+
+         UploadRGBAToFBO(const_cast<unsigned char*>(frameData), mImageWidth, mImageHeight);
+         mGIFCurrentFrame = 0;
+         mGIFLastFrameTime = 0;
+
+         // If only 1 frame, treat as static image
+         if (numFrames <= 1)
+            mGIFAnimator = GIFAnimator{};
+      }
+      return;
+   }
+
    auto juceImage = juce::ImageFileFormat::loadFrom(file);
    if (!juceImage.isValid())
+   {
+      mLoadedPath.clear();
       return;
+   }
 
    int newW = juceImage.getWidth();
    int newH = juceImage.getHeight();
 
-   // Delete old image handle from existing FBO context BEFORE destroying it
-   if (mImageHandle >= 0 && mFBO)
-   {
-      NVGcontext* oldNvg = mFBO->GetNVGContext();
-      if (oldNvg)
-         nvgDeleteImage(oldNvg, mImageHandle);
-      mImageHandle = -1;
-   }
-
-   // Recreate FBO (destroys old context internally if needed)
-   if (!mFBO)
-      mFBO = new VisualFBO();
-   mFBO->Create(newW, newH);
-
    mImageWidth = newW;
    mImageHeight = newH;
-   mLoadedPath = mPendingPath;
 
-   // Get pixel data
    juce::Image::BitmapData bitmapData(juceImage, juce::Image::BitmapData::readOnly);
    std::vector<unsigned char> rgbaData(mImageWidth * mImageHeight * 4);
    for (int y = 0; y < mImageHeight; ++y)
@@ -165,24 +234,31 @@ void ImageLoaderModule::DoLoadImage()
       }
    }
 
-   // Create nanovg image handle in FBO's context
+   UploadRGBAToFBO(rgbaData.data(), mImageWidth, mImageHeight);
+}
+
+void ImageLoaderModule::UpdateGIFAnimation()
+{
+   if (mGIFAnimator.GetNumFrames() <= 0)
+      return;
+
+   int numFrames = mGIFAnimator.GetNumFrames();
+   int currentDelay = mGIFAnimator.GetFrameDelay(mGIFCurrentFrame);
+   if (currentDelay <= 0) currentDelay = 10; // default 100ms
+
+   double frameDuration = currentDelay / 1000.0; // delay is in milliseconds
+
+   double elapsed = gTime - mGIFLastFrameTime;
+
+   if (elapsed >= frameDuration)
    {
-      NVGcontext* savedNvg = gNanoVG;
-      gNanoVG = mFBO->GetNVGContext();
-      mImageHandle = nvgCreateImageRGBA(gNanoVG, mImageWidth, mImageHeight, 0, rgbaData.data());
-      gNanoVG = savedNvg;
+      mGIFCurrentFrame = (mGIFCurrentFrame + 1) % numFrames;
+      mGIFLastFrameTime = gTime;
+
+      const auto* frameData = mGIFAnimator.GetFrameRGBA(mGIFCurrentFrame);
+      if (frameData)
+         UploadRGBAToFBO(const_cast<unsigned char*>(frameData), mImageWidth, mImageHeight);
    }
-
-   // Render image into FBO using Bind/Unbind (handles context switch + frame lifecycle)
-   mFBO->Bind();
-
-   NVGpaint imgPaint = nvgImagePattern(gNanoVG, 0, 0, mImageWidth, mImageHeight, 0.0f, mImageHandle, 1.0f);
-   nvgBeginPath(gNanoVG);
-   nvgRect(gNanoVG, 0, 0, mImageWidth, mImageHeight);
-   nvgFillPaint(gNanoVG, imgPaint);
-   nvgFill(gNanoVG);
-
-   mFBO->Unbind();
 }
 
 void ImageLoaderModule::SaveState(FileStreamOut& out)
@@ -200,6 +276,9 @@ void ImageLoaderModule::LoadState(FileStreamIn& in, int rev)
    in >> path;
    in >> mWidth;
    in >> mHeight;
+   if (mOutputCable)
+      mOutputCable->SetManualPosition(mWidth, 10);
+
    if (!path.empty())
    {
       mPendingPath = path;
