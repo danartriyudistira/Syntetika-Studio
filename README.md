@@ -226,7 +226,7 @@ Fork dari [Bespoke Synth](https://github.com/BespokeSynth/BespokeSynth) oleh Rya
 ```
 Synthetika Studio — experimental fork of Bespoke Synth
 Copyright (C) 2021 Ryan Challinor
-Copyright (C) 2024 Danar Tri Yudistira
+Copyright (C) 2024-2026 Danar Tri Yudistira
 ```
 
 Lihat file [LICENSE](LICENSE) untuk detail lengkap.
