@@ -155,11 +155,13 @@ target_sources(Syntetika PRIVATE
     DistortionEffect.h
     GIFAnimator.cpp
     ImageLoaderModule.cpp
+    ImageSequencerModule.cpp
     AudioVisualizerModule.cpp
     LayerComposition.cpp
 
     GIFAnimator.h
     ImageLoaderModule.h
+    ImageSequencerModule.h
     AudioVisualizerModule.h
     LayerComposition.h
     DotGrid.cpp
