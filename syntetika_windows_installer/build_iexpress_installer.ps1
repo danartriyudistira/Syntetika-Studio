@@ -1,5 +1,5 @@
 param(
-    [string]$ReleaseDir = "..\build\Source\Syntetika_artefacts\Release",
+    [string]$ReleaseDir = "..\build_ninja_release\Source\Syntetika_artefacts\Release",
     [string]$OutputDir = "..\dist",
     [string]$InstallerName = "Synthetika-Studio-Setup.exe"
 )

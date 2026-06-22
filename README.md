@@ -5,6 +5,7 @@
 ![Platform: macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white)
 ![Platform: Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black)
 [![Build Status](https://dev.azure.com/syntetika/syntetika/_apis/build/status/syntetika?branchName=main)](azure-pipelines.yml)
+[![Download](https://img.shields.io/badge/Download-Latest%20Release-blueviolet?logo=github)](https://github.com/danartriyudistira/Syntetika-Studio/releases/latest)
 
 > **Compose Sound. Shape Space. Create Experience.**
 
@@ -185,6 +186,13 @@ cmake --build build --config Release
 - Refactor sistem spatial audio (legacy removal)
 - Perbaikan save/load + UI improvements
 - Cleanup orphan files & gitignore artifacts
+- Thread safety fixes (Transport, DisplayManager, SpatialRender)
+- Memory leak fixes (Push2Control)
+- Buffer overflow fixes (SpatialRender, GIFAnimator)
+
+**Download:**
+- [Windows Installer (EXE)](https://github.com/danartriyudistira/Syntetika-Studio/releases/latest) — self-extracting installer
+- Atau [build dari source](#build-dari-source)
 
 **Planned:**
 - [ ] Visual Nodes (generative graphics, real-time visuals)
