@@ -4,7 +4,6 @@
 #include "IVisualSource.h"
 #include "PatchCableSource.h"
 #include "ClickButton.h"
-#include "GIFAnimator.h"
 #include "Slider.h"
 
 #include <vector>
@@ -37,17 +36,12 @@ public:
    void LoadState(FileStreamIn& in, int rev) override;
    int GetModuleSaveStateRev() const override { return 0; }
 
-   //IVisualSource
    VisualFBO* GetFBO() override;
 
 private:
    struct ImageEntry
    {
       std::string filePath;
-      bool isGif{ false };
-      GIFAnimator gifAnimator;
-      int gifCurrentFrame{ 0 };
-      double gifLastFrameTime{ 0 };
    };
 
    void DoScanFolder();

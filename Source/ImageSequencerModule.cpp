@@ -104,6 +104,9 @@ void ImageSequencerModule::DrawModule()
 
 void ImageSequencerModule::PostRender()
 {
+   if (!mEnabled)
+      return;
+
    if (mPendingScan)
    {
       mPendingScan = false;
@@ -137,39 +140,9 @@ void ImageSequencerModule::AdvanceFrame()
    if (mImages.empty())
       return;
 
-   auto& entry = mImages[mCurrentIndex];
-
-   if (entry.isGif)
-   {
-      int numGifFrames = entry.gifAnimator.GetNumFrames();
-      if (numGifFrames > 1)
-      {
-         int delay = entry.gifAnimator.GetFrameDelay(entry.gifCurrentFrame);
-         if (delay <= 0) delay = 10;
-         float gifDuration = delay / 1000.0f;
-         double gifElapsed = gTime - entry.gifLastFrameTime;
-         if (gifElapsed >= gifDuration)
-         {
-            entry.gifCurrentFrame = (entry.gifCurrentFrame + 1) % numGifFrames;
-            entry.gifLastFrameTime = gTime;
-            const auto* frameData = entry.gifAnimator.GetFrameRGBA(entry.gifCurrentFrame);
-            if (frameData && mImageWidth > 0 && mImageHeight > 0)
-               UploadRGBAToFBO(const_cast<unsigned char*>(frameData), mImageWidth, mImageHeight);
-         }
-         return;
-      }
-   }
-
-   int nextIndex = mCurrentIndex + 1;
-   if (nextIndex >= (int)mImages.size())
-      nextIndex = 0;
-
-   if (nextIndex != mCurrentIndex)
-   {
-      mCurrentIndex = nextIndex;
-      mPendingLoadIndex = mCurrentIndex;
-      mPendingLoad = true;
-   }
+   mCurrentIndex = (mCurrentIndex + 1) % (int)mImages.size();
+   mPendingLoadIndex = mCurrentIndex;
+   mPendingLoad = true;
 }
 
 void ImageSequencerModule::ButtonClicked(ClickButton* button, double time)
@@ -250,20 +223,13 @@ void ImageSequencerModule::DoScanFolder()
       return;
 
    juce::Array<juce::File> results;
-   folder.findChildFiles(results, juce::File::findFiles, false, "*.png;*.jpg;*.jpeg;*.gif");
+   folder.findChildFiles(results, juce::File::findFiles, false, "*.png;*.jpg;*.jpeg");
    results.sort();
 
    for (auto& f : results)
    {
       ImageEntry entry;
       entry.filePath = f.getFullPathName().toStdString();
-      std::string ext = f.getFileExtension().toLowerCase().toStdString();
-      entry.isGif = (ext == ".gif");
-      if (entry.isGif)
-      {
-         if (!entry.gifAnimator.Load(entry.filePath))
-            continue;
-      }
       mImages.push_back(entry);
    }
 
@@ -282,24 +248,6 @@ void ImageSequencerModule::LoadImageAtIndex(int index)
       return;
 
    auto& entry = mImages[index];
-
-   if (entry.isGif)
-   {
-      int numFrames = entry.gifAnimator.GetNumFrames();
-      if (numFrames > 0)
-      {
-         entry.gifCurrentFrame = 0;
-         entry.gifLastFrameTime = gTime;
-         const auto* frameData = entry.gifAnimator.GetFrameRGBA(0);
-         if (frameData)
-         {
-            mImageWidth = entry.gifAnimator.GetCanvasWidth();
-            mImageHeight = entry.gifAnimator.GetCanvasHeight();
-            UploadRGBAToFBO(const_cast<unsigned char*>(frameData), mImageWidth, mImageHeight);
-         }
-      }
-      return;
-   }
 
    juce::File file(entry.filePath);
    if (!file.existsAsFile())
@@ -388,6 +336,8 @@ void ImageSequencerModule::LoadState(FileStreamIn& in, int rev)
    in >> mHeight;
    in >> mPlaying;
    in >> mFps;
+   if (mFpsSlider)
+      mFpsSlider->SetValue(mFps, gTime);
    if (mOutputCable)
       mOutputCable->SetManualPosition(mWidth, 10);
    if (!path.empty())
