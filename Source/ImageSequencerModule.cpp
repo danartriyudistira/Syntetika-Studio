@@ -149,7 +149,7 @@ void ImageSequencerModule::ButtonClicked(ClickButton* button, double time)
 {
    if (button == mBrowseButton)
    {
-      juce::FileChooser chooser("Select Image Folder", juce::File(), "*", false, false, TheSynth->GetFileChooserParent());
+      juce::FileChooser chooser("Select Image Folder", juce::File::getSpecialLocation(juce::File::userDocumentsDirectory), "*", true, false, TheSynth->GetFileChooserParent());
       if (chooser.browseForDirectory())
       {
          mFolderPath = chooser.getResult().getFullPathName().toStdString();
