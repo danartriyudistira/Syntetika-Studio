@@ -17,7 +17,7 @@ if (!(Test-Path $vcvars)) {
     exit 1
 }
 
-Write-Host "=== Building Synthetika Studio ($Configuration) ===" -ForegroundColor Cyan
+Write-Host "=== Building Syntetika Studio ($Configuration) ===" -ForegroundColor Cyan
 
 # Setup VC env
 & cmd /c """$vcvars"" x64 2>&1"

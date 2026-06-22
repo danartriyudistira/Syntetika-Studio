@@ -50,7 +50,7 @@ public:
          {
             std::cout << "A modular DAW for Mac, Windows, and Linux.\n"
                       << "\n"
-                        << "Usage: Synthetika Studio [OPTIONS] [path].json [path].bsk\n"
+                        << "Usage: Syntetika Studio [OPTIONS] [path].json [path].bsk\n"
                       << "\n"
                       << "Arguments:\n"
                        << "  [path].bsk      the project file to open (must end in .bsk)\n"
@@ -65,7 +65,7 @@ public:
          }
          else if (argument == "-v" || argument == "--version")
          {
-            std::cout << "Synthetika Studio " << GetBuildInfoString() << std::endl;
+            std::cout << "Syntetika Studio " << GetBuildInfoString() << std::endl;
             should_exit = true;
          }
          else if (argument == "-o" || argument == "--option")
@@ -92,10 +92,10 @@ public:
          return;
       }
 
-      mainWindow = std::make_unique<MainWindow>("Synthetika Studio");
+      mainWindow = std::make_unique<MainWindow>("Syntetika Studio");
 
       juce::PropertiesFile::Options options;
-      options.applicationName = "Synthetika-Studio";
+      options.applicationName = "Syntetika-Studio";
       options.filenameSuffix = "settings";
       options.osxLibrarySubFolder = "Preferences";
 

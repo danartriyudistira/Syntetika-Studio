@@ -116,6 +116,7 @@
 #include "DisplayManager.h"
 #include "GLSLShaderModule.h"
 #include "ImageLoaderModule.h"
+#include "AudioVisualizerModule.h"
 #include "LayerComposition.h"
 
 #include "MonitorModule.h"
@@ -351,6 +352,7 @@ ModuleFactory::ModuleFactory()
      REGISTER(DisplayManager, displaymanager, kModuleCategory_Visual);
       REGISTER(GLSLShaderModule, glslshader, kModuleCategory_Visual);
 REGISTER(ImageLoaderModule, imageloader, kModuleCategory_Visual);
+   REGISTER(AudioVisualizerModule, audiovisualizer, kModuleCategory_Visual);
    REGISTER(LayerComposition, layercomposition, kModuleCategory_Visual);
 
        REGISTER(MonitorModule, monitor, kModuleCategory_Visual);

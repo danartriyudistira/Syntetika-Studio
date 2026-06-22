@@ -1,7 +1,7 @@
 param(
     [string]$ReleaseDir = "..\build_ninja_release\Source\Syntetika_artefacts\Release",
     [string]$OutputDir = "..\dist",
-    [string]$InstallerName = "Synthetika-Studio-Setup.exe"
+    [string]$InstallerName = "Syntetika-Studio-Setup.exe"
 )
 
 $ErrorActionPreference = "Stop"
@@ -10,12 +10,12 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Resolve-Path (Join-Path $scriptDir "..")
 $releasePath = Resolve-Path (Join-Path $scriptDir $ReleaseDir)
 $outputPath = Resolve-Path (New-Item -ItemType Directory -Force -Path (Join-Path $scriptDir $OutputDir))
-$buildRoot = Join-Path $env:TEMP "SynthetikaStudioInstaller"
+$buildRoot = Join-Path $env:TEMP "SyntetikaStudioInstaller"
 $workPath = Join-Path $buildRoot "iexpress-work"
-$payloadZip = Join-Path $workPath "Synthetika-Studio.zip"
+$payloadZip = Join-Path $workPath "Syntetika-Studio.zip"
 $installPs1 = Join-Path $workPath "install.ps1"
 $installCmd = Join-Path $workPath "install.cmd"
-$sedPath = Join-Path $workPath "Synthetika-Studio.sed"
+$sedPath = Join-Path $workPath "Syntetika-Studio.sed"
 $tempInstallerPath = Join-Path $buildRoot $InstallerName
 $installerPath = Join-Path $outputPath $InstallerName
 
@@ -42,11 +42,11 @@ Compress-Archive -Path (Join-Path $releasePath "*") -DestinationPath $payloadZip
 $ErrorActionPreference = "Stop"
 
 $packageDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$zipPath = Join-Path $packageDir "Synthetika-Studio.zip"
-$installDir = Join-Path $env:LOCALAPPDATA "Programs\Synthetika Studio"
-$startMenuDir = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Synthetika Studio"
-$desktopShortcut = Join-Path ([Environment]::GetFolderPath("Desktop")) "Synthetika Studio.lnk"
-$startShortcut = Join-Path $startMenuDir "Synthetika Studio.lnk"
+$zipPath = Join-Path $packageDir "Syntetika-Studio.zip"
+$installDir = Join-Path $env:LOCALAPPDATA "Programs\Syntetika Studio"
+$startMenuDir = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Syntetika Studio"
+$desktopShortcut = Join-Path ([Environment]::GetFolderPath("Desktop")) "Syntetika Studio.lnk"
+$startShortcut = Join-Path $startMenuDir "Syntetika Studio.lnk"
 $exePath = Join-Path $installDir "Syntetika.exe"
 
 if (Test-Path $installDir) {
@@ -62,16 +62,16 @@ $shell = New-Object -ComObject WScript.Shell
 $shortcut = $shell.CreateShortcut($startShortcut)
 $shortcut.TargetPath = $exePath
 $shortcut.WorkingDirectory = $installDir
-$shortcut.Description = "Synthetika Studio"
+$shortcut.Description = "Syntetika Studio"
 $shortcut.Save()
 
 $shortcut = $shell.CreateShortcut($desktopShortcut)
 $shortcut.TargetPath = $exePath
 $shortcut.WorkingDirectory = $installDir
-$shortcut.Description = "Synthetika Studio"
+$shortcut.Description = "Syntetika Studio"
 $shortcut.Save()
 
-Write-Host "Synthetika Studio installed to $installDir"
+Write-Host "Syntetika Studio installed to $installDir"
 Write-Host "Shortcuts were created on the Desktop and Start Menu."
 '@ | Set-Content -LiteralPath $installPs1 -Encoding ASCII
 
@@ -103,9 +103,9 @@ CAB_ResvCodeSigning=0
 RebootMode=N
 InstallPrompt=
 DisplayLicense=
-FinishMessage=Synthetika Studio installation has finished.
+FinishMessage=Syntetika Studio installation has finished.
 TargetName=$tempInstallerPath
-FriendlyName=Synthetika Studio Installer
+FriendlyName=Syntetika Studio Installer
 AppLaunched=install.cmd
 PostInstallCmd=<None>
 AdminQuietInstCmd=install.cmd
@@ -113,7 +113,7 @@ UserQuietInstCmd=install.cmd
 SourceFiles=SourceFiles
 
 [Strings]
-FILE0="Synthetika-Studio.zip"
+FILE0="Syntetika-Studio.zip"
 FILE1="install.ps1"
 FILE2="install.cmd"
 

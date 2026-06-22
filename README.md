@@ -1,4 +1,4 @@
-# Synthetika Studio
+# Syntetika Studio
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 ![Platform: Windows](https://img.shields.io/badge/Windows-0078D6?logo=windows&logoColor=white)
@@ -13,7 +13,7 @@
 
 ## Daftar Isi
 
-- [Tentang Synthetika Studio](#tentang-synthetika-studio)
+- [Tentang Syntetika Studio](#tentang-synthetika-studio)
 - [Dari Audio ke Experience Composition](#dari-audio-ke-experience-composition)
 - [Screenshot](#screenshot)
 - [Fitur](#fitur)
@@ -26,9 +26,9 @@
 
 ---
 
-## Tentang Synthetika Studio
+## Tentang Syntetika Studio
 
-Synthetika Studio berawal dari sebuah eksperimen pribadi yang saya mulai melalui proyek **[Syntetika Engine (Web Version)](https://github.com/danartriyudistira/syntetika_engine)**.
+Syntetika Studio berawal dari sebuah eksperimen pribadi yang saya mulai melalui proyek **[Syntetika Engine (Web Version)](https://github.com/danartriyudistira/syntetika_engine)**.
 
 Pada tahap awal, fokus utama proyek tersebut adalah membangun sistem sequencer generatif berbasis web. Saya ingin mengeksplorasi bagaimana pola, probabilitas, dan algoritma dapat digunakan untuk menghasilkan komposisi musik secara dinamis. Syntetika Engine menjadi ruang eksperimen untuk membangun generator MIDI, sequencer generatif, dan berbagai pendekatan komputasional dalam proses penciptaan musik.
 
@@ -42,7 +42,7 @@ Pencarian tersebut akhirnya membawa saya pada **[Bespoke Synth](https://github.c
 
 Alih-alih membangun seluruh infrastruktur dari nol, saya melihat Bespoke sebagai pondasi yang ideal untuk mengembangkan visi yang selama ini saya bayangkan.
 
-Dari titik itulah lahir **Synthetika Studio**.
+Dari titik itulah lahir **Syntetika Studio**.
 
 ---
 
@@ -50,11 +50,11 @@ Dari titik itulah lahir **Synthetika Studio**.
 
 Sebagian besar software kreatif saat ini masih memisahkan berbagai medium ke dalam aplikasi yang berbeda. Musik dibuat di DAW. Visual dibuat di software VJ. Spatial audio menggunakan sistem lain. Interaksi menggunakan sistem yang berbeda lagi.
 
-Synthetika Studio berusaha menjembatani keterpisahan tersebut.
+Syntetika Studio berusaha menjembatani keterpisahan tersebut.
 
 Bagi saya, komposisi masa depan tidak hanya berbicara tentang nada dan ritme, tetapi juga tentang posisi, gerakan, visual, ruang, dan bagaimana semuanya membentuk pengalaman yang dirasakan manusia.
 
-Karena itu saya mendefinisikan Synthetika Studio bukan sebagai synthesizer, bukan sebagai DAW, dan bukan sebagai software VJ. Saya melihatnya sebagai:
+Karena itu saya mendefinisikan Syntetika Studio bukan sebagai synthesizer, bukan sebagai DAW, dan bukan sebagai software VJ. Saya melihatnya sebagai:
 
 > **Open Experience Composition Platform**
 
@@ -205,19 +205,19 @@ cmake --build build --config Release
 
 ## Open Source sebagai Fondasi
 
-Synthetika Studio dibangun di atas semangat open source yang sama dengan Bespoke Synth.
+Syntetika Studio dibangun di atas semangat open source yang sama dengan Bespoke Synth.
 
 Saya memilih mengembangkan proyek ini secara terbuka karena saya percaya bahwa ekosistem kreatif tumbuh lebih kuat ketika pengetahuan, alat, dan eksperimen dapat dibagikan dan dikembangkan bersama.
 
 Tujuan saya bukan menciptakan produk tertutup. Tujuan saya adalah membangun fondasi yang dapat digunakan, dipelajari, dimodifikasi, dan dikembangkan oleh seniman media, visual jockey, creative coder, musisi eksperimental, dan para kreator yang memiliki ketertarikan yang sama terhadap persimpangan antara seni, teknologi, dan pengalaman manusia.
 
-Synthetika Studio adalah kelanjutan dari perjalanan tersebut. Sebuah evolusi dari Syntetika Engine menuju platform yang lebih terbuka, lebih modular, dan lebih dekat dengan visi saya tentang masa depan komposisi audiovisual dan spatial experience.
+Syntetika Studio adalah kelanjutan dari perjalanan tersebut. Sebuah evolusi dari Syntetika Engine menuju platform yang lebih terbuka, lebih modular, dan lebih dekat dengan visi saya tentang masa depan komposisi audiovisual dan spatial experience.
 
 ---
 
 ## AI-Driven Development
 
-Synthetika Studio dikembangkan dengan bantuan **OpenCode** berbasis model **DeepSeek V4** sebagai AI coding assistant.
+Syntetika Studio dikembangkan dengan bantuan **OpenCode** berbasis model **DeepSeek V4** sebagai AI coding assistant.
 
 Proyek ini adalah eksperimen pribadi untuk mengeksplorasi bagaimana AI dapat mempercepat pengembangan perangkat lunak kreatif yang kompleks — mulai dari refactoring kode C++17, debugging sistem real-time audio/visual, hingga membangun modul baru seperti LayerComposition dan GIFAnimator.
 
@@ -227,12 +227,12 @@ Pendekatan ini memungkinkan satu pengembang untuk mengerjakan fondasi teknis yan
 
 ## Lisensi
 
-Synthetika Studio adalah open source, dilisensikan di bawah **GNU General Public License v3.0**.
+Syntetika Studio adalah open source, dilisensikan di bawah **GNU General Public License v3.0**.
 
 Fork dari [Bespoke Synth](https://github.com/BespokeSynth/BespokeSynth) oleh Ryan Challinor.
 
 ```
-Synthetika Studio — experimental fork of Bespoke Synth
+Syntetika Studio — experimental fork of Bespoke Synth
 Copyright (C) 2021 Ryan Challinor
 Copyright (C) 2024-2026 Danar Tri Yudistira
 ```

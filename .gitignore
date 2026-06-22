@@ -413,11 +413,16 @@ header_file.txt
 
 syntetika_windows_installer/Syntetika-Windows-x64.msi
 syntetika_windows_installer/Syntetika-Windows-x64.wixpdb
+syntetika_windows_installer/Syntetika-Studio-Windows-x64.msi
+syntetika_windows_installer/Syntetika-Studio-Windows-x64.wixpdb
 
 run_cmake*.bat
 run_cmake*.sh
 
 scripts/installer_macOS/Syntetika-Mac.dmg
+
+# Distribution output
+dist/
 
 # Local build scripts
 run.cmd

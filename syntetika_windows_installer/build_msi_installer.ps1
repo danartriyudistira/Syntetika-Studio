@@ -42,25 +42,18 @@ try {
     if (-not (Test-Path $resourceDir)) {
         throw "Resource directory not found: $resourceDir"
     }
-    if (-not (Test-Path $pythonDir)) {
-        throw "Python directory not found: $pythonDir"
-    }
 
     Write-Host "[1/4] Harvesting resource directory..." -ForegroundColor Yellow
     & $heat dir $resourceDir -o HarvestedResourceDir.wxs -scom -frag -srd -sreg -gg -cg SyntetikaResourceDir -dr RESOURCE_DIR_REF
     if ($LASTEXITCODE -ne 0) { throw "heat failed for resource directory" }
 
-    Write-Host "[2/4] Harvesting Python directory..." -ForegroundColor Yellow
-    & $heat dir $pythonDir -o HarvestedPythonDir.wxs -scom -frag -srd -sreg -gg -cg SyntetikaPythonDir -dr PYTHON_DIR_REF
-    if ($LASTEXITCODE -ne 0) { throw "heat failed for Python directory" }
-
-    Write-Host "[3/4] Compiling WiX sources..." -ForegroundColor Yellow
-    & $candle Syntetika.wxs HarvestedResourceDir.wxs HarvestedPythonDir.wxs -arch x64
+    Write-Host "[2/4] Compiling WiX sources..." -ForegroundColor Yellow
+    & $candle Syntetika.wxs HarvestedResourceDir.wxs -arch x64
     if ($LASTEXITCODE -ne 0) { throw "candle compilation failed" }
 
-    Write-Host "[4/4] Linking MSI package..." -ForegroundColor Yellow
-    & $light Syntetika.wixobj HarvestedResourceDir.wixobj HarvestedPythonDir.wixobj `
-        -b $resourceDir -b $pythonDir -out $OutputMsi -ext WixUIExtension
+    Write-Host "[3/4] Linking MSI package..." -ForegroundColor Yellow
+    & $light Syntetika.wixobj HarvestedResourceDir.wixobj `
+        -b $resourceDir -out $OutputMsi -ext WixUIExtension
     if ($LASTEXITCODE -ne 0) { throw "light linking failed" }
 
     $msiPath = Join-Path $scriptDir $OutputMsi
