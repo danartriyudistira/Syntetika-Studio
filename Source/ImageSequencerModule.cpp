@@ -125,7 +125,7 @@ void ImageSequencerModule::PostRender()
    if (mFps <= 0)
       return;
 
-   float frameDuration = 1.0f / mFps;
+   float frameDuration = 1000.0f / mFps;
    double elapsed = gTime - mLastFrameTime;
 
    if (elapsed >= frameDuration)
