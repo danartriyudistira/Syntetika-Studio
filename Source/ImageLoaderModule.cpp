@@ -128,6 +128,9 @@ void ImageLoaderModule::ResetGIFState()
 
 void ImageLoaderModule::UploadRGBAToFBO(unsigned char* data, int w, int h)
 {
+   if (data == nullptr || w <= 0 || h <= 0)
+      return;
+
    if (mImageHandle >= 0 && mFBO)
    {
       NVGcontext* oldNvg = mFBO->GetNVGContext();
@@ -147,6 +150,12 @@ void ImageLoaderModule::UploadRGBAToFBO(unsigned char* data, int w, int h)
       gNanoVG = savedNvg;
    }
 
+   if (mImageHandle < 0)
+   {
+      mLoadedPath.clear();
+      return;
+   }
+
    mFBO->Bind();
    NVGpaint imgPaint = nvgImagePattern(gNanoVG, 0, 0, w, h, 0.0f, mImageHandle, 1.0f);
    nvgBeginPath(gNanoVG);
@@ -156,14 +165,39 @@ void ImageLoaderModule::UploadRGBAToFBO(unsigned char* data, int w, int h)
    mFBO->Unbind();
 }
 
+namespace
+{
+   bool IsFileReady(const juce::File& file)
+   {
+      if (!file.existsAsFile())
+         return false;
+      juce::FileInputStream stream(file);
+      if (!stream.openedOk())
+         return false;
+      int64_t size = stream.getTotalLength();
+      if (size <= 0)
+         return false;
+      // Check that the file isn't being written to by checking
+      // if the size is stable after a brief wait
+      juce::Time::waitForMillisecondCounter(juce::Time::getMillisecondCounter() + 20);
+      if (stream.getTotalLength() != size)
+         return false;
+      return true;
+   }
+}
+
 void ImageLoaderModule::DoLoadImage()
 {
    if (mPendingPath.empty())
       return;
 
    juce::File file(mPendingPath);
-   if (!file.existsAsFile())
+   if (!IsFileReady(file))
+   {
+      // File not ready yet (being written), retry next frame
+      mPendingLoad = true;
       return;
+   }
 
    mLoadedPath = mPendingPath;
    mPendingPath.clear();
