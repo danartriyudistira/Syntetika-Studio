@@ -33,8 +33,8 @@ void ImageSequencerModule::CreateUIControls()
    mNextButton = new ClickButton(this, ">>", 175, 3);
    AddUIControl(mNextButton);
 
-   mFpsSlider = new FloatSlider(this, "fps", 3, 20, 90, 15, &mFps, 1, 60);
-   AddUIControl(mFpsSlider);
+   mFramesPerBeatSlider = new FloatSlider(this, "frames/beat", 3, 20, 90, 15, &mFramesPerBeat, 0.25f, 16);
+   AddUIControl(mFramesPerBeatSlider);
 
    mOutputCable = new PatchCableSource(this, kConnectionType_Special);
    mOutputCable->SetManualPosition(mWidth, 10);
@@ -57,7 +57,7 @@ void ImageSequencerModule::DrawModule()
    mPlayPauseButton->Draw();
    mPrevButton->Draw();
    mNextButton->Draw();
-   mFpsSlider->Draw();
+   mFramesPerBeatSlider->Draw();
 
    float contentTop = 40;
    float contentW = mWidth - 6;
@@ -119,19 +119,22 @@ void ImageSequencerModule::PostRender()
       LoadImageAtIndex(mPendingLoadIndex);
    }
 
-   if (!mPlaying || mImages.empty())
+   if (!mPlaying || mImages.empty() || mFramesPerBeat <= 0)
       return;
 
-   if (mFps <= 0)
+   double beatMs = TheTransport->GetDuration(kInterval_4n);
+   double advanceMs = beatMs / mFramesPerBeat;
+
+   if (advanceMs <= 0)
       return;
 
-   float frameDuration = 1000.0f / mFps;
-   double elapsed = gTime - mLastFrameTime;
-
-   if (elapsed >= frameDuration)
+   double elapsed = gTime - mLastAdvanceTime;
+   int stepsToAdvance = (int)(elapsed / advanceMs);
+   if (stepsToAdvance > 0)
    {
-      mLastFrameTime = gTime;
-      AdvanceFrame();
+      mLastAdvanceTime += stepsToAdvance * advanceMs;
+      for (int i = 0; i < stepsToAdvance; ++i)
+         AdvanceFrame();
    }
 }
 
@@ -261,7 +264,7 @@ void ImageSequencerModule::DoScanFolder()
       mCurrentIndex = 0;
       mPendingLoadIndex = 0;
       mPendingLoad = true;
-      mLastFrameTime = gTime;
+      mLastAdvanceTime = gTime;
    }
 }
 
@@ -323,7 +326,7 @@ void ImageSequencerModule::SaveState(FileStreamOut& out)
    out << mWidth;
    out << mHeight;
    out << mPlaying;
-   out << mFps;
+   out << mFramesPerBeat;
 }
 
 void ImageSequencerModule::LoadState(FileStreamIn& in, int rev)
@@ -334,9 +337,9 @@ void ImageSequencerModule::LoadState(FileStreamIn& in, int rev)
    in >> mWidth;
    in >> mHeight;
    in >> mPlaying;
-   in >> mFps;
-   if (mFpsSlider)
-      mFpsSlider->SetValue(mFps, gTime);
+   in >> mFramesPerBeat;
+   if (mFramesPerBeatSlider)
+      mFramesPerBeatSlider->SetValue(mFramesPerBeat, gTime);
    if (mOutputCable)
       mOutputCable->SetManualPosition(mWidth, 10);
    if (!path.empty())

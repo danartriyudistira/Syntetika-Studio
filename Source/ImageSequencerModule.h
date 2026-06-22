@@ -5,6 +5,7 @@
 #include "PatchCableSource.h"
 #include "ClickButton.h"
 #include "Slider.h"
+#include "Transport.h"
 
 #include <vector>
 #include <string>
@@ -67,14 +68,14 @@ private:
    ClickButton* mPlayPauseButton{ nullptr };
    ClickButton* mPrevButton{ nullptr };
    ClickButton* mNextButton{ nullptr };
-   float mFps{ 24 };
-   FloatSlider* mFpsSlider{ nullptr };
+   float mFramesPerBeat{ 1 };
+   FloatSlider* mFramesPerBeatSlider{ nullptr };
 
    bool mPlaying{ true };
    bool mPendingScan{ false };
    bool mPendingLoad{ false };
    int mPendingLoadIndex{ -1 };
-   double mLastFrameTime{ 0 };
+   double mLastAdvanceTime{ 0 };
 
    float mWidth{ 320 };
    float mHeight{ 280 };
