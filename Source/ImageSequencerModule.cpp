@@ -230,6 +230,29 @@ void ImageSequencerModule::DoScanFolder()
    {
       ImageEntry entry;
       entry.filePath = f.getFullPathName().toStdString();
+
+      auto juceImage = juce::ImageFileFormat::loadFrom(f);
+      if (!juceImage.isValid())
+         continue;
+
+      entry.width = juceImage.getWidth();
+      entry.height = juceImage.getHeight();
+
+      juce::Image::BitmapData bitmapData(juceImage, juce::Image::BitmapData::readOnly);
+      entry.decodedData.resize(entry.width * entry.height * 4);
+      for (int y = 0; y < entry.height; ++y)
+      {
+         for (int x = 0; x < entry.width; ++x)
+         {
+            int si = y * entry.width + x;
+            auto c = bitmapData.getPixelColour(x, y);
+            entry.decodedData[si * 4 + 0] = c.getRed();
+            entry.decodedData[si * 4 + 1] = c.getGreen();
+            entry.decodedData[si * 4 + 2] = c.getBlue();
+            entry.decodedData[si * 4 + 3] = c.getAlpha();
+         }
+      }
+
       mImages.push_back(entry);
    }
 
@@ -248,37 +271,13 @@ void ImageSequencerModule::LoadImageAtIndex(int index)
       return;
 
    auto& entry = mImages[index];
-
-   juce::File file(entry.filePath);
-   if (!file.existsAsFile())
+   if (entry.decodedData.empty() || entry.width <= 0 || entry.height <= 0)
       return;
 
-   auto juceImage = juce::ImageFileFormat::loadFrom(file);
-   if (!juceImage.isValid())
-      return;
+   mImageWidth = entry.width;
+   mImageHeight = entry.height;
 
-   int newW = juceImage.getWidth();
-   int newH = juceImage.getHeight();
-
-   mImageWidth = newW;
-   mImageHeight = newH;
-
-   juce::Image::BitmapData bitmapData(juceImage, juce::Image::BitmapData::readOnly);
-   std::vector<unsigned char> rgbaData(mImageWidth * mImageHeight * 4);
-   for (int y = 0; y < mImageHeight; ++y)
-   {
-      for (int x = 0; x < mImageWidth; ++x)
-      {
-         int si = y * mImageWidth + x;
-         auto c = bitmapData.getPixelColour(x, y);
-         rgbaData[si * 4 + 0] = c.getRed();
-         rgbaData[si * 4 + 1] = c.getGreen();
-         rgbaData[si * 4 + 2] = c.getBlue();
-         rgbaData[si * 4 + 3] = c.getAlpha();
-      }
-   }
-
-   UploadRGBAToFBO(rgbaData.data(), mImageWidth, mImageHeight);
+   UploadRGBAToFBO(entry.decodedData.data(), mImageWidth, mImageHeight);
 }
 
 void ImageSequencerModule::UploadRGBAToFBO(unsigned char* data, int w, int h)

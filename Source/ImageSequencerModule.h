@@ -42,6 +42,9 @@ private:
    struct ImageEntry
    {
       std::string filePath;
+      std::vector<unsigned char> decodedData;
+      int width{ 0 };
+      int height{ 0 };
    };
 
    void DoScanFolder();
