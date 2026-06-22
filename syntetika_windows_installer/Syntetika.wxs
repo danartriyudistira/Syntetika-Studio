@@ -11,11 +11,9 @@
       <Property Id="ARPHELPLINK" Value="https://github.com/danartriyudistira/Syntetika-Studio"/>
       <Property Id="ARPURLINFOABOUT" Value="https://github.com/danartriyudistira/Syntetika-Studio"/>
       <Property Id="ARPNOREPAIR" Value="1"/>
-       <Upgrade Id="$(var.ProductUpgradeCode)">
-          <UpgradeVersion OnlyDetect="yes" Minimum="$(var.ProductVersion)" IncludeMinimum="no" Property="NEWERVERSIONDETECTED"/>
-          <UpgradeVersion Minimum="0.0.0" IncludeMinimum="yes" Property="OLDERVERSIONBEINGUPGRADED"/>
-       </Upgrade>
-       <Condition Message="A newer version of this software is already installed.">NOT NEWERVERSIONDETECTED</Condition>
+        <Upgrade Id="$(var.ProductUpgradeCode)">
+           <UpgradeVersion Minimum="0.0.0" IncludeMinimum="yes" Property="OLDERVERSIONBEINGUPGRADED"/>
+        </Upgrade>
 
       <Directory Id="TARGETDIR" Name="SourceDir">
          <Directory Id="ProgramFiles64Folder">
