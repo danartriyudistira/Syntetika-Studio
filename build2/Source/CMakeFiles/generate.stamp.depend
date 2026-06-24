@@ -1,0 +1,9 @@
+# CMake generation dependency list for this directory.
+C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/Source/CMakeLists.txt
+C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/Source/VersionInfo.cpp.in
+C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/Source/cmake/lib.cmake
+C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/Source/cmake/versiontools.cmake
+C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/CMakeFiles/cmake.verify_globs
+C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/ableton-link/AbletonLinkConfig.cmake
+C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/ableton-link/cmake_include/ConfigureAbletonLink.cmake
+C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/ableton-link/cmake_include/ConfigureAsioStandalone.cmake

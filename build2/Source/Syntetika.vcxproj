@@ -1,0 +1,1422 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{FAEED950-FBE5-3E5D-8E40-57275A91547E}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>Syntetika</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Syntetika.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Syntetika</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <LocalDebuggerWorkingDirectory Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/Debug</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerEnvironment Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PATH=%PATH%;/bin</LocalDebuggerEnvironment>
+    <LocalDebuggerCommand Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/Debug/Syntetika.exe</LocalDebuggerCommand>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Syntetika.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Syntetika</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <LocalDebuggerWorkingDirectory Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/Release</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerEnvironment Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PATH=%PATH%;/bin</LocalDebuggerEnvironment>
+    <LocalDebuggerCommand Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/Release/Syntetika.exe</LocalDebuggerCommand>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Syntetika.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Syntetika</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
+    <LocalDebuggerWorkingDirectory Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/MinSizeRel</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerEnvironment Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">PATH=%PATH%;/bin</LocalDebuggerEnvironment>
+    <LocalDebuggerCommand Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/MinSizeRel/Syntetika.exe</LocalDebuggerCommand>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Syntetika.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Syntetika</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+    <LocalDebuggerWorkingDirectory Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/RelWithDebInfo</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerEnvironment Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">PATH=%PATH%;/bin</LocalDebuggerEnvironment>
+    <LocalDebuggerCommand Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/RelWithDebInfo/Syntetika.exe</LocalDebuggerCommand>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\JuceLibraryCode;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\exprtk\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\freeverb\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\json\jsoncpp\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\leathers\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanosvg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanovg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\psmove\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tinyobjloader\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\xwax\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tuning-library\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\oddsound-mts\MTS-ESP\Client;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\readerwriterqueue;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lv2;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\serd;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sratom;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/pybind11/include" /external:I "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/ableton-link/include" /external:I "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/ableton-link/modules/asio-standalone/asio/include" /utf-8 /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;JUCE_STANDALONE_APPLICATION=1;JUCE_PLUGINHOST_AU=1;JUCE_MODAL_LOOPS_PERMITTED=1;JUCE_ALLOW_STATIC_NULL_VARIABLES=0;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_VST3_CAN_REPLACE_VST2=0;JUCE_USE_CURL=0;JUCE_WEB_BROWSER=0;JUCE_USE_CAMERA=disabled;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_REPORT_APP_USAGE=0;JUCE_COREGRAPHICS_DRAW_ASYNC=1;JUCE_ALSA=1;JUCE_JACK=1;JUCE_JACK_CLIENT_NAME="Syntetika";JUCE_WASAPI=1;JUCE_DIRECTSOUND=1;JUCE_PLUGINHOST_VST3=1;JUCE_PLUGINHOST_VST=0;JUCE_PLUGINHOST_LV2=1;JUCE_PLUGINHOST_LADSPA=0;JUCE_CATCH_UNHANDLED_EXCEPTIONS=0;SYNTETIKA_WINDOWS=1;PYBIND11_EXPORT=;LINK_PLATFORM_WINDOWS=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;DEBUG=1;_DEBUG=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_opengl=1;JUCE_MODULE_AVAILABLE_juce_osc=1;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;JUCE_STANDALONE_APPLICATION=1;JUCE_PLUGINHOST_AU=1;JUCE_MODAL_LOOPS_PERMITTED=1;JUCE_ALLOW_STATIC_NULL_VARIABLES=0;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_VST3_CAN_REPLACE_VST2=0;JUCE_USE_CURL=0;JUCE_WEB_BROWSER=0;JUCE_USE_CAMERA=disabled;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_REPORT_APP_USAGE=0;JUCE_COREGRAPHICS_DRAW_ASYNC=1;JUCE_ALSA=1;JUCE_JACK=1;JUCE_JACK_CLIENT_NAME=\"Syntetika\";JUCE_WASAPI=1;JUCE_DIRECTSOUND=1;JUCE_PLUGINHOST_VST3=1;JUCE_PLUGINHOST_VST=0;JUCE_PLUGINHOST_LV2=1;JUCE_PLUGINHOST_LADSPA=0;JUCE_CATCH_UNHANDLED_EXCEPTIONS=0;SYNTETIKA_WINDOWS=1;PYBIND11_EXPORT=;LINK_PLATFORM_WINDOWS=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;DEBUG=1;_DEBUG=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_opengl=1;JUCE_MODULE_AVAILABLE_juce_osc=1;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\JuceLibraryCode;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\exprtk\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\freeverb\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\json\jsoncpp\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\leathers\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanosvg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanovg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\psmove\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tinyobjloader\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\xwax\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tuning-library\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\oddsound-mts\MTS-ESP\Client;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\readerwriterqueue;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lv2;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\serd;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sratom;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\pybind11\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\modules\asio-standalone\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\JuceLibraryCode;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\exprtk\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\freeverb\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\json\jsoncpp\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\leathers\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanosvg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanovg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\psmove\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tinyobjloader\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\xwax\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tuning-library\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\oddsound-mts\MTS-ESP\Client;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\readerwriterqueue;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lv2;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\serd;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sratom;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\pybind11\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\modules\asio-standalone\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message>	Copying Python DLLs	</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E echo 
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo *******************************
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Video playback requires ffmpeg.exe"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Place ffmpeg.exe next to Syntetika.exe"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Download from: https://ffmpeg.org/download.html"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Or install via: winget install ffmpeg"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo *******************************
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo 
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Program Files/WindowsApps/PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0/python3.dll" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/Debug/python3.dll"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Program Files/WindowsApps/PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0/python313.dll" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/Debug/python313.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -P "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/Source/cmake/install-quiet.cmake" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/resource" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/Debug" QUIET
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>windowscodecs.lib;..\libs\freeverb\Debug\freeverb.lib;..\libs\json\Debug\json.lib;..\libs\nanovg\Debug\nanovg.lib;..\libs\psmove\Debug\psmove.lib;..\libs\push2\Debug\push2.lib;..\libs\xwax\Debug\xwax.lib;..\libs\oddsound-mts\Debug\oddsound-mts.lib;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\libs\python313.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_basics/libs/VisualStudio2022/x64/MTd;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_basics/libs/VisualStudio2022/x64/MTd/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_core/libs/VisualStudio2022/x64/MTd;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_core/libs/VisualStudio2022/x64/MTd/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_devices/libs/VisualStudio2022/x64/MTd;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_devices/libs/VisualStudio2022/x64/MTd/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_events/libs/VisualStudio2022/x64/MTd;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_events/libs/VisualStudio2022/x64/MTd/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_formats/libs/VisualStudio2022/x64/MTd;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_formats/libs/VisualStudio2022/x64/MTd/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_processors/libs/VisualStudio2022/x64/MTd;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_processors/libs/VisualStudio2022/x64/MTd/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_extra/libs/VisualStudio2022/x64/MTd;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_extra/libs/VisualStudio2022/x64/MTd/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_basics/libs/VisualStudio2022/x64/MTd;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_basics/libs/VisualStudio2022/x64/MTd/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_graphics/libs/VisualStudio2022/x64/MTd;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_graphics/libs/VisualStudio2022/x64/MTd/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_data_structures/libs/VisualStudio2022/x64/MTd;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_data_structures/libs/VisualStudio2022/x64/MTd/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_dsp/libs/VisualStudio2022/x64/MTd;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_dsp/libs/VisualStudio2022/x64/MTd/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_cryptography/libs/VisualStudio2022/x64/MTd;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_cryptography/libs/VisualStudio2022/x64/MTd/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_opengl/libs/VisualStudio2022/x64/MTd;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_opengl/libs/VisualStudio2022/x64/MTd/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_osc/libs/VisualStudio2022/x64/MTd;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_osc/libs/VisualStudio2022/x64/MTd/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/Debug/Syntetika.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/Debug/Syntetika.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\JuceLibraryCode;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\exprtk\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\freeverb\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\json\jsoncpp\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\leathers\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanosvg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanovg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\psmove\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tinyobjloader\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\xwax\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tuning-library\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\oddsound-mts\MTS-ESP\Client;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\readerwriterqueue;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lv2;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\serd;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sratom;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/pybind11/include" /external:I "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/ableton-link/include" /external:I "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/ableton-link/modules/asio-standalone/asio/include" /utf-8 /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;JUCE_STANDALONE_APPLICATION=1;JUCE_PLUGINHOST_AU=1;JUCE_MODAL_LOOPS_PERMITTED=1;JUCE_ALLOW_STATIC_NULL_VARIABLES=0;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_VST3_CAN_REPLACE_VST2=0;JUCE_USE_CURL=0;JUCE_WEB_BROWSER=0;JUCE_USE_CAMERA=disabled;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_REPORT_APP_USAGE=0;JUCE_COREGRAPHICS_DRAW_ASYNC=1;JUCE_ALSA=1;JUCE_JACK=1;JUCE_JACK_CLIENT_NAME="Syntetika";JUCE_WASAPI=1;JUCE_DIRECTSOUND=1;JUCE_PLUGINHOST_VST3=1;JUCE_PLUGINHOST_VST=0;JUCE_PLUGINHOST_LV2=1;JUCE_PLUGINHOST_LADSPA=0;JUCE_CATCH_UNHANDLED_EXCEPTIONS=0;SYNTETIKA_WINDOWS=1;PYBIND11_EXPORT=;LINK_PLATFORM_WINDOWS=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;NDEBUG=1;_NDEBUG=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_opengl=1;JUCE_MODULE_AVAILABLE_juce_osc=1;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;JUCE_STANDALONE_APPLICATION=1;JUCE_PLUGINHOST_AU=1;JUCE_MODAL_LOOPS_PERMITTED=1;JUCE_ALLOW_STATIC_NULL_VARIABLES=0;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_VST3_CAN_REPLACE_VST2=0;JUCE_USE_CURL=0;JUCE_WEB_BROWSER=0;JUCE_USE_CAMERA=disabled;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_REPORT_APP_USAGE=0;JUCE_COREGRAPHICS_DRAW_ASYNC=1;JUCE_ALSA=1;JUCE_JACK=1;JUCE_JACK_CLIENT_NAME=\"Syntetika\";JUCE_WASAPI=1;JUCE_DIRECTSOUND=1;JUCE_PLUGINHOST_VST3=1;JUCE_PLUGINHOST_VST=0;JUCE_PLUGINHOST_LV2=1;JUCE_PLUGINHOST_LADSPA=0;JUCE_CATCH_UNHANDLED_EXCEPTIONS=0;SYNTETIKA_WINDOWS=1;PYBIND11_EXPORT=;LINK_PLATFORM_WINDOWS=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;NDEBUG=1;_NDEBUG=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_opengl=1;JUCE_MODULE_AVAILABLE_juce_osc=1;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\JuceLibraryCode;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\exprtk\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\freeverb\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\json\jsoncpp\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\leathers\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanosvg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanovg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\psmove\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tinyobjloader\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\xwax\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tuning-library\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\oddsound-mts\MTS-ESP\Client;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\readerwriterqueue;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lv2;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\serd;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sratom;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\pybind11\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\modules\asio-standalone\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\JuceLibraryCode;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\exprtk\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\freeverb\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\json\jsoncpp\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\leathers\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanosvg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanovg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\psmove\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tinyobjloader\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\xwax\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tuning-library\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\oddsound-mts\MTS-ESP\Client;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\readerwriterqueue;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lv2;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\serd;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sratom;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\pybind11\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\modules\asio-standalone\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message>	Copying Python DLLs	</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E echo 
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo *******************************
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Video playback requires ffmpeg.exe"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Place ffmpeg.exe next to Syntetika.exe"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Download from: https://ffmpeg.org/download.html"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Or install via: winget install ffmpeg"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo *******************************
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo 
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Program Files/WindowsApps/PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0/python3.dll" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/Release/python3.dll"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Program Files/WindowsApps/PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0/python313.dll" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/Release/python313.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -P "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/Source/cmake/install-quiet.cmake" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/resource" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/Release" QUIET
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>windowscodecs.lib;..\libs\freeverb\Release\freeverb.lib;..\libs\json\Release\json.lib;..\libs\nanovg\Release\nanovg.lib;..\libs\psmove\Release\psmove.lib;..\libs\push2\Release\push2.lib;..\libs\xwax\Release\xwax.lib;..\libs\oddsound-mts\Release\oddsound-mts.lib;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\libs\python313.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_basics/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_basics/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_core/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_core/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_devices/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_devices/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_events/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_events/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_formats/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_formats/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_processors/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_processors/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_extra/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_extra/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_basics/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_basics/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_graphics/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_graphics/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_data_structures/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_data_structures/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_dsp/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_dsp/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_cryptography/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_cryptography/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_opengl/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_opengl/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_osc/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_osc/libs/VisualStudio2022/x64/MT/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/Release/Syntetika.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/Release/Syntetika.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\JuceLibraryCode;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\exprtk\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\freeverb\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\json\jsoncpp\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\leathers\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanosvg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanovg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\psmove\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tinyobjloader\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\xwax\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tuning-library\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\oddsound-mts\MTS-ESP\Client;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\readerwriterqueue;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lv2;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\serd;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sratom;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/pybind11/include" /external:I "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/ableton-link/include" /external:I "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/ableton-link/modules/asio-standalone/asio/include" /utf-8 /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;JUCE_STANDALONE_APPLICATION=1;JUCE_PLUGINHOST_AU=1;JUCE_MODAL_LOOPS_PERMITTED=1;JUCE_ALLOW_STATIC_NULL_VARIABLES=0;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_VST3_CAN_REPLACE_VST2=0;JUCE_USE_CURL=0;JUCE_WEB_BROWSER=0;JUCE_USE_CAMERA=disabled;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_REPORT_APP_USAGE=0;JUCE_COREGRAPHICS_DRAW_ASYNC=1;JUCE_ALSA=1;JUCE_JACK=1;JUCE_JACK_CLIENT_NAME="Syntetika";JUCE_WASAPI=1;JUCE_DIRECTSOUND=1;JUCE_PLUGINHOST_VST3=1;JUCE_PLUGINHOST_VST=0;JUCE_PLUGINHOST_LV2=1;JUCE_PLUGINHOST_LADSPA=0;JUCE_CATCH_UNHANDLED_EXCEPTIONS=0;SYNTETIKA_WINDOWS=1;PYBIND11_EXPORT=;LINK_PLATFORM_WINDOWS=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;NDEBUG=1;_NDEBUG=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_opengl=1;JUCE_MODULE_AVAILABLE_juce_osc=1;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;JUCE_STANDALONE_APPLICATION=1;JUCE_PLUGINHOST_AU=1;JUCE_MODAL_LOOPS_PERMITTED=1;JUCE_ALLOW_STATIC_NULL_VARIABLES=0;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_VST3_CAN_REPLACE_VST2=0;JUCE_USE_CURL=0;JUCE_WEB_BROWSER=0;JUCE_USE_CAMERA=disabled;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_REPORT_APP_USAGE=0;JUCE_COREGRAPHICS_DRAW_ASYNC=1;JUCE_ALSA=1;JUCE_JACK=1;JUCE_JACK_CLIENT_NAME=\"Syntetika\";JUCE_WASAPI=1;JUCE_DIRECTSOUND=1;JUCE_PLUGINHOST_VST3=1;JUCE_PLUGINHOST_VST=0;JUCE_PLUGINHOST_LV2=1;JUCE_PLUGINHOST_LADSPA=0;JUCE_CATCH_UNHANDLED_EXCEPTIONS=0;SYNTETIKA_WINDOWS=1;PYBIND11_EXPORT=;LINK_PLATFORM_WINDOWS=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;NDEBUG=1;_NDEBUG=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_opengl=1;JUCE_MODULE_AVAILABLE_juce_osc=1;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\JuceLibraryCode;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\exprtk\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\freeverb\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\json\jsoncpp\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\leathers\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanosvg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanovg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\psmove\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tinyobjloader\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\xwax\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tuning-library\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\oddsound-mts\MTS-ESP\Client;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\readerwriterqueue;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lv2;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\serd;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sratom;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\pybind11\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\modules\asio-standalone\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\JuceLibraryCode;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\exprtk\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\freeverb\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\json\jsoncpp\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\leathers\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanosvg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanovg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\psmove\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tinyobjloader\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\xwax\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tuning-library\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\oddsound-mts\MTS-ESP\Client;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\readerwriterqueue;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lv2;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\serd;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sratom;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\pybind11\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\modules\asio-standalone\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message>	Copying Python DLLs	</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E echo 
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo *******************************
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Video playback requires ffmpeg.exe"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Place ffmpeg.exe next to Syntetika.exe"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Download from: https://ffmpeg.org/download.html"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Or install via: winget install ffmpeg"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo *******************************
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo 
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Program Files/WindowsApps/PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0/python3.dll" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/MinSizeRel/python3.dll"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Program Files/WindowsApps/PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0/python313.dll" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/MinSizeRel/python313.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -P "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/Source/cmake/install-quiet.cmake" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/resource" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/MinSizeRel" QUIET
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>windowscodecs.lib;..\libs\freeverb\MinSizeRel\freeverb.lib;..\libs\json\MinSizeRel\json.lib;..\libs\nanovg\MinSizeRel\nanovg.lib;..\libs\psmove\MinSizeRel\psmove.lib;..\libs\push2\MinSizeRel\push2.lib;..\libs\xwax\MinSizeRel\xwax.lib;..\libs\oddsound-mts\MinSizeRel\oddsound-mts.lib;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\libs\python313.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_basics/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_basics/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_core/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_core/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_devices/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_devices/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_events/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_events/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_formats/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_formats/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_processors/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_processors/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_extra/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_extra/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_basics/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_basics/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_graphics/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_graphics/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_data_structures/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_data_structures/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_dsp/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_dsp/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_cryptography/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_cryptography/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_opengl/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_opengl/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_osc/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_osc/libs/VisualStudio2022/x64/MT/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/MinSizeRel/Syntetika.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/MinSizeRel/Syntetika.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\JuceLibraryCode;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\exprtk\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\freeverb\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\json\jsoncpp\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\leathers\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanosvg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanovg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\psmove\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tinyobjloader\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\xwax\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tuning-library\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\oddsound-mts\MTS-ESP\Client;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\readerwriterqueue;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lv2;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\serd;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sratom;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /external:I "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/pybind11/include" /external:I "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/ableton-link/include" /external:I "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/ableton-link/modules/asio-standalone/asio/include" /utf-8 /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;JUCE_STANDALONE_APPLICATION=1;JUCE_PLUGINHOST_AU=1;JUCE_MODAL_LOOPS_PERMITTED=1;JUCE_ALLOW_STATIC_NULL_VARIABLES=0;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_VST3_CAN_REPLACE_VST2=0;JUCE_USE_CURL=0;JUCE_WEB_BROWSER=0;JUCE_USE_CAMERA=disabled;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_REPORT_APP_USAGE=0;JUCE_COREGRAPHICS_DRAW_ASYNC=1;JUCE_ALSA=1;JUCE_JACK=1;JUCE_JACK_CLIENT_NAME="Syntetika";JUCE_WASAPI=1;JUCE_DIRECTSOUND=1;JUCE_PLUGINHOST_VST3=1;JUCE_PLUGINHOST_VST=0;JUCE_PLUGINHOST_LV2=1;JUCE_PLUGINHOST_LADSPA=0;JUCE_CATCH_UNHANDLED_EXCEPTIONS=0;SYNTETIKA_WINDOWS=1;PYBIND11_EXPORT=;LINK_PLATFORM_WINDOWS=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;NDEBUG=1;_NDEBUG=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_opengl=1;JUCE_MODULE_AVAILABLE_juce_osc=1;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;JUCE_STANDALONE_APPLICATION=1;JUCE_PLUGINHOST_AU=1;JUCE_MODAL_LOOPS_PERMITTED=1;JUCE_ALLOW_STATIC_NULL_VARIABLES=0;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_VST3_CAN_REPLACE_VST2=0;JUCE_USE_CURL=0;JUCE_WEB_BROWSER=0;JUCE_USE_CAMERA=disabled;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_REPORT_APP_USAGE=0;JUCE_COREGRAPHICS_DRAW_ASYNC=1;JUCE_ALSA=1;JUCE_JACK=1;JUCE_JACK_CLIENT_NAME=\"Syntetika\";JUCE_WASAPI=1;JUCE_DIRECTSOUND=1;JUCE_PLUGINHOST_VST3=1;JUCE_PLUGINHOST_VST=0;JUCE_PLUGINHOST_LV2=1;JUCE_PLUGINHOST_LADSPA=0;JUCE_CATCH_UNHANDLED_EXCEPTIONS=0;SYNTETIKA_WINDOWS=1;PYBIND11_EXPORT=;LINK_PLATFORM_WINDOWS=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;NDEBUG=1;_NDEBUG=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_opengl=1;JUCE_MODULE_AVAILABLE_juce_osc=1;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\JuceLibraryCode;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\exprtk\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\freeverb\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\json\jsoncpp\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\leathers\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanosvg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanovg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\psmove\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tinyobjloader\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\xwax\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tuning-library\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\oddsound-mts\MTS-ESP\Client;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\readerwriterqueue;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lv2;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\serd;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sratom;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\pybind11\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\modules\asio-standalone\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\JuceLibraryCode;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\Include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\exprtk\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\freeverb\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\json\jsoncpp\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\leathers\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanosvg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\nanovg\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\psmove\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tinyobjloader\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\xwax\.;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\tuning-library\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\oddsound-mts\MTS-ESP\Client;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\readerwriterqueue;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\VST3_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lv2;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\serd;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sord\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\sratom;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\format_types\LV2_SDK\lilv\src;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\pybind11\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\include;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\modules\asio-standalone\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message>	Copying Python DLLs	</Message>
+      <Command>setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E echo 
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo *******************************
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Video playback requires ffmpeg.exe"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Place ffmpeg.exe next to Syntetika.exe"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Download from: https://ffmpeg.org/download.html"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo "  Or install via: winget install ffmpeg"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo *******************************
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo 
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Program Files/WindowsApps/PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0/python3.dll" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/RelWithDebInfo/python3.dll"
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_if_different "C:/Program Files/WindowsApps/PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0/python313.dll" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/RelWithDebInfo/python313.dll"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -P "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/Source/cmake/install-quiet.cmake" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/resource" "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/RelWithDebInfo" QUIET
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>windowscodecs.lib;..\libs\freeverb\RelWithDebInfo\freeverb.lib;..\libs\json\RelWithDebInfo\json.lib;..\libs\nanovg\RelWithDebInfo\nanovg.lib;..\libs\psmove\RelWithDebInfo\psmove.lib;..\libs\push2\RelWithDebInfo\push2.lib;..\libs\xwax\RelWithDebInfo\xwax.lib;..\libs\oddsound-mts\RelWithDebInfo\oddsound-mts.lib;C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3824.0_x64__qbz5n2kfra8p0\libs\python313.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_basics/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_basics/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_core/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_core/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_devices/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_devices/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_events/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_events/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_formats/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_formats/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_processors/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_audio_processors/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_extra/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_extra/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_basics/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_gui_basics/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_graphics/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_graphics/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_data_structures/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_data_structures/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_dsp/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_dsp/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_cryptography/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_cryptography/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_opengl/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_opengl/libs/VisualStudio2022/x64/MT/$(Configuration);C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_osc/libs/VisualStudio2022/x64/MT;C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/libs/JUCE/modules/juce_osc/libs/VisualStudio2022/x64/MT/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/RelWithDebInfo/Syntetika.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/Syntetika_artefacts/RelWithDebInfo/Syntetika.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/Source/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/user/Desktop/Syntetika Project/Syntetika Studio" "-BC:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2" --check-stamp-file "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VersionInfo.cpp.in;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\cmake\lib.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\cmake\versiontools.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\CMakeFiles\cmake.verify_globs;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\AbletonLinkConfig.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\cmake_include\ConfigureAbletonLink.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\cmake_include\ConfigureAsioStandalone.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/Source/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/user/Desktop/Syntetika Project/Syntetika Studio" "-BC:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2" --check-stamp-file "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VersionInfo.cpp.in;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\cmake\lib.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\cmake\versiontools.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\CMakeFiles\cmake.verify_globs;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\AbletonLinkConfig.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\cmake_include\ConfigureAbletonLink.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\cmake_include\ConfigureAsioStandalone.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/Source/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/user/Desktop/Syntetika Project/Syntetika Studio" "-BC:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2" --check-stamp-file "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VersionInfo.cpp.in;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\cmake\lib.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\cmake\versiontools.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\CMakeFiles\cmake.verify_globs;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\AbletonLinkConfig.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\cmake_include\ConfigureAbletonLink.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\cmake_include\ConfigureAsioStandalone.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/Source/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/user/Desktop/Syntetika Project/Syntetika Studio" "-BC:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2" --check-stamp-file "C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VersionInfo.cpp.in;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\cmake\lib.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\cmake\versiontools.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\CMakeFiles\cmake.verify_globs;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\AbletonLinkConfig.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\cmake_include\ConfigureAbletonLink.cmake;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\cmake_include\ConfigureAsioStandalone.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_artefacts\JuceLibraryCode\icon.ico">
+    </None>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\geninclude\VersionInfo.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\geninclude\VersionInfoBld.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ADSR.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ADSR.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ADSRDisplay.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ADSRDisplay.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AbletonLink.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AbletonLink.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Amplifier.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Amplifier.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Arpeggiator.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Arpeggiator.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ArrangementController.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ArrangementController.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioLevelToCV.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioLevelToCV.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioMeter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioMeter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioRouter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioRouter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioSend.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioSend.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioSplitter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioSplitter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioToCV.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioToCV.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioToPulse.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioToPulse.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Autotalent.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Autotalent.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\BandVocoder.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\BandVocoder.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\BeatBloks.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\BeatBloks.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Beats.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Beats.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\BiquadFilter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\BiquadFilter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\BiquadFilterEffect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\BiquadFilterEffect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\BitcrushEffect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\BitcrushEffect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\BufferShuffler.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\BufferShuffler.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ButterworthFilterEffect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ButterworthFilterEffect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Canvas.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Canvas.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CanvasControls.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CanvasControls.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CanvasElement.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CanvasElement.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CanvasScrollbar.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CanvasScrollbar.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CanvasTimeline.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CanvasTimeline.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Capo.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Capo.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ChannelBuffer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ChannelBuffer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ChaosEngine.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ChaosEngine.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Checkbox.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Checkbox.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Chord.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Chord.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ChordDatabase.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ChordDatabase.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ChordDisplayer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ChordDisplayer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ChordHolder.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ChordHolder.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Chorder.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Chorder.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CircleSequencer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CircleSequencer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ClickButton.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ClickButton.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ClipArranger.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ClipArranger.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ClipLauncher.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ClipLauncher.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CodeEntry.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CodeEntry.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ComboGridController.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ComboGridController.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CommentDisplay.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CommentDisplay.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Compressor.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Compressor.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ControlRecorder.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ControlRecorder.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ControlSequencer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ControlSequencer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ControlTactileFeedback.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ControlTactileFeedback.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ControllingSong.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ControllingSong.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Curve.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Curve.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CurveLooper.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CurveLooper.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DataProvider.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DataProvider.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DCOffset.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DCOffset.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DCRemoverEffect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DCRemoverEffect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DebugAudioSource.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DebugAudioSource.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DelayEffect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DelayEffect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DisplayManager.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DisplayManager.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DistortionEffect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DistortionEffect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GIFAnimator.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ImageLoaderModule.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ImageSequencerModule.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioVisualizerModule.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LayerComposition.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GIFAnimator.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ImageLoaderModule.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ImageSequencerModule.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\AudioVisualizerModule.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LayerComposition.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DotGrid.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DotGrid.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DotSequencer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DotSequencer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DropdownList.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DropdownList.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DrumPlayer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DrumPlayer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DrumSynth.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\DrumSynth.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EQEffect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EQEffect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EQModule.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EQModule.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EffectChain.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EffectChain.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EffectFactory.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EffectFactory.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EnvOscillator.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EnvOscillator.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EnvelopeEditor.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EnvelopeEditor.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EnvelopeModulator.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EnvelopeModulator.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EuclideanSequencer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EuclideanSequencer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EventCanvas.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\EventCanvas.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FFT.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FFT.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FFTtoAdditive.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FFTtoAdditive.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FMSynth.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FMSynth.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FMVoice.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FMVoice.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FeedbackModule.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FeedbackModule.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FileStream.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FileStream.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FillSaveDropdown.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FilterButterworth24db.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FilterButterworth24db.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FilterViz.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FilterViz.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FloatSliderLFOControl.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FloatSliderLFOControl.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FollowingSong.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FollowingSong.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FormantFilterEffect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FormantFilterEffect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FourOnTheFloor.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FourOnTheFloor.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FreeverbEffect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FreeverbEffect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FreqDelay.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FreqDelay.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FreqDomainBoilerplate.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FreqDomainBoilerplate.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FubbleModule.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\FubbleModule.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GainStageEffect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GainStageEffect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GateEffect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GateEffect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GlobalControls.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GlobalControls.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ShaderModule.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ShaderModule.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GlShaderUtil.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GlShaderUtil.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MonitorModule.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MonitorModule.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Granulator.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Granulator.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GridController.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GridController.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GridModule.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GridModule.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GridSliders.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GridSliders.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GroupControl.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\GroupControl.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\HelpDisplay.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\HelpDisplay.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IAudioEffect.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IAudioPoller.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IAudioProcessor.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IAudioProcessor.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IAudioReceiver.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IAudioReceiver.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IAudioSource.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IAudioSource.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IClickable.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IClickable.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IDrawableModule.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IDrawableModule.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IDrivableSequencer.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IMidiVoice.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IModulator.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IModulator.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\INonstandardController.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\INoteReceiver.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\INoteReceiver.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\INoteSource.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\INoteSource.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IPatchable.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IPollable.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IPulseReceiver.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IPulseReceiver.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IUIControl.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IUIControl.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IVisualSource.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\IVoiceParams.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\InputChannel.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\InputChannel.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Inverter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Inverter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\JumpBlender.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\JumpBlender.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\KarplusStrong.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\KarplusStrong.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\KarplusStrongVoice.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\KarplusStrongVoice.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\KeyboardDisplay.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\KeyboardDisplay.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Kicker.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Kicker.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LabelDisplay.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LabelDisplay.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LFO.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LFO.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LFOController.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LFOController.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LaunchpadInterpreter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LaunchpadInterpreter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LaunchpadKeyboard.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LaunchpadKeyboard.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LaunchpadNoteDisplayer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LaunchpadNoteDisplayer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LevelMeterDisplay.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LevelMeterDisplay.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LinkwitzRileyFilter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LinkwitzRileyFilter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LinnstrumentControl.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LinnstrumentControl.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Lissajous.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Lissajous.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Syntetiscope.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Syntetiscope.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TriggerWaveEffect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TriggerWaveEffect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TrigMatrixFX.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TrigMatrixFX.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LiveGranulator.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LiveGranulator.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LocationZoomer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LocationZoomer.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LockFreeQueue.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LoopStorer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LoopStorer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Looper.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Looper.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LooperGranulator.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LooperGranulator.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LooperRecorder.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\LooperRecorder.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\M185Sequencer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\M185Sequencer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MPESmoother.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MPESmoother.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MPETweaker.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MPETweaker.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MacroSlider.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MacroSlider.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Main.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MainComponent.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MathUtils.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MathUtils.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MeshInstances3D.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MeshInstances3D.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Metronome.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Metronome.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModelDVoice.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModelDVoice.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModelDSynth.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModelDSynth.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiCapturer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiCapturer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiClockIn.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiClockIn.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiClockOut.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiClockOut.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiControlChange.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiControlChange.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiController.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiController.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiDevice.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiDevice.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiOutput.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiOutput.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiReader.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MidiReader.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Minimap.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Minimap.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModWheel.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModWheel.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModWheelToCV.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModWheelToCV.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModularSynth.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModularSynth.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulationChain.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulationChain.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulationVisualizer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulationVisualizer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorAccum.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorAccum.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorAdd.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorAdd.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorAddCentered.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorAddCentered.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\BoundsToPulse.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\BoundsToPulse.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorCurve.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorCurve.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorExpression.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorExpression.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorGravity.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorGravity.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorMult.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorMult.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorSmoother.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorSmoother.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorSubtract.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModulatorSubtract.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModuleContainer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModuleContainer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModuleFactory.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModuleFactory.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModuleSaveData.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModuleSaveData.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModuleSaveDataPanel.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModuleSaveDataPanel.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModwheelToPressure.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModwheelToPressure.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModwheelToVibrato.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ModwheelToVibrato.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Monome.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Monome.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Monophonify.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Monophonify.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MultiBandTracker.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MultiBandTracker.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MultibandCompressor.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MultibandCompressor.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MultitapDelay.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MultitapDelay.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MultitrackRecorder.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\MultitrackRecorder.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Muter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Muter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NamedMutex.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NamedMutex.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Neighborhooder.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Neighborhooder.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoiseEffect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoiseEffect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteCanvas.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteCanvas.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteChainNode.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteChainNode.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteChance.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteChance.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteCounter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteCounter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteCreator.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteCreator.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteDelayer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteDelayer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteDisplayer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteDisplayer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteEcho.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteEcho.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteEffectBase.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteExpressionRouter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteExpressionRouter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteFilter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteFilter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteFlusher.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteFlusher.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteGate.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteGate.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteHocket.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteHocket.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteHumanizer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteHumanizer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteLatch.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteLatch.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteLooper.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteLooper.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteOctaver.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteOctaver.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteOutputQueue.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteOutputQueue.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NotePanAlternator.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NotePanAlternator.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NotePanRandom.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NotePanRandom.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NotePanner.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NotePanner.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteQuantizer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteQuantizer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteRangeFilter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteRangeFilter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteRatchet.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteRatchet.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteRouter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteRouter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteSinger.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteSinger.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteSorter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteSorter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteStepSequencer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteStepSequencer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteStepper.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteStepper.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteStreamDisplay.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteStreamDisplay.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteStrummer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteStrummer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteSustain.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteSustain.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteTable.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteTable.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteToFreq.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteToFreq.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteToMs.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteToMs.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteToPulse.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteToPulse.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteToggle.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteToggle.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteTransformer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteTransformer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteVibrato.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\NoteVibrato.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\OSCOutput.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\OSCOutput.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\OpenFrameworksPort.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\OpenFrameworksPort.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\OscController.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\OscController.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Oscillator.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Oscillator.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\OutputChannel.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\OutputChannel.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PatternMatrix.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PatternMatrix.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CastParameter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\CastParameter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PSMoveController.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PSMoveController.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PSMoveMgr.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PSMoveMgr.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PanicButton.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PanicButton.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Panner.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Panner.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PatchCable.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PatchCable.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PatchCableSource.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PatchCableSource.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PeakTracker.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PeakTracker.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PerformanceTimer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PerformanceTimer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PerlinNoise.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PerlinNoise.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchBender.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchBender.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchChorus.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchChorus.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchDetector.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchDetector.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchDive.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchDive.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchPanner.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchPanner.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchRemap.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchRemap.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchSetter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchSetter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchShiftEffect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchShiftEffect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchShifter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchShifter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchToCV.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchToCV.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchToSpeed.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchToSpeed.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchToValue.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PitchToValue.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PlaySequencer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PlaySequencer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PolyphonyMgr.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PolyphonyMgr.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Polyrhythms.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Polyrhythms.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Prefab.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Prefab.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Pressure.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Pressure.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PressureToCV.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PressureToCV.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PressureToModwheel.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PressureToModwheel.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PressureToVibrato.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PressureToVibrato.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PreviousNote.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PreviousNote.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Producer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Producer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Profiler.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Profiler.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseButton.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseButton.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseChance.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseChance.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseDelayer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseDelayer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseDisplayer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseDisplayer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseFlag.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseFlag.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseGate.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseGate.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseHocket.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseHocket.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseLimit.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseLimit.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseRouter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseRouter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseSequence.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseSequence.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseTrain.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\PulseTrain.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Pulser.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Pulser.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Pumper.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Pumper.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Push2Control.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Push2Control.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\QuickSpawnMenu.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\QuickSpawnMenu.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\QwertyController.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\QwertyController.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\QwertyToPitchMapping.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\QwertyToPitchMapping.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\RadioButton.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\RadioButton.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\RadioSequencer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\RadioSequencer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Ramp.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Ramp.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Ramper.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Ramper.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\RandomNoteGenerator.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\RandomNoteGenerator.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Razor.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Razor.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Rewriter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Rewriter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\RhythmSequencer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\RhythmSequencer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\RingModulator.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\RingModulator.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\RollingBuffer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\RollingBuffer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Sample.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Sample.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SampleBrowser.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SampleBrowser.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SampleCanvas.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SampleCanvas.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SampleCapturer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SampleCapturer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SampleDrawer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SampleDrawer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SampleFinder.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SampleFinder.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SampleLayerer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SampleLayerer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SamplePlayer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SamplePlayer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SampleVoice.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SampleVoice.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Sampler.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Sampler.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SamplerGrid.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SamplerGrid.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SaveStateLoader.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SaveStateLoader.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Scale.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Scale.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ScaleDegree.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ScaleDegree.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ScaleDetect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ScaleDetect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ScriptModule.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ScriptModule.h" />
+    <None Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ScriptModule_PythonInterface.i">
+    </None>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ScriptStatus.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ScriptStatus.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SeaOfGrain.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SeaOfGrain.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Selector.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Selector.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SignalClamp.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SignalClamp.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SignalGenerator.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SignalGenerator.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SingleOscillator.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SingleOscillator.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SingleOscillatorVoice.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SingleOscillatorVoice.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Slider.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Slider.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SliderSequencer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SliderSequencer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SlowLayers.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SlowLayers.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Snapshots.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Snapshots.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SongBuilder.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SongBuilder.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SpaceMouseControl.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SpaceMouseControl.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SpatialSource.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SpatialSource.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SpatialRender.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SpatialRender.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SpectralDisplay.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SpectralDisplay.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Splitter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Splitter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\StepSequencer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\StepSequencer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Stutter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Stutter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\StutterControl.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\StutterControl.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SustainPedal.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SustainPedal.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SwitchAndRamp.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SwitchAndRamp.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SynthGlobals.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\SynthGlobals.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TakeRecorder.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TakeRecorder.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TextEntry.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TextEntry.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TimelineControl.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TimelineControl.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TimerDisplay.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TimerDisplay.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TitleBar.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TitleBar.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Transport.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Transport.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TransposeFrom.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TransposeFrom.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TremoloEffect.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TremoloEffect.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TriggerDetector.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\TriggerDetector.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\UIControlMacros.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\UIGrid.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\UIGrid.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\UnstableModWheel.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\UnstableModWheel.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\UnstablePitch.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\UnstablePitch.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\UnstablePressure.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\UnstablePressure.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\UserData.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\UserData.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\UserPrefs.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\UserPrefs.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\UserPrefsEditor.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\UserPrefsEditor.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VSTPlayhead.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VSTPlayhead.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VSTPlugin.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VSTPlugin.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VSTScanner.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VSTScanner.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VSTWindow.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VSTWindow.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ValueSetter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ValueSetter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ValueStream.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ValueStream.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VisualFBO.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VisualFBO.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VisualNodeBase.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VisualNodeBase.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VelocityCurve.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VelocityCurve.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VelocityScaler.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VelocityScaler.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VelocitySetter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VelocitySetter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VelocityStepSequencer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VelocityStepSequencer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VelocityToCV.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VelocityToCV.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VelocityToChance.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VelocityToChance.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VinylTempoControl.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VinylTempoControl.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Vocoder.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Vocoder.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VocoderCarrierInput.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VocoderCarrierInput.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VoiceSetter.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VoiceSetter.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VolcaBeatsControl.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\VolcaBeatsControl.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\WaveformViewer.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\WaveformViewer.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Waveshaper.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\Waveshaper.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\WhiteKeys.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\WhiteKeys.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\WindowCloseListener.h" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ofxJSONElement.cpp" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\Source\ofxJSONElement.h" />
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\ableton-link\include\ableton\Link.hpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_basics\juce_audio_basics.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_core\juce_core.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_devices\juce_audio_devices.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_events\juce_events.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_formats\juce_audio_formats.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\juce_audio_processors.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\juce_audio_processors_ara.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_audio_processors\juce_audio_processors_lv2_libs.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_gui_extra\juce_gui_extra.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_gui_basics\juce_gui_basics.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_graphics\juce_graphics.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_data_structures\juce_data_structures.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_dsp\juce_dsp.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_cryptography\juce_cryptography.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_opengl\juce_opengl.cpp" />
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\JUCE\modules\juce_osc\juce_osc.cpp" />
+    <Object Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_rc_lib.dir\$(Configuration)\Syntetika_resources.res" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\ZERO_CHECK.vcxproj">
+      <Project>{78E17862-8DC0-3BEB-AEB1-91F41D327D8A}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\Syntetika_rc_lib.vcxproj">
+      <Project>{743EB5E4-885A-3733-9B4C-9EBD938B6C15}</Project>
+      <Name>Syntetika_rc_lib</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\exprtk\exprtk.vcxproj">
+      <Project>{D7EC6502-E4FB-39DB-91E5-068258F1C334}</Project>
+      <Name>exprtk</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\freeverb\freeverb.vcxproj">
+      <Project>{A1864631-839E-3964-9AA7-4613B307DE75}</Project>
+      <Name>freeverb</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\json\json.vcxproj">
+      <Project>{52A21871-3A2C-3D9D-A580-C0D7C2F445DE}</Project>
+      <Name>json</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\nanovg\nanovg.vcxproj">
+      <Project>{A9733D76-8803-30DD-980C-C6A6F741F055}</Project>
+      <Name>nanovg</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\oddsound-mts\oddsound-mts.vcxproj">
+      <Project>{17D169C1-F6DE-3CC9-B464-6D344C82C984}</Project>
+      <Name>oddsound-mts</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\psmove\psmove.vcxproj">
+      <Project>{7B020656-2357-3EC7-9509-5F5828DAAE2D}</Project>
+      <Name>psmove</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\push2\push2.vcxproj">
+      <Project>{A86E4228-52C6-3900-9C5A-3772EFD87766}</Project>
+      <Name>push2</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\Source\version-info.vcxproj">
+      <Project>{DBE96AA9-7D63-35F4-8D50-265FC249C377}</Project>
+      <Name>version-info</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\xwax\xwax.vcxproj">
+      <Project>{1CB966E7-ADFC-3274-A566-C3033BDC454F}</Project>
+      <Name>xwax</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

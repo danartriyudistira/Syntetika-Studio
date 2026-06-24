@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\JuceToPush2DisplayBridge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\Push2-Display.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\Result.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\core.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\descriptor.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\hotplug.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\io.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\strerror.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\sync.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\os\poll_windows.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\os\threads_windows.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\os\windows_winusb.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\os\windows_nt_common.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\Push2-Usb-Communicator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\Push2-Display.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\Push2-UsbCommunicator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include\push2\JuceToPush2DisplayBridge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include\push2\Macros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include\push2\Push2-Bitmap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\include\push2\Result.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{5F99301C-B387-3ABD-85B2-6E88BD6DB226}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{76D3A91B-AE74-392F-89C0-DBC128283969}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

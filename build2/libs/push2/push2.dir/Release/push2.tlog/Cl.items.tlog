@@ -1,0 +1,14 @@
+C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\JuceToPush2DisplayBridge.cpp;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\push2\push2.dir\Release\JuceToPush2DisplayBridge.obj
+C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\Push2-Display.cpp;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\push2\push2.dir\Release\Push2-Display.obj
+C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\Result.cpp;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\push2\push2.dir\Release\Result.obj
+C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\core.c;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\push2\push2.dir\Release\core.obj
+C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\descriptor.c;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\push2\push2.dir\Release\descriptor.obj
+C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\hotplug.c;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\push2\push2.dir\Release\hotplug.obj
+C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\io.c;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\push2\push2.dir\Release\io.obj
+C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\strerror.c;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\push2\push2.dir\Release\strerror.obj
+C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\sync.c;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\push2\push2.dir\Release\sync.obj
+C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\os\poll_windows.c;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\push2\push2.dir\Release\poll_windows.obj
+C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\os\threads_windows.c;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\push2\push2.dir\Release\threads_windows.obj
+C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\os\windows_winusb.c;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\push2\push2.dir\Release\windows_winusb.obj
+C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\modules\libusb\os\windows_nt_common.c;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\push2\push2.dir\Release\windows_nt_common.obj
+C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\push2\Push2-Usb-Communicator.cpp;C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\build2\libs\push2\push2.dir\Release\Push2-Usb-Communicator.obj

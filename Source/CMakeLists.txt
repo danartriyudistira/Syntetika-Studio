@@ -941,6 +941,14 @@ elseif (WIN32)
     set_target_properties(Syntetika PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:Syntetika>"
         VS_DEBUGGER_COMMAND           "$<TARGET_FILE:Syntetika>"
         VS_DEBUGGER_ENVIRONMENT       "PATH=%PATH%;${CMAKE_PREFIX_PATH}/bin")
+
+    # Windows install rules
+    install(TARGETS Syntetika
+        RUNTIME DESTINATION bin
+        BUNDLE DESTINATION .
+    )
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource DESTINATION .)
+    install(FILES $<TARGET_RUNTIME_DLLS:Syntetika> DESTINATION bin OPTIONAL)
 else ()
     target_compile_definitions(Syntetika PRIVATE SYNTETIKA_LINUX=1)
 

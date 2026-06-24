@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\exprtk\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\user\Desktop\Syntetika Project\Syntetika Studio\libs\exprtk\include\exprtk.hpp">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{5F99301C-B387-3ABD-85B2-6E88BD6DB226}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

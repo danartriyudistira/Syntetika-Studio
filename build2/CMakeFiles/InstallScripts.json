@@ -1,0 +1,28 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/JUCE/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/JUCE/modules/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/JUCE/extras/Build/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/JUCE/extras/Build/juceaide/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/tinygltf/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/tinyobjloader/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/exprtk/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/freeverb/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/json/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/leathers/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/nanosvg/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/nanovg/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/oddsound-mts/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/psmove/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/push2/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/readerwriterqueue/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/pybind11/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/tuning-library/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/libs/xwax/cmake_install.cmake",
+		"C:/Users/user/Desktop/Syntetika Project/Syntetika Studio/build2/Source/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
