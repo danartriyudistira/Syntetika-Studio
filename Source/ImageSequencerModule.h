@@ -5,6 +5,7 @@
 #include "PatchCableSource.h"
 #include "ClickButton.h"
 #include "Slider.h"
+#include "DropdownList.h"
 #include "Transport.h"
 
 #include <vector>
@@ -12,7 +13,7 @@
 
 class VisualFBO;
 
-class ImageSequencerModule : public IDrawableModule, public IButtonListener, public IFloatSliderListener, public IVisualSource
+class ImageSequencerModule : public IDrawableModule, public IButtonListener, public IFloatSliderListener, public IDropdownListener, public IVisualSource
 {
 public:
    ImageSequencerModule();
@@ -32,10 +33,11 @@ public:
    void GetModuleDimensions(float& width, float& height) override;
    void ButtonClicked(ClickButton* button, double time) override;
    void FloatSliderUpdated(FloatSlider* slider, float oldVal, double time) override;
+   void DropdownUpdated(DropdownList* list, int oldVal, double time) override;
 
    void SaveState(FileStreamOut& out) override;
    void LoadState(FileStreamIn& in, int rev) override;
-   int GetModuleSaveStateRev() const override { return 0; }
+   int GetModuleSaveStateRev() const override { return 1; }
 
    VisualFBO* GetFBO() override;
 
@@ -43,7 +45,6 @@ private:
    struct ImageEntry
    {
       std::string filePath;
-      std::vector<unsigned char> decodedData;
       int width{ 0 };
       int height{ 0 };
    };
@@ -68,8 +69,13 @@ private:
    ClickButton* mPlayPauseButton{ nullptr };
    ClickButton* mPrevButton{ nullptr };
    ClickButton* mNextButton{ nullptr };
+   enum { kMode_FPB, kMode_FPS };
+   int mMode{ kMode_FPB };
    float mFramesPerBeat{ 1 };
    FloatSlider* mFramesPerBeatSlider{ nullptr };
+   float mFps{ 30 };
+   FloatSlider* mFpsSlider{ nullptr };
+   DropdownList* mModeDropdown{ nullptr };
 
    bool mPlaying{ true };
    bool mPendingScan{ false };

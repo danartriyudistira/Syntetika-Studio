@@ -40,6 +40,10 @@ private:
    int mHeight{ 0 };
    int mDisplayImage{ -1 };
    bool mBound{ false };
+
+   mutable unsigned int mPBOIds[2]{ 0, 0 };
+   mutable int mPBOIndex{ 0 };
+   mutable bool mPBOInitialized{ false };
 public:
    void ReleaseDisplayImage() { mDisplayImage = -1; }
 };

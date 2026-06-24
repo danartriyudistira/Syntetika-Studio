@@ -231,8 +231,10 @@ target_sources(Syntetika PRIVATE
     GateEffect.h
     GlobalControls.cpp
     GlobalControls.h
-    GLSLShaderModule.cpp
-    GLSLShaderModule.h
+    ShaderModule.cpp
+    ShaderModule.h
+    GlShaderUtil.cpp
+    GlShaderUtil.h
     MonitorModule.cpp
     MonitorModule.h
     Granulator.cpp
@@ -310,6 +312,12 @@ target_sources(Syntetika PRIVATE
     LinnstrumentControl.h
     Lissajous.cpp
     Lissajous.h
+    Syntetiscope.cpp
+    Syntetiscope.h
+    TriggerWaveEffect.cpp
+    TriggerWaveEffect.h
+    TrigMatrixFX.cpp
+    TrigMatrixFX.h
     LiveGranulator.cpp
     LiveGranulator.h
     LocationZoomer.cpp
@@ -335,6 +343,8 @@ target_sources(Syntetika PRIVATE
     MainComponent.cpp
     MathUtils.cpp
     MathUtils.h
+    MeshInstances3D.cpp
+    MeshInstances3D.h
      Metronome.cpp
      Metronome.h
      ModelDVoice.cpp
@@ -947,10 +957,12 @@ target_link_libraries(Syntetika PRIVATE
     syntetika::freeverb
     $<IF:$<STREQUAL:${SYNTETIKA_SYSTEM_JSONCPP},OFF>,syntetika::json,jsoncpp>
     syntetika::leathers
+    syntetika::nanosvg
     syntetika::nanovg
     syntetika::psmove
     syntetika::push2
     syntetika::pybind11
+    syntetika::tinyobjloader
     syntetika::xwax
 
     $<$<STREQUAL:${SYNTETIKA_SYSTEM_TUNING_LIBRARY},OFF>:tuning-library>
@@ -962,6 +974,7 @@ target_link_libraries(Syntetika PRIVATE
     juce::juce_audio_devices
     juce::juce_audio_formats
     juce::juce_audio_processors
+    juce::juce_dsp
     juce::juce_cryptography
     juce::juce_gui_basics
     juce::juce_opengl

@@ -44,7 +44,7 @@
 
 
 #define NSS_MAX_STEPS 32
-#define NSS_NUM_PATTERNS 8
+#define NSS_NUM_PATTERNS 32
 
 class PatchCableSource;
 

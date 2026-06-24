@@ -47,7 +47,7 @@ public:
 
    void Init() override;
    void Poll() override;
-   bool IsResizable() const override { return !mDock; }
+   bool IsResizable() const override { return false; }
    bool HasTitleBar() const override { return !mDock; }
    bool AlwaysOnTop() override { return mDock; }
 
@@ -61,13 +61,14 @@ public:
    void SetUpFromSaveData() override;
    void SaveState(FileStreamOut& out) override;
    void LoadState(FileStreamIn& in, int rev) override;
-    int GetModuleSaveStateRev() const override { return 5; }
+    int GetModuleSaveStateRev() const override { return 7; }
 
    bool IsEnabled() const override { return true; }
 
 private:
-   static const int kMaxSlots = 8;
+    static const int kMaxSlots = 32;
    static const int kMaxTracks = 16;
+   static constexpr float kDragSensitivity = 60.0f;
 
    enum class CellType { kRotaryKnob, kSlider, kButton };
 
@@ -87,12 +88,6 @@ private:
       IDrawableModule* mModule{ nullptr };
       std::string mModuleName;
       int mCurrentPattern{ -1 };
-      int mQueuedPattern{ -1 };
-
-      // element grids [row][col]
-      std::vector<std::vector<Cell>> mRotaryGrid;
-      std::vector<std::vector<Cell>> mSliderGrid;
-      std::vector<std::vector<Cell>> mButtonGrid;
    };
 
    void DrawModule() override;
@@ -112,19 +107,24 @@ private:
    int GetDropdownTrackIndex(DropdownList* list) const;
 
    void RebuildElementGrids();
-   void ClearElementGrids();
    Cell MakeCell(CellType type);
 
-    bool HitTestElementGrid(int trackIdx, float px, float py, Cell*& outCell, int* outRow = nullptr, int* outCol = nullptr);
+   bool HitTestElementGrid(float px, float py, Cell*& outCell, int* outRow = nullptr, int* outCol = nullptr);
    void DrawRotaryKnob(float cx, float cy, float radius, float val, float min, float max);
    void DrawSlider(float x, float y, float w, float h, float val, float min, float max);
    void DrawButton(float x, float y, float w, float h);
    void RebuildParamList();
    void ResolveElementBindings();
+   void Resize(float w, float h) override;
 
    std::vector<TrackInfo> mTracks;
    int mNumTracks{ 4 };
    int mNumSlots{ 8 };
+
+   // standalone element grids [row][col]
+   std::vector<std::vector<Cell>> mRotaryGrid;
+   std::vector<std::vector<Cell>> mSliderGrid;
+   std::vector<std::vector<Cell>> mButtonGrid;
 
    int mRotaryCols{ 0 };
    int mRotaryRows{ 0 };
@@ -137,7 +137,6 @@ private:
    int mTrackDropdownSelection[kMaxTracks]{};
 
    // element drag state
-   int mDragTrack{ -1 };
    Cell* mDragCell{ nullptr };
    float mDragStartY{ 0 };
    float mDragStartVal{ 0 };
@@ -173,17 +172,32 @@ private:
     float mPendingBindX{ 0 };
     float mPendingBindY{ 0 };
 
-    // MIDI mapping
-    struct MidiBinding
-    {
-        int mControl{ 0 };
-        int mChannel{ 0 };
-        int mTrack{ -1 };     // -1 = scene trigger, >= 0 = track
-        CellType mCellType{ CellType::kRotaryKnob };
-        int mRow{ 0 };
-        int mCol{ 0 };
-        int mSlot{ -1 };      // -1 = element grid cell, >= 0 = pattern slot/scene
-    };
+     // MIDI mapping
+     struct MidiBinding
+     {
+         int mControl{ 0 };
+         int mChannel{ 0 };
+         int mTrack{ -1 };     // -1 = scene trigger, >= 0 = track
+         CellType mCellType{ CellType::kRotaryKnob };
+         int mRow{ 0 };
+         int mCol{ 0 };
+         int mSlot{ -1 };      // -1 = element grid cell, >= 0 = pattern slot/scene
+     };
+
+     // -- pages --
+     static const int kMaxPages = 8;
+
+     struct PageData
+     {
+         std::vector<char> mPatternData[kMaxTracks][kMaxSlots];
+         int mCurrentPattern[kMaxTracks]{};
+         ofColor mColor;
+     };
+
+     void SwitchPage(int pageIdx);
+     void SnapshotPage(int pageIdx);
+     void RestorePage(int pageIdx);
+     void InitPages();
 
     void SetMidiController(std::string name);
     void OnMidiNote(MidiNote& note) override;
@@ -207,4 +221,8 @@ private:
     int mLearnCellSlot{ -1 };   // >= 0 = learning a slot/scene
     std::vector<MidiBinding> mMidiBindings;
     std::string mMidiControllerName;
+
+    std::vector<PageData> mPages;
+    int mNumPages{ 1 };
+    int mCurrentPage{ 0 };
 };

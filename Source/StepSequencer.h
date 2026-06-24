@@ -288,7 +288,7 @@ private:
       bool mHasData{ false };
       std::vector<char> mData;
    };
-   static const int kNumPatternSlots = 8;
+   static const int kNumPatternSlots = 32;
    PatternSlot mPatterns[kNumPatternSlots];
 
    TransportListenerInfo* mTransportListenerInfo{ nullptr };

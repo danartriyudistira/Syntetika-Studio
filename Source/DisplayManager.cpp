@@ -14,6 +14,7 @@ DisplayManager::DisplayManager()
 
 DisplayManager::~DisplayManager()
 {
+   delete mOutputFBO;
 }
 
 void DisplayManager::CreateUIControls()
@@ -153,7 +154,10 @@ void DisplayManager::DrawModule()
       {
          auto* fbo = mSources[i]->GetFBO();
          if (fbo && fbo->IsValid())
+         {
+            fbo->ReleaseDisplayImage();
             fbo->Draw(x, y, cellW, cellH);
+         }
       }
       else
       {
@@ -214,6 +218,39 @@ void DisplayManager::DrawModule()
       }
    }
    ofPopStyle();
+}
+
+void DisplayManager::PostRender()
+{
+   std::lock_guard<std::recursive_mutex> lock(mDataMutex);
+
+   if (!mEnabled || mActiveCell < 0 || mActiveCell >= (int)mSources.size())
+      return;
+
+   IVisualSource* src = mSources[mActiveCell];
+   if (!src)
+      return;
+
+   VisualFBO* srcFBO = src->GetFBO();
+   if (!srcFBO || !srcFBO->IsValid())
+      return;
+
+   int w = srcFBO->GetWidth();
+   int h = srcFBO->GetHeight();
+   if (w <= 0 || h <= 0)
+      return;
+
+   if (!mOutputFBO)
+      mOutputFBO = new VisualFBO();
+   if (mOutputFBO->GetWidth() != w || mOutputFBO->GetHeight() != h)
+      mOutputFBO->Create(std::max(64, w), std::max(64, h));
+
+   mOutputFBO->Bind();
+
+   srcFBO->ReleaseDisplayImage();
+   srcFBO->Draw(0, 0, (float)w, (float)h);
+
+   mOutputFBO->Unbind();
 }
 
 void DisplayManager::PostRepatch(PatchCableSource* source, bool fromUserClick)
@@ -612,6 +649,7 @@ void DisplayManager::ApplyGridSize()
          {
             mInputCables[i]->Clear();
             RemovePatchCableSource(mInputCables[i]);
+            delete mInputCables[i];
          }
       }
       mInputCables.resize(newTotal);
@@ -636,9 +674,5 @@ void DisplayManager::ApplyGridSize()
 
 VisualFBO* DisplayManager::GetFBO()
 {
-   if (mActiveCell >= 0 && mActiveCell < (int)mSources.size() && mSources[mActiveCell])
-      return mSources[mActiveCell]->GetFBO();
-   if (!mSources.empty() && mSources[0])
-      return mSources[0]->GetFBO();
-   return nullptr;
+   return mOutputFBO;
 }

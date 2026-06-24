@@ -27,6 +27,7 @@ public:
 
    void CreateUIControls() override;
    void DrawModule() override;
+   void PostRender() override;
    bool IsResizable() const override { return true; }
    void Resize(float w, float h) override;
    void GetModuleDimensions(float& width, float& height) override;
@@ -83,6 +84,7 @@ private:
    Checkbox* mAutoSwitchCheckbox{ nullptr };
 
    PatchCableSource* mOutputCable{ nullptr };
+   VisualFBO* mOutputFBO{ nullptr };
 
    mutable std::recursive_mutex mDataMutex;
 

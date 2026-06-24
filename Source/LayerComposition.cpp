@@ -195,17 +195,17 @@ void LayerComposition::RenderComposite()
 {
    if (!mOutputFBO)
       mOutputFBO = new VisualFBO();
-   if (mOutputFBO->GetWidth() != 640 || mOutputFBO->GetHeight() != 480)
-      mOutputFBO->Create(640, 480);
+   int fboW = std::max(64, (int)mWidth);
+   int fboH = std::max(64, (int)mHeight);
+   if (mOutputFBO->GetWidth() != fboW || mOutputFBO->GetHeight() != fboH)
+      mOutputFBO->Create(fboW, fboH);
 
    mOutputFBO->Bind();
 
    nvgBeginPath(gNanoVG);
-   nvgRect(gNanoVG, 0, 0, 640, 480);
+   nvgRect(gNanoVG, 0, 0, (float)fboW, (float)fboH);
    nvgFillColor(gNanoVG, nvgRGBA(60, 60, 120, 255));
    nvgFill(gNanoVG);
-
-   std::vector<int> tempImages;
 
    for (int i = 0; i < kNumLayers; ++i)
    {
@@ -221,38 +221,34 @@ void LayerComposition::RenderComposite()
       if (srcW <= 0 || srcH <= 0)
          continue;
 
-      auto pixels = srcFBO->ReadPixels();
-      if (pixels.empty())
-         continue;
-
-      int w = (int)srcW;
-      int h = (int)srcH;
-
-      int imgHandle = nvgCreateImageRGBA(gNanoVG, w, h, 0, pixels.data());
-      if (imgHandle < 0)
-         continue;
-      tempImages.push_back(imgHandle);
-
-      float scaleX = 640.0f / w;
-      float scaleY = 480.0f / h;
+      float scaleX = (float)fboW / srcW;
+      float scaleY = (float)fboH / srcH;
       float fitScale = std::min(scaleX, scaleY);
-      float drawW = w * fitScale;
-      float drawH = h * fitScale;
-      float offsetX = (640 - drawW) / 2;
-      float offsetY = (480 - drawH) / 2;
+      float drawW = srcW * fitScale;
+      float drawH = srcH * fitScale;
+      float offsetX = (fboW - drawW) / 2;
+      float offsetY = (fboH - drawH) / 2;
 
-      NVGpaint paint = nvgImagePattern(gNanoVG, offsetX, offsetY, drawW, drawH, 0.0f, imgHandle, layer.mOpacity);
-      nvgBeginPath(gNanoVG);
-      nvgRect(gNanoVG, offsetX, offsetY, drawW, drawH);
-      nvgFillPaint(gNanoVG, paint);
-      nvgFill(gNanoVG);
+      switch (layer.mBlendMode)
+      {
+      case 1: nvgGlobalCompositeBlendFunc(gNanoVG, NVG_SRC_ALPHA, NVG_ONE); break;
+      case 2: nvgGlobalCompositeBlendFunc(gNanoVG, NVG_DST_COLOR, NVG_ZERO); break;
+      case 3: nvgGlobalCompositeBlendFunc(gNanoVG, NVG_ONE, NVG_ONE_MINUS_SRC_COLOR); break;
+      default: nvgGlobalCompositeOperation(gNanoVG, NVG_SOURCE_OVER); break;
+      }
+
+      if (layer.mOpacity < 1.0f)
+         nvgGlobalAlpha(gNanoVG, layer.mOpacity);
+
+      srcFBO->ReleaseDisplayImage();
+      srcFBO->Draw(offsetX, offsetY, drawW, drawH);
+
+      if (layer.mOpacity < 1.0f)
+         nvgGlobalAlpha(gNanoVG, 1.0f);
    }
 
-   NVGcontext* outputNvg = mOutputFBO->GetNVGContext();
+   nvgGlobalCompositeOperation(gNanoVG, NVG_SOURCE_OVER);
    mOutputFBO->Unbind();
-
-   for (int h : tempImages)
-      nvgDeleteImage(outputNvg, h);
 }
 
 VisualFBO* LayerComposition::GetFBO()

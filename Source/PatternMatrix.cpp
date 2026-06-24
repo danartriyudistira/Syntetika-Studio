@@ -69,8 +69,9 @@ void PatternMatrix::CreateUIControls()
 
     mDockCheckbox = new Checkbox(this, "dock", -1, -1, &mDock);
 
-    mParamBrowser = new DropdownList(this, "parambrowser", -1, -1, &mParamBrowserSelection, 300);
-    mParamBrowser->SetShowing(false);
+     mParamBrowser = new DropdownList(this, "parambrowser", -1, -1, &mParamBrowserSelection, 300);
+     mParamBrowser->SetCableTargetable(false);
+     mParamBrowser->SetShowing(false);
 
     mEditMapButton = new ClickButton(this, "edit map", -1, -1);
     mMidiControllerDropdown = new DropdownList(this, "midicontroller", -1, -1, &mMidiControllerDropdownSelection, 180);
@@ -174,24 +175,13 @@ PatternMatrix::Cell PatternMatrix::MakeCell(CellType type)
    return c;
 }
 
-void PatternMatrix::ClearElementGrids()
-{
-   for (auto& track : mTracks)
-   {
-      track.mRotaryGrid.clear();
-      track.mSliderGrid.clear();
-      track.mButtonGrid.clear();
-   }
-}
-
 void PatternMatrix::RebuildElementGrids()
 {
-   for (auto& track : mTracks)
-   {
-      track.mRotaryGrid.assign(mRotaryRows, std::vector<Cell>(mRotaryCols, MakeCell(CellType::kRotaryKnob)));
-      track.mSliderGrid.assign(mSliderRows, std::vector<Cell>(mSliderCols, MakeCell(CellType::kSlider)));
-      track.mButtonGrid.assign(mButtonRows, std::vector<Cell>(mButtonCols, MakeCell(CellType::kButton)));
-   }
+   mDragCell = nullptr;
+   mContextCell = nullptr;
+   mRotaryGrid.assign(mRotaryRows, std::vector<Cell>(mRotaryCols, MakeCell(CellType::kRotaryKnob)));
+   mSliderGrid.assign(mSliderRows, std::vector<Cell>(mSliderCols, MakeCell(CellType::kSlider)));
+   mButtonGrid.assign(mButtonRows, std::vector<Cell>(mButtonCols, MakeCell(CellType::kButton)));
 }
 
 void PatternMatrix::RebuildParamList()
@@ -220,18 +210,15 @@ void PatternMatrix::RebuildParamList()
 
 void PatternMatrix::ResolveElementBindings()
 {
-   for (auto& track : mTracks)
-   {
-      for (auto& row : track.mRotaryGrid)
-         for (auto& cell : row)
-            cell.mTarget = TheSynth->FindUIControl(cell.mTargetPath);
-      for (auto& row : track.mSliderGrid)
-         for (auto& cell : row)
-            cell.mTarget = TheSynth->FindUIControl(cell.mTargetPath);
-      for (auto& row : track.mButtonGrid)
-         for (auto& cell : row)
-            cell.mTarget = TheSynth->FindUIControl(cell.mTargetPath);
-   }
+   for (auto& row : mRotaryGrid)
+      for (auto& cell : row)
+         cell.mTarget = TheSynth->FindUIControl(cell.mTargetPath);
+   for (auto& row : mSliderGrid)
+      for (auto& cell : row)
+         cell.mTarget = TheSynth->FindUIControl(cell.mTargetPath);
+   for (auto& row : mButtonGrid)
+      for (auto& cell : row)
+         cell.mTarget = TheSynth->FindUIControl(cell.mTargetPath);
 }
 
 // --- layout helpers ---
@@ -246,44 +233,48 @@ namespace
    const float kRowPad = 3;
    const float kHeaderH = 16;
    const float kMargin = 5;
-   const float kBottomH = 20;  // bottom bar for dock checkbox
+   const float kBottomH = 20;
+   const float kPageTabW = 26;
+   const float kPageTabH = 14;
+
+   ofColor kDefaultPageColors[8] = {
+      ofColor(200, 80, 80),    // red
+      ofColor(80, 180, 80),    // green
+      ofColor(80, 100, 220),   // blue
+      ofColor(200, 180, 60),   // yellow
+      ofColor(200, 80, 200),   // magenta
+      ofColor(60, 200, 200),   // cyan
+      ofColor(220, 140, 60),   // orange
+      ofColor(150, 150, 150),  // gray
+   };
 
    float GetGridX() { return kMargin + kSelW; }
    float GetHeaderStartY() { return kMargin + 2; }
+   float GetFirstTrackY() { return GetHeaderStartY() + kHeaderH + kRowPad; }
 
-   int GetElementGridRows(int rotaryRows, int sliderRows, int buttonRows)
+   float GetTracksBottom(int numTracks)
    {
-      return MAX(MAX(rotaryRows, sliderRows), buttonRows);
+      return GetFirstTrackY() + numTracks * (kCellH + kRowPad);
    }
 
-   int GetElementGridCols(int rotaryCols, int sliderCols, int buttonCols)
-   {
-      return rotaryCols + sliderCols + buttonCols;
-   }
-
-   float GetElementGridStartX(int numSlots)
+   float GetElementAreaStartX(int numSlots)
    {
       return GetGridX() + numSlots * kCellW + kMargin;
    }
 
-   // Track row: pattern slots on left, element grid on right.
-   // First element row shares Y with pattern slots; if grid has more rows,
-   // track height grows to accommodate them.
-   float GetTrackY(int trackIdx, int extraRows)
+   int GetElementGridRows(int rotaryRows, int sliderRows, int buttonRows)
    {
-      float headerArea = GetHeaderStartY() + kHeaderH + kRowPad;
-      float trackH = kCellH + kRowPad;
-      if (extraRows > 1)                   // first row shares Y with slots
-         trackH += (extraRows - 1) * (kElemH + kRowPad);
-      return headerArea + trackIdx * trackH;
+      return MAX(rotaryRows, MAX(sliderRows, buttonRows));
    }
 
-   float GetTrackHeight(int extraRows)
+   int GetElementTotalCols(int rotaryCols, int sliderCols, int buttonCols)
    {
-      float h = kCellH + kRowPad;
-      if (extraRows > 1)
-         h += (extraRows - 1) * (kElemH + kRowPad);
-      return h;
+      return rotaryCols + sliderCols + buttonCols;
+   }
+
+   float GetElementAreaWidth(int rotaryCols, int sliderCols, int buttonCols)
+   {
+      return GetElementTotalCols(rotaryCols, sliderCols, buttonCols) * (kElemW + 2);
    }
 }
 
@@ -296,7 +287,6 @@ void PatternMatrix::DrawModule()
       float w, h;
       GetModuleDimensions(w, h);
       SetPosition(0, ofGetHeight() / GetOwningContainer()->GetDrawScale() - h);
-      Resize(ofGetWidth() / GetOwningContainer()->GetDrawScale(), h);
    }
 
    if (Minimized() || IsVisible() == false)
@@ -304,19 +294,24 @@ void PatternMatrix::DrawModule()
 
    float gridX = GetGridX();
    float headerY = GetHeaderStartY();
-   int extraRows = GetElementGridRows(mRotaryRows, mSliderRows, mButtonRows);
+   float firstTrackY = GetFirstTrackY();
+   float elemX0 = GetElementAreaStartX(mNumSlots);
+   int elemGridRows = GetElementGridRows(mRotaryRows, mSliderRows, mButtonRows);
+   int elemTotalCols = GetElementTotalCols(mRotaryCols, mSliderCols, mButtonCols);
 
    ofPushStyle();
 
-   // column headers P1-Px
+   // column headers P1-Px and element type labels
+   ofSetColor(50, 50, 50, gModuleDrawAlpha);
+   ofFill();
+   for (int c = 0; c < mNumSlots; ++c)
+      ofRect(gridX + c * kCellW, headerY, kCellW, kHeaderH);
+   if (elemTotalCols > 0)
+      ofRect(elemX0, headerY, elemTotalCols * (kElemW + 2), kHeaderH);
+
    for (int c = 0; c < mNumSlots; ++c)
    {
       float x = gridX + c * kCellW;
-      ofColor headerColor(50, 50, 50);
-      headerColor.a = gModuleDrawAlpha;
-      ofSetColor(headerColor);
-      ofFill();
-      ofRect(x, headerY, kCellW, kHeaderH);
       ofSetColor(60, 60, 60, gModuleDrawAlpha);
       ofNoFill();
       ofRect(x, headerY, kCellW, kHeaderH);
@@ -324,44 +319,51 @@ void PatternMatrix::DrawModule()
       DrawTextNormal(("P" + ofToString(c + 1)).c_str(), x + kCellW / 2 - 7, headerY + 11, 10);
    }
 
-    // dock checkbox (bottom bar)
-    float checkY = GetTrackY(mNumTracks - 1, extraRows) + GetTrackHeight(extraRows);
-    ofSetColor(40, 40, 40, gModuleDrawAlpha);
-    ofFill();
-    ofRect(kMargin, checkY, ofGetWidth() / GetOwningContainer()->GetDrawScale() - kMargin * 2, kBottomH);
-    mDockCheckbox->SetShowing(GetOwningContainer() == TheSynth->GetRootContainer() || GetOwningContainer() == TheSynth->GetUIContainer());
-    mDockCheckbox->SetPosition(kMargin + 2, checkY + 2);
-    mDockCheckbox->Draw();
-
-    mEditMapButton->SetPosition(kMargin + 60, checkY + 2);
-    mEditMapButton->Draw();
-
-    if (mEditMapMode)
-    {
-       mMidiControllerDropdown->SetPosition(kMargin + 150, checkY + 2);
-       mMidiControllerDropdown->Draw();
-    }
+   if (elemTotalCols > 0)
+   {
+      ofSetColor(60, 60, 60, gModuleDrawAlpha);
+      ofNoFill();
+      ofRect(elemX0, headerY, elemTotalCols * (kElemW + 2), kHeaderH);
+      float ex = elemX0;
+      if (mRotaryCols > 0)
+      {
+         ofSetColor(200, 200, 200, gModuleDrawAlpha);
+         DrawTextNormal("R", ex + 3, headerY + 11, 10);
+      }
+      ex += mRotaryCols * (kElemW + 2);
+      if (mSliderCols > 0)
+      {
+         ofSetColor(200, 200, 200, gModuleDrawAlpha);
+         DrawTextNormal("S", ex + 3, headerY + 11, 10);
+      }
+      ex += mSliderCols * (kElemW + 2);
+      if (mButtonCols > 0)
+      {
+         ofSetColor(200, 200, 200, gModuleDrawAlpha);
+         DrawTextNormal("B", ex + 3, headerY + 11, 10);
+      }
+   }
 
    // tracks
    for (int i = 0; i < mNumTracks; ++i)
    {
-      float y = GetTrackY(i, extraRows);
+      float y = firstTrackY + i * (kCellH + kRowPad);
 
       mTracks[i].mModuleSelector->SetPosition(kMargin, y);
       mTracks[i].mModuleSelector->SetWidth(kSelW);
       mTracks[i].mModuleSelector->Draw();
 
-      // pattern slots
       for (int c = 0; c < mNumSlots; ++c)
       {
          float x = gridX + c * kCellW;
          bool hasData = PatternHasData(i, c);
 
-          ofColor color;
-          if (mTracks[i].mCurrentPattern == c)
-             color.set(0, 200, 80);
-          else if (hasData)
-            color.set(60, 100, 180);
+         ofColor pageCol = mPages[mCurrentPage].mColor;
+         ofColor color;
+         if (mTracks[i].mCurrentPattern == c)
+            color = pageCol;
+         else if (hasData)
+            color = pageCol * 0.5f;
          else
             color.set(40, 40, 40);
          color.a = gModuleDrawAlpha;
@@ -377,56 +379,104 @@ void PatternMatrix::DrawModule()
             DrawTextNormal(("P" + ofToString(c + 1)).c_str(), x + kCellW / 2 - 7, y + kCellH / 2 + 3, 10);
          }
       }
+   }
 
-      // element grid (first row shares Y with pattern slots)
-      if (extraRows > 0)
+   // standalone element grids (right side)
+   if (elemGridRows > 0)
+   {
+      float elemY = firstTrackY;
+
+      // rotary grid
+      for (int r = 0; r < mRotaryRows && r < (int)mRotaryGrid.size(); ++r)
       {
-         float egX = GetElementGridStartX(mNumSlots);
-         float egY = y;  // same Y as pattern slots
-
-         // rotary grid
-         for (int r = 0; r < (int)mTracks[i].mRotaryGrid.size() && r < mRotaryRows; ++r)
+         for (int c = 0; c < mRotaryCols && c < (int)mRotaryGrid[r].size(); ++c)
          {
-            for (int c = 0; c < (int)mTracks[i].mRotaryGrid[r].size() && c < mRotaryCols; ++c)
-            {
-               float ex = egX + c * kElemW;
-               float ey = egY + r * kElemH;
-               const Cell& cell = mTracks[i].mRotaryGrid[r][c];
-               DrawRotaryKnob(ex + kElemW / 2, ey + kElemH / 2, kElemW / 2 - 3, cell.mValue, cell.mMin, cell.mMax);
-            }
+            float ex = elemX0 + c * (kElemW + 2);
+            float ey = elemY + r * (kElemH + kRowPad);
+            DrawRotaryKnob(ex + kElemW / 2, ey + kElemH / 2, kElemW / 2 - 3, mRotaryGrid[r][c].mValue, mRotaryGrid[r][c].mMin, mRotaryGrid[r][c].mMax);
          }
+      }
 
-         // slider grid
-         float sliderX = egX + mRotaryCols * kElemW;
-         for (int r = 0; r < (int)mTracks[i].mSliderGrid.size() && r < mSliderRows; ++r)
+      // slider grid (right of rotary)
+      float sliderX0 = elemX0 + mRotaryCols * (kElemW + 2);
+      for (int r = 0; r < mSliderRows && r < (int)mSliderGrid.size(); ++r)
+      {
+         for (int c = 0; c < mSliderCols && c < (int)mSliderGrid[r].size(); ++c)
          {
-            for (int c = 0; c < (int)mTracks[i].mSliderGrid[r].size() && c < mSliderCols; ++c)
-            {
-               float ex = sliderX + c * kElemW;
-               float ey = egY + r * kElemH;
-               const Cell& cell = mTracks[i].mSliderGrid[r][c];
-               DrawSlider(ex, ey, kElemW, kElemH, cell.mValue, cell.mMin, cell.mMax);
-            }
+            float ex = sliderX0 + c * (kElemW + 2);
+            float ey = elemY + r * (kElemH + kRowPad);
+            DrawSlider(ex, ey, kElemW, kElemH, mSliderGrid[r][c].mValue, mSliderGrid[r][c].mMin, mSliderGrid[r][c].mMax);
          }
+      }
 
-         // button grid
-         float btnX = sliderX + mSliderCols * kElemW;
-         for (int r = 0; r < (int)mTracks[i].mButtonGrid.size() && r < mButtonRows; ++r)
+      // button grid (right of slider)
+      float btnX0 = sliderX0 + mSliderCols * (kElemW + 2);
+      for (int r = 0; r < mButtonRows && r < (int)mButtonGrid.size(); ++r)
+      {
+         for (int c = 0; c < mButtonCols && c < (int)mButtonGrid[r].size(); ++c)
          {
-            for (int c = 0; c < (int)mTracks[i].mButtonGrid[r].size() && c < mButtonCols; ++c)
-            {
-               float ex = btnX + c * kElemW;
-               float ey = egY + r * kElemH;
-               DrawButton(ex, ey, kElemW, kElemH);
-            }
+            float ex = btnX0 + c * (kElemW + 2);
+            float ey = elemY + r * (kElemH + kRowPad);
+            DrawButton(ex, ey, kElemW, kElemH);
          }
       }
    }
 
-   // MIDI mapping overlay (draw after cells)
+   // bottom bar
+   float actualW, actualH;
+   GetModuleDimensions(actualW, actualH);
+   float tracksContentH = mNumTracks * (kCellH + kRowPad);
+   float elemContentH = elemGridRows * (kElemH + kRowPad);
+   float contentH = MAX(tracksContentH, elemContentH);
+   float bottomY = firstTrackY + contentH + kMargin;
+   ofSetColor(40, 40, 40, gModuleDrawAlpha);
+   ofFill();
+   ofRect(kMargin, bottomY, actualW - kMargin * 2, kBottomH);
+   mDockCheckbox->SetShowing(GetOwningContainer() == TheSynth->GetRootContainer() || GetOwningContainer() == TheSynth->GetUIContainer());
+   mDockCheckbox->SetPosition(kMargin + 2, bottomY + 2);
+   mDockCheckbox->Draw();
+
+   mEditMapButton->SetPosition(kMargin + 60, bottomY + 2);
+   mEditMapButton->Draw();
+
+   // page tabs
+   float pageTabX = kMargin + 128;
+   ofSetColor(60, 60, 60, gModuleDrawAlpha);
+   ofFill();
+   ofRect(pageTabX - 2, bottomY + 1, 1, kBottomH - 2);
+   float tabY = bottomY + 3;
+   float tabH = kPageTabH;
+   for (int p = 0; p < mNumPages; ++p)
+   {
+      ofColor col = mPages[p].mColor;
+      col.a = gModuleDrawAlpha;
+      ofSetColor(col);
+      ofFill();
+      ofRect(pageTabX, tabY, kPageTabW, tabH);
+      ofSetColor(p == mCurrentPage ? ofColor::white : ofColor(200, 200, 200), gModuleDrawAlpha);
+      DrawTextNormal(ofToString(p + 1).c_str(), pageTabX + kPageTabW / 2 - 4, tabY + 10, 9);
+      pageTabX += kPageTabW + 2;
+   }
+
+   // "+" button to add a page
+   if (mNumPages < kMaxPages)
+   {
+      ofSetColor(80, 80, 80, gModuleDrawAlpha);
+      ofFill();
+      ofRect(pageTabX, tabY, 16, tabH);
+      ofSetColor(200, 200, 200, gModuleDrawAlpha);
+      DrawTextNormal("+", pageTabX + 5, tabY + 10, 9);
+   }
+
    if (mEditMapMode)
    {
-      // column header (scene) overlay
+      mMidiControllerDropdown->SetPosition(pageTabX + 24, bottomY + 2);
+      mMidiControllerDropdown->Draw();
+   }
+
+   // MIDI mapping overlay
+   if (mEditMapMode)
+   {
       for (int c = 0; c < mNumSlots; ++c)
       {
          float x = gridX + c * kCellW;
@@ -435,50 +485,32 @@ void PatternMatrix::DrawModule()
 
       for (int i = 0; i < mNumTracks; ++i)
       {
-         float y = GetTrackY(i, extraRows);
-         float egX = GetElementGridStartX(mNumSlots);
-
-         // pattern slot overlay
+         float y = firstTrackY + i * (kCellH + kRowPad);
          for (int c = 0; c < mNumSlots; ++c)
          {
             float sx = gridX + c * kCellW;
             DrawSlotMidiOverlay(i, c, sx, y, kCellW, kCellH);
          }
+      }
 
-         // rotary grid overlay
-         for (int r = 0; r < (int)mTracks[i].mRotaryGrid.size() && r < mRotaryRows; ++r)
-         {
-            for (int c = 0; c < (int)mTracks[i].mRotaryGrid[r].size() && c < mRotaryCols; ++c)
-            {
-               float ex = egX + c * kElemW;
-               float ey = y + r * kElemH;
-               DrawMidiOverlay(i, CellType::kRotaryKnob, r, c, ex, ey, kElemW, kElemH);
-            }
-         }
+      // standalone element MIDI overlay
+      if (elemGridRows > 0)
+      {
+         float elemY = firstTrackY;
 
-         // slider grid overlay
-         float sliderX = egX + mRotaryCols * kElemW;
-         for (int r = 0; r < (int)mTracks[i].mSliderGrid.size() && r < mSliderRows; ++r)
-         {
-            for (int c = 0; c < (int)mTracks[i].mSliderGrid[r].size() && c < mSliderCols; ++c)
-            {
-               float ex = sliderX + c * kElemW;
-               float ey = y + r * kElemH;
-               DrawMidiOverlay(i, CellType::kSlider, r, c, ex, ey, kElemW, kElemH);
-            }
-         }
+         for (int r = 0; r < mRotaryRows && r < (int)mRotaryGrid.size(); ++r)
+            for (int c = 0; c < mRotaryCols && c < (int)mRotaryGrid[r].size(); ++c)
+               DrawMidiOverlay(-1, CellType::kRotaryKnob, r, c, elemX0 + c * (kElemW + 2), elemY + r * (kElemH + kRowPad), kElemW, kElemH);
 
-         // button grid overlay
-         float btnX = sliderX + mSliderCols * kElemW;
-         for (int r = 0; r < (int)mTracks[i].mButtonGrid.size() && r < mButtonRows; ++r)
-         {
-            for (int c = 0; c < (int)mTracks[i].mButtonGrid[r].size() && c < mButtonCols; ++c)
-            {
-               float ex = btnX + c * kElemW;
-               float ey = y + r * kElemH;
-               DrawMidiOverlay(i, CellType::kButton, r, c, ex, ey, kElemW, kElemH);
-            }
-         }
+         float sliderX0 = elemX0 + mRotaryCols * (kElemW + 2);
+         for (int r = 0; r < mSliderRows && r < (int)mSliderGrid.size(); ++r)
+            for (int c = 0; c < mSliderCols && c < (int)mSliderGrid[r].size(); ++c)
+               DrawMidiOverlay(-1, CellType::kSlider, r, c, sliderX0 + c * (kElemW + 2), elemY + r * (kElemH + kRowPad), kElemW, kElemH);
+
+         float btnX0 = sliderX0 + mSliderCols * (kElemW + 2);
+         for (int r = 0; r < mButtonRows && r < (int)mButtonGrid.size(); ++r)
+            for (int c = 0; c < mButtonCols && c < (int)mButtonGrid[r].size(); ++c)
+               DrawMidiOverlay(-1, CellType::kButton, r, c, btnX0 + c * (kElemW + 2), elemY + r * (kElemH + kRowPad), kElemW, kElemH);
       }
    }
 
@@ -487,7 +519,9 @@ void PatternMatrix::DrawModule()
 
 void PatternMatrix::DrawRotaryKnob(float cx, float cy, float radius, float val, float min, float max)
 {
-   float norm = (val - min) / (max - min);
+   float norm = 0;
+   if (max != min)
+      norm = (val - min) / (max - min);
    norm = ofClamp(norm, 0, 1);
 
    ofSetColor(60, 60, 60, gModuleDrawAlpha);
@@ -512,7 +546,9 @@ void PatternMatrix::DrawRotaryKnob(float cx, float cy, float radius, float val, 
 
 void PatternMatrix::DrawSlider(float x, float y, float w, float h, float val, float min, float max)
 {
-   float norm = (val - min) / (max - min);
+   float norm = 0;
+   if (max != min)
+      norm = (val - min) / (max - min);
    norm = ofClamp(norm, 0, 1);
 
    ofSetColor(40, 40, 40, gModuleDrawAlpha);
@@ -540,40 +576,47 @@ void PatternMatrix::DrawButton(float x, float y, float w, float h)
 
 void PatternMatrix::GetModuleDimensions(float& width, float& height)
 {
-   int extraRows = GetElementGridRows(mRotaryRows, mSliderRows, mButtonRows);
-   float extraW = GetElementGridCols(mRotaryCols, mSliderCols, mButtonCols) * kElemW;
-   if (extraW > 0)
-      extraW += kMargin;
+   width = kMargin + kSelW + mNumSlots * kCellW + kMargin;
+   int elemCols = GetElementTotalCols(mRotaryCols, mSliderCols, mButtonCols);
+   if (elemCols > 0)
+      width += GetElementAreaWidth(mRotaryCols, mSliderCols, mButtonCols) + kMargin;
 
-   width = kMargin + kSelW + mNumSlots * kCellW + extraW + kMargin;
+   // ensure minimum width for page tabs in the bottom bar
+   float minPageWidth = kMargin + 130 + mNumPages * (kPageTabW + 2) + 22 + kMargin;
+   if (mNumPages > 1 || minPageWidth > width)
+      width = MAX(width, minPageWidth);
 
-   // when docked, span full window width
+   int elemGridRows = GetElementGridRows(mRotaryRows, mSliderRows, mButtonRows);
+   float tracksContentH = mNumTracks * (kCellH + kRowPad);
+   float elemContentH = elemGridRows * (kElemH + kRowPad);
+   float contentH = MAX(tracksContentH, elemContentH);
+   height = GetFirstTrackY() + contentH + kMargin + kBottomH;
+
    if (mDock && GetOwningContainer())
       width = MAX(width, ofGetWidth() / GetOwningContainer()->GetDrawScale());
+}
 
-   float lastTrackY = GetTrackY(mNumTracks - 1, extraRows);
-   height = lastTrackY + GetTrackHeight(extraRows) + kMargin + kBottomH;
+void PatternMatrix::Resize(float w, float h)
+{
 }
 
 // --- click handling ---
 
-bool PatternMatrix::HitTestElementGrid(int trackIdx, float px, float py, Cell*& outCell, int* outRow, int* outCol)
+bool PatternMatrix::HitTestElementGrid(float px, float py, Cell*& outCell, int* outRow, int* outCol)
 {
-   auto& t = mTracks[trackIdx];
-   float egX = GetElementGridStartX(mNumSlots);
-   float egY = GetTrackY(trackIdx, GetElementGridRows(mRotaryRows, mSliderRows, mButtonRows));
+   float elemX0 = GetElementAreaStartX(mNumSlots);
+   float firstTrackY = GetFirstTrackY();
 
    // check rotary grid
-   float x0 = egX;
-   for (int r = 0; r < (int)t.mRotaryGrid.size(); ++r)
+   for (int r = 0; r < mRotaryRows && r < (int)mRotaryGrid.size(); ++r)
    {
-      for (int c = 0; c < (int)t.mRotaryGrid[r].size(); ++c)
+      for (int c = 0; c < mRotaryCols && c < (int)mRotaryGrid[r].size(); ++c)
       {
-         float ex = x0 + c * kElemW;
-         float ey = egY + r * kElemH;
+         float ex = elemX0 + c * (kElemW + 2);
+         float ey = firstTrackY + r * (kElemH + kRowPad);
          if (px >= ex && px < ex + kElemW && py >= ey && py < ey + kElemH)
          {
-            outCell = &t.mRotaryGrid[r][c];
+            outCell = &mRotaryGrid[r][c];
             if (outRow) *outRow = r;
             if (outCol) *outCol = c;
             return true;
@@ -582,16 +625,16 @@ bool PatternMatrix::HitTestElementGrid(int trackIdx, float px, float py, Cell*& 
    }
 
    // check slider grid
-   float sx = egX + mRotaryCols * kElemW;
-   for (int r = 0; r < (int)t.mSliderGrid.size(); ++r)
+   float sliderX0 = elemX0 + mRotaryCols * (kElemW + 2);
+   for (int r = 0; r < mSliderRows && r < (int)mSliderGrid.size(); ++r)
    {
-      for (int c = 0; c < (int)t.mSliderGrid[r].size(); ++c)
+      for (int c = 0; c < mSliderCols && c < (int)mSliderGrid[r].size(); ++c)
       {
-         float ex = sx + c * kElemW;
-         float ey = egY + r * kElemH;
+         float ex = sliderX0 + c * (kElemW + 2);
+         float ey = firstTrackY + r * (kElemH + kRowPad);
          if (px >= ex && px < ex + kElemW && py >= ey && py < ey + kElemH)
          {
-            outCell = &t.mSliderGrid[r][c];
+            outCell = &mSliderGrid[r][c];
             if (outRow) *outRow = r;
             if (outCol) *outCol = c;
             return true;
@@ -600,16 +643,16 @@ bool PatternMatrix::HitTestElementGrid(int trackIdx, float px, float py, Cell*& 
    }
 
    // check button grid
-   float bx = sx + mSliderCols * kElemW;
-   for (int r = 0; r < (int)t.mButtonGrid.size(); ++r)
+   float btnX0 = sliderX0 + mSliderCols * (kElemW + 2);
+   for (int r = 0; r < mButtonRows && r < (int)mButtonGrid.size(); ++r)
    {
-      for (int c = 0; c < (int)t.mButtonGrid[r].size(); ++c)
+      for (int c = 0; c < mButtonCols && c < (int)mButtonGrid[r].size(); ++c)
       {
-         float ex = bx + c * kElemW;
-         float ey = egY + r * kElemH;
+         float ex = btnX0 + c * (kElemW + 2);
+         float ey = firstTrackY + r * (kElemH + kRowPad);
          if (px >= ex && px < ex + kElemW && py >= ey && py < ey + kElemH)
          {
-            outCell = &t.mButtonGrid[r][c];
+            outCell = &mButtonGrid[r][c];
             if (outRow) *outRow = r;
             if (outCol) *outCol = c;
             return true;
@@ -626,7 +669,12 @@ void PatternMatrix::OnClicked(float x, float y, bool right)
 
    float gridX = GetGridX();
    float headerY = GetHeaderStartY();
-   int extraRows = GetElementGridRows(mRotaryRows, mSliderRows, mButtonRows);
+   float firstTrackY = GetFirstTrackY();
+   float tracksContentH = mNumTracks * (kCellH + kRowPad);
+   int elemGridRows = GetElementGridRows(mRotaryRows, mSliderRows, mButtonRows);
+   float elemContentH = elemGridRows * (kElemH + kRowPad);
+   float contentH = MAX(tracksContentH, elemContentH);
+   float contentBottom = firstTrackY + contentH;
 
    // column header click -> scene trigger / MIDI learn
    for (int c = 0; c < mNumSlots; ++c)
@@ -647,129 +695,138 @@ void PatternMatrix::OnClicked(float x, float y, bool right)
       }
    }
 
-    // cancel cell learn when clicking outside interactive area in edit mode
-    if (mEditMapMode && mPendingCellLearn)
-    {
-       bool hitSomething = false;
-       // check header area
-       for (int c = 0; c < mNumSlots && !hitSomething; ++c)
-       {
-          float colX = gridX + c * kCellW;
-          if (x >= colX && x < colX + kCellW && y >= headerY && y < headerY + kHeaderH)
-             hitSomething = true;
-       }
-       // check track areas
-       for (int i = 0; i < mNumTracks && !hitSomething; ++i)
-       {
-          float ty = GetTrackY(i, extraRows);
-          float th = GetTrackHeight(extraRows);
-          if (y >= ty && y < ty + th)
-             hitSomething = true;
-       }
-       if (!hitSomething)
-          CancelCellLearn();
-    }
-
-    // track rows
-    for (int i = 0; i < mNumTracks; ++i)
+   // cancel cell learn in edit mode
+   if (mEditMapMode && mPendingCellLearn)
    {
-      float ty = GetTrackY(i, extraRows);
-      float th = GetTrackHeight(extraRows);
+      bool hitSomething = (y >= headerY && y < contentBottom);
+      if (!hitSomething)
+         CancelCellLearn();
+   }
 
-      if (y < ty || y >= ty + th)
+   // track rows
+   for (int i = 0; i < mNumTracks; ++i)
+   {
+      float ty = firstTrackY + i * (kCellH + kRowPad);
+
+      if (y < ty || y >= ty + kCellH + kRowPad)
          continue;
 
-      // pattern slot area (top part of track)
-      float slotAreaBottom = ty + kCellH;
-      if (y < slotAreaBottom)
+      for (int c = 0; c < mNumSlots; ++c)
       {
-         for (int c = 0; c < mNumSlots; ++c)
+         float colX = gridX + c * kCellW;
+         if (x >= colX && x < colX + kCellW)
          {
-            float colX = gridX + c * kCellW;
-            if (x >= colX && x < colX + kCellW)
+            if (mEditMapMode && mMidiController && !right)
             {
-                // MIDI learn mode: click starts pending learn on this slot
-                if (mEditMapMode && mMidiController && !right)
-                {
-                   CancelCellLearn();
-                   mPendingCellLearn = true;
-                   mLearnTrack = i;
-                   mLearnCellSlot = c;
-                   return;
-                }
-
-                if (right)
-                {
-                   // right-click only on the active (green) slot
-                   if (mTracks[i].mCurrentPattern == c)
-                   {
-                      mContextTrack = i;
-                      mContextSlot = c;
-                      mContextMenu->SetPosition(x + kCellW, y);
-                      mContextMenu->SetShowing(true);
-                      mContextMenu->TestClick(x + kCellW, y, false);  // open menu immediately
-                   }
-                }
-                else
-                {
-                   if (PatternHasData(i, c))
-                      LoadPattern(i, c);  // click filled → load/switch
-                   else
-                      StorePattern(i, c); // click empty → save
-                }
+               CancelCellLearn();
+               mPendingCellLearn = true;
+               mLearnTrack = i;
+               mLearnCellSlot = c;
                return;
             }
-         }
-      }
 
-      // element grid area (below pattern slots)
-      Cell* hitCell = nullptr;
-      int hitRow = -1, hitCol = -1;
-      if (HitTestElementGrid(i, x, y, hitCell, &hitRow, &hitCol))
-      {
-         // MIDI learn mode: click starts pending learn on this cell
-         if (mEditMapMode && mMidiController && !right)
-         {
-            CancelCellLearn();
-            mPendingCellLearn = true;
-            mLearnTrack = i;
-            mLearnCellType = hitCell->mType;
-            mLearnCellRow = hitRow;
-            mLearnCellCol = hitCol;
+            if (right)
+            {
+               if (mTracks[i].mCurrentPattern == c)
+               {
+                  mContextTrack = i;
+                  mContextSlot = c;
+                  mContextMenu->SetPosition(x + kCellW, y);
+                  mContextMenu->SetShowing(true);
+                  mContextMenu->TestClick(x + kCellW, y, false);
+               }
+            }
+            else
+            {
+               if (PatternHasData(i, c))
+                  LoadPattern(i, c);
+               else
+                  StorePattern(i, c);
+            }
             return;
          }
+      }
+   }
 
-         if (right)
+   // bottom bar clicks (page tabs, + button)
+   float botY = firstTrackY + contentH + kMargin;
+   if (y >= botY && y < botY + kBottomH)
+   {
+      float pageTabX = kMargin + 128;
+      float tabY = botY + 3;
+      for (int p = 0; p < mNumPages; ++p)
+      {
+         if (x >= pageTabX && x < pageTabX + kPageTabW && y >= tabY && y < tabY + kPageTabH)
          {
-            mContextTrack = i;
-            mContextSlot = -1;
-            mContextCell = hitCell;
-            mContextMenu->SetPosition(x + kElemW, y);
-            mContextMenu->SetShowing(true);
-            mContextMenu->TestClick(x + kElemW, y, false);
+            if (p != mCurrentPage)
+               SwitchPage(p);
+            return;
          }
-         else
+         pageTabX += kPageTabW + 2;
+      }
+      // "+" button
+      if (mNumPages < kMaxPages && x >= pageTabX && x < pageTabX + 16 && y >= tabY && y < tabY + kPageTabH)
+      {
+         SnapshotPage(mCurrentPage);
+         mNumPages++;
+         while ((int)mPages.size() < mNumPages)
          {
-            switch (hitCell->mType)
-            {
-               case CellType::kRotaryKnob:
-               case CellType::kSlider:
-                  mDragTrack = i;
-                  mDragCell = hitCell;
-                  mDragStartY = y;
-                  mDragStartVal = hitCell->mValue;
-                  break;
-               case CellType::kButton:
-                  if (hitCell->mTarget)
-                  {
-                     float cur = hitCell->mTarget->GetValue();
-                     hitCell->mTarget->SetValue(cur > 0 ? 0 : 1, gTime);
-                  }
-                  break;
-            }
+            PageData page;
+            int idx = (int)mPages.size();
+            page.mColor = kDefaultPageColors[idx % 8];
+            mPages.push_back(page);
          }
          return;
       }
+      return;
+   }
+
+   // standalone element grid area
+   Cell* hitCell = nullptr;
+   int hitRow = -1, hitCol = -1;
+   if (HitTestElementGrid(x, y, hitCell, &hitRow, &hitCol))
+   {
+      if (mEditMapMode && mMidiController && !right)
+      {
+         CancelCellLearn();
+         mPendingCellLearn = true;
+         mLearnTrack = -1;
+         mLearnCellSlot = -1;
+         mLearnCellType = hitCell->mType;
+         mLearnCellRow = hitRow;
+         mLearnCellCol = hitCol;
+         return;
+      }
+
+      if (right)
+      {
+         mContextTrack = -1;
+         mContextSlot = -1;
+         mContextCell = hitCell;
+         mContextMenu->SetPosition(x + kElemW, y);
+         mContextMenu->SetShowing(true);
+         mContextMenu->TestClick(x + kElemW, y, false);
+      }
+      else
+      {
+         switch (hitCell->mType)
+         {
+            case CellType::kRotaryKnob:
+            case CellType::kSlider:
+               mDragCell = hitCell;
+               mDragStartY = y;
+               mDragStartVal = hitCell->mValue;
+               break;
+            case CellType::kButton:
+               if (hitCell->mTarget)
+               {
+                  float cur = hitCell->mTarget->GetValue();
+                  hitCell->mTarget->SetValue(cur > 0 ? 0 : 1, gTime);
+               }
+               break;
+         }
+      }
+      return;
    }
 }
 
@@ -782,7 +839,7 @@ bool PatternMatrix::MouseMoved(float x, float y)
    float range = mDragCell->mMax - mDragCell->mMin;
    if (range == 0)
       range = 1;
-   float delta = dy / 60.0f * range;
+   float delta = dy / kDragSensitivity * range;
    mDragCell->mValue = ofClamp(mDragStartVal + delta, mDragCell->mMin, mDragCell->mMax);
 
    if (mDragCell->mTarget)
@@ -793,7 +850,6 @@ bool PatternMatrix::MouseMoved(float x, float y)
 
 void PatternMatrix::MouseReleased()
 {
-   mDragTrack = -1;
    mDragCell = nullptr;
 }
 
@@ -804,10 +860,7 @@ void PatternMatrix::StorePattern(int trackIdx, int slot)
    if (trackIdx < 0 || trackIdx >= mNumTracks || slot < 0 || slot >= mNumSlots)
       return;
    if (PatternSave(trackIdx, slot))
-   {
       mTracks[trackIdx].mCurrentPattern = slot;
-      mTracks[trackIdx].mQueuedPattern = -1;
-   }
 }
 
 void PatternMatrix::LoadPattern(int trackIdx, int slot)
@@ -815,10 +868,7 @@ void PatternMatrix::LoadPattern(int trackIdx, int slot)
    if (trackIdx < 0 || trackIdx >= mNumTracks || slot < 0 || slot >= mNumSlots)
       return;
    if (PatternLoad(trackIdx, slot))
-   {
       mTracks[trackIdx].mCurrentPattern = slot;
-      mTracks[trackIdx].mQueuedPattern = -1;
-   }
 }
 
 // --- sequencer dispatch helpers ---
@@ -1056,32 +1106,45 @@ void PatternMatrix::ApplyBinding(const MidiBinding& binding, float value)
       return;
    }
 
-   if (binding.mTrack < 0 || binding.mTrack >= mNumTracks)
-      return;
-   auto& track = mTracks[binding.mTrack];
-
+   // Element grid cell (standalone global grid, mTrack == -1)
    Cell* cell = nullptr;
-   switch (binding.mCellType)
+   if (binding.mTrack >= 0)
    {
-      case CellType::kRotaryKnob:
-         if (binding.mRow < (int)track.mRotaryGrid.size() && binding.mCol < (int)track.mRotaryGrid[binding.mRow].size())
-            cell = &track.mRotaryGrid[binding.mRow][binding.mCol];
-         break;
-      case CellType::kSlider:
-         if (binding.mRow < (int)track.mSliderGrid.size() && binding.mCol < (int)track.mSliderGrid[binding.mRow].size())
-            cell = &track.mSliderGrid[binding.mRow][binding.mCol];
-         break;
-      case CellType::kButton:
-         if (binding.mRow < (int)track.mButtonGrid.size() && binding.mCol < (int)track.mButtonGrid[binding.mRow].size())
-            cell = &track.mButtonGrid[binding.mRow][binding.mCol];
-         break;
+      // Per-track element bindings no longer supported in rev 6+
+      return;
+   }
+   else
+   {
+      switch (binding.mCellType)
+      {
+         case CellType::kRotaryKnob:
+            if (binding.mRow < (int)mRotaryGrid.size() && binding.mCol < (int)mRotaryGrid[binding.mRow].size())
+               cell = &mRotaryGrid[binding.mRow][binding.mCol];
+            break;
+         case CellType::kSlider:
+            if (binding.mRow < (int)mSliderGrid.size() && binding.mCol < (int)mSliderGrid[binding.mRow].size())
+               cell = &mSliderGrid[binding.mRow][binding.mCol];
+            break;
+         case CellType::kButton:
+            if (binding.mRow < (int)mButtonGrid.size() && binding.mCol < (int)mButtonGrid[binding.mRow].size())
+               cell = &mButtonGrid[binding.mRow][binding.mCol];
+            break;
+      }
    }
 
    if (cell)
    {
-      cell->mValue = ofClamp(value, cell->mMin, cell->mMax);
-      if (cell->mTarget)
-         cell->mTarget->SetValue(cell->mValue, gTime);
+      if (cell->mType == CellType::kButton && cell->mTarget)
+      {
+         if (value > 0.5f)
+            cell->mTarget->SetValue(cell->mTarget->GetValue() > 0 ? 0 : 1, gTime);
+      }
+      else
+      {
+         cell->mValue = ofClamp(value, cell->mMin, cell->mMax);
+         if (cell->mTarget)
+            cell->mTarget->SetValue(cell->mValue, gTime);
+      }
    }
 }
 
@@ -1184,8 +1247,12 @@ void PatternMatrix::DropdownUpdated(DropdownList* list, int oldVal, double time)
 
       if (mContextTrack < 0 || mContextTrack >= mNumTracks)
       {
-         mContextAction = (int)ContextAction::kNone;
-         return;
+         // Allow element cell actions (remove/bind) even without a valid track
+         if (action != ContextAction::kRemoveElement && action != ContextAction::kBindElement)
+         {
+            mContextAction = (int)ContextAction::kNone;
+            return;
+         }
       }
 
         switch (action)
@@ -1278,6 +1345,90 @@ void PatternMatrix::DropdownUpdated(DropdownList* list, int oldVal, double time)
    }
 }
 
+// --- page management ---
+
+void PatternMatrix::InitPages()
+{
+   if (!mPages.empty())
+      return;
+
+   mPages.clear();
+   for (int i = 0; i < mNumPages; ++i)
+   {
+      PageData page;
+      page.mColor = kDefaultPageColors[i % 8];
+      mPages.push_back(page);
+   }
+   mCurrentPage = 0;
+}
+
+void PatternMatrix::SnapshotPage(int pageIdx)
+{
+   if (pageIdx < 0 || pageIdx >= (int)mPages.size())
+      return;
+
+   PageData& page = mPages[pageIdx];
+   for (int i = 0; i < mNumTracks; ++i)
+   {
+      page.mCurrentPattern[i] = mTracks[i].mCurrentPattern;
+      for (int s = 0; s < mNumSlots; ++s)
+      {
+         std::vector<char> blob;
+         if (PatternGetData(i, s, blob))
+            page.mPatternData[i][s] = std::move(blob);
+         else
+            page.mPatternData[i][s].clear();
+      }
+   }
+   // clear unused tracks
+   for (int i = mNumTracks; i < kMaxTracks; ++i)
+   {
+      page.mCurrentPattern[i] = -1;
+      for (int s = 0; s < kMaxSlots; ++s)
+         page.mPatternData[i][s].clear();
+   }
+}
+
+void PatternMatrix::RestorePage(int pageIdx)
+{
+   if (pageIdx < 0 || pageIdx >= (int)mPages.size())
+      return;
+
+   PageData& page = mPages[pageIdx];
+   for (int i = 0; i < mNumTracks; ++i)
+   {
+      for (int s = 0; s < mNumSlots; ++s)
+      {
+         if (!page.mPatternData[i][s].empty())
+            PatternSetData(i, s, page.mPatternData[i][s]);
+         else
+         {
+            std::vector<char> empty;
+            PatternSetData(i, s, empty);
+         }
+      }
+      mTracks[i].mCurrentPattern = -1;
+      if (page.mCurrentPattern[i] >= 0 && page.mCurrentPattern[i] < mNumSlots)
+      {
+         if (!page.mPatternData[i][page.mCurrentPattern[i]].empty())
+         {
+            mTracks[i].mCurrentPattern = page.mCurrentPattern[i];
+            PatternLoad(i, page.mCurrentPattern[i]);
+         }
+      }
+   }
+}
+
+void PatternMatrix::SwitchPage(int pageIdx)
+{
+   if (pageIdx < 0 || pageIdx >= (int)mPages.size() || pageIdx == mCurrentPage)
+      return;
+
+   SnapshotPage(mCurrentPage);
+   mCurrentPage = pageIdx;
+   RestorePage(pageIdx);
+}
+
 void PatternMatrix::CheckboxUpdated(Checkbox* checkbox, double time)
 {
    if (checkbox == mDockCheckbox)
@@ -1305,6 +1456,7 @@ void PatternMatrix::LoadLayout(const ofxJSONElement& moduleInfo)
 {
    mModuleSaveData.LoadInt("numtracks", moduleInfo, 4, 1, kMaxTracks, K(isTextField));
    mModuleSaveData.LoadInt("numslots", moduleInfo, 8, 1, kMaxSlots, K(isTextField));
+   mModuleSaveData.LoadInt("numpages", moduleInfo, 1, 1, kMaxPages, K(isTextField));
 
    mModuleSaveData.LoadInt("rotarycols", moduleInfo, 0, 0, 8, K(isTextField));
    mModuleSaveData.LoadInt("rotaryrows", moduleInfo, 0, 0, 8, K(isTextField));
@@ -1320,6 +1472,7 @@ void PatternMatrix::SetUpFromSaveData()
 {
    mNumTracks = mModuleSaveData.GetInt("numtracks");
    mNumSlots = mModuleSaveData.GetInt("numslots");
+   mNumPages = mModuleSaveData.GetInt("numpages");
 
    mRotaryCols = mModuleSaveData.GetInt("rotarycols");
    mRotaryRows = mModuleSaveData.GetInt("rotaryrows");
@@ -1330,14 +1483,20 @@ void PatternMatrix::SetUpFromSaveData()
 
    RebuildElementGrids();
    ResolveElementBindings();
+   InitPages();
 }
 
 void PatternMatrix::SaveState(FileStreamOut& out)
 {
-      IDrawableModule::SaveState(out);
+   IDrawableModule::SaveState(out);
 
    out << mNumTracks;
    out << mNumSlots;
+
+   // rev 7+ : save current page state snapshot first
+   SnapshotPage(mCurrentPage);
+
+   // track names
    for (int i = 0; i < kMaxTracks; ++i)
       out << mTracks[i].mModuleName;
 
@@ -1345,37 +1504,58 @@ void PatternMatrix::SaveState(FileStreamOut& out)
    out << mSliderCols << mSliderRows;
    out << mButtonCols << mButtonRows;
 
-   // save element bindings per track
-   for (int i = 0; i < kMaxTracks; ++i)
+   // rev 6+ : save standalone global element bindings
+   for (int r = 0; r < (int)mRotaryGrid.size(); ++r)
+      for (int c = 0; c < (int)mRotaryGrid[r].size(); ++c)
+         out << mRotaryGrid[r][c].mTargetPath << mRotaryGrid[r][c].mValue;
+
+   for (int r = 0; r < (int)mSliderGrid.size(); ++r)
+      for (int c = 0; c < (int)mSliderGrid[r].size(); ++c)
+         out << mSliderGrid[r][c].mTargetPath << mSliderGrid[r][c].mValue;
+
+   for (int r = 0; r < (int)mButtonGrid.size(); ++r)
+      for (int c = 0; c < (int)mButtonGrid[r].size(); ++c)
+         out << mButtonGrid[r][c].mTargetPath;
+
+   // MIDI mapping data (rev 4+)
+   out << mMidiControllerName;
+   int numBindings = (int)mMidiBindings.size();
+   out << numBindings;
+   for (const auto& b : mMidiBindings)
    {
-      for (int r = 0; r < (int)mTracks[i].mRotaryGrid.size(); ++r)
-         for (int c = 0; c < (int)mTracks[i].mRotaryGrid[r].size(); ++c)
-            out << mTracks[i].mRotaryGrid[r][c].mTargetPath << mTracks[i].mRotaryGrid[r][c].mValue;
-
-      for (int r = 0; r < (int)mTracks[i].mSliderGrid.size(); ++r)
-         for (int c = 0; c < (int)mTracks[i].mSliderGrid[r].size(); ++c)
-            out << mTracks[i].mSliderGrid[r][c].mTargetPath << mTracks[i].mSliderGrid[r][c].mValue;
-
-      for (int r = 0; r < (int)mTracks[i].mButtonGrid.size(); ++r)
-         for (int c = 0; c < (int)mTracks[i].mButtonGrid[r].size(); ++c)
-            out << mTracks[i].mButtonGrid[r][c].mTargetPath;
+      out << b.mControl;
+      out << b.mChannel;
+      out << b.mTrack;
+      int cellType = (int)b.mCellType;
+      out << cellType;
+      out << b.mRow;
+      out << b.mCol;
+      out << b.mSlot; // rev 5+
    }
 
-    // MIDI mapping data (rev 4+)
-    out << mMidiControllerName;
-    int numBindings = (int)mMidiBindings.size();
-    out << numBindings;
-    for (const auto& b : mMidiBindings)
-    {
-       out << b.mControl;
-       out << b.mChannel;
-       out << b.mTrack;
-       int cellType = (int)b.mCellType;
-       out << cellType;
-       out << b.mRow;
-       out << b.mCol;
-       out << b.mSlot; // rev 5+
-    }
+   // rev 7+ : page data
+   out << mNumPages;
+   out << mCurrentPage;
+   for (int p = 0; p < mNumPages; ++p)
+   {
+      const auto& page = mPages[p];
+      for (int i = 0; i < kMaxTracks; ++i)
+      {
+         out << page.mCurrentPattern[i];
+         for (int s = 0; s < kMaxSlots; ++s)
+         {
+            bool hasData = !page.mPatternData[i][s].empty();
+            out << hasData;
+            if (hasData)
+            {
+               int size = (int)page.mPatternData[i][s].size();
+               out << size;
+               out.WriteGeneric(page.mPatternData[i][s].data(), size);
+            }
+         }
+      }
+      out << page.mColor.r << page.mColor.g << page.mColor.b;
+   }
 }
 
 void PatternMatrix::LoadState(FileStreamIn& in, int rev)
@@ -1385,60 +1565,136 @@ void PatternMatrix::LoadState(FileStreamIn& in, int rev)
 
    in >> mNumTracks;
    in >> mNumSlots;
+   mNumTracks = ofClamp(mNumTracks, 1, kMaxTracks);
+   mNumSlots = ofClamp(mNumSlots, 1, kMaxSlots);
    for (int i = 0; i < kMaxTracks; ++i)
       in >> mTracks[i].mModuleName;
 
-    if (rev >= 3)
-    {
-       in >> mRotaryCols >> mRotaryRows;
-       in >> mSliderCols >> mSliderRows;
-       in >> mButtonCols >> mButtonRows;
-       RebuildElementGrids();
+   if (rev >= 3)
+   {
+      in >> mRotaryCols >> mRotaryRows;
+      in >> mSliderCols >> mSliderRows;
+      in >> mButtonCols >> mButtonRows;
+      RebuildElementGrids();
 
-       for (int i = 0; i < kMaxTracks; ++i)
-       {
-          for (int r = 0; r < (int)mTracks[i].mRotaryGrid.size(); ++r)
-             for (int c = 0; c < (int)mTracks[i].mRotaryGrid[r].size(); ++c)
-                in >> mTracks[i].mRotaryGrid[r][c].mTargetPath >> mTracks[i].mRotaryGrid[r][c].mValue;
+      if (rev >= 6)
+      {
+         // rev 6+ : load standalone global element bindings
+         for (int r = 0; r < (int)mRotaryGrid.size(); ++r)
+            for (int c = 0; c < (int)mRotaryGrid[r].size(); ++c)
+               in >> mRotaryGrid[r][c].mTargetPath >> mRotaryGrid[r][c].mValue;
 
-          for (int r = 0; r < (int)mTracks[i].mSliderGrid.size(); ++r)
-             for (int c = 0; c < (int)mTracks[i].mSliderGrid[r].size(); ++c)
-                in >> mTracks[i].mSliderGrid[r][c].mTargetPath >> mTracks[i].mSliderGrid[r][c].mValue;
+         for (int r = 0; r < (int)mSliderGrid.size(); ++r)
+            for (int c = 0; c < (int)mSliderGrid[r].size(); ++c)
+               in >> mSliderGrid[r][c].mTargetPath >> mSliderGrid[r][c].mValue;
 
-          for (int r = 0; r < (int)mTracks[i].mButtonGrid.size(); ++r)
-             for (int c = 0; c < (int)mTracks[i].mButtonGrid[r].size(); ++c)
-                in >> mTracks[i].mButtonGrid[r][c].mTargetPath;
-       }
+         for (int r = 0; r < (int)mButtonGrid.size(); ++r)
+            for (int c = 0; c < (int)mButtonGrid[r].size(); ++c)
+               in >> mButtonGrid[r][c].mTargetPath;
+      }
+      else
+      {
+         // rev 3-5 : skip per-track element data
+         for (int i = 0; i < kMaxTracks; ++i)
+         {
+            for (int r = 0; r < (int)mRotaryGrid.size(); ++r)
+               for (int c = 0; c < (int)mRotaryGrid[r].size(); ++c)
+               {
+                  std::string path;
+                  float val;
+                  in >> path >> val;
+               }
 
-       if (rev >= 4)
-       {
-          std::string controllerName;
-          in >> controllerName;
-          SetMidiController(controllerName);
-          mMidiControllerDropdown->SetShowing(false);
+            for (int r = 0; r < (int)mSliderGrid.size(); ++r)
+               for (int c = 0; c < (int)mSliderGrid[r].size(); ++c)
+               {
+                  std::string path;
+                  float val;
+                  in >> path >> val;
+               }
 
-          int numBindings;
-          in >> numBindings;
-           mMidiBindings.clear();
-           for (int i = 0; i < numBindings; ++i)
-           {
-              MidiBinding b;
-              int cellType;
-              in >> b.mControl;
-              in >> b.mChannel;
-              in >> b.mTrack;
-              in >> cellType;
-              b.mCellType = (CellType)cellType;
-              in >> b.mRow;
-              in >> b.mCol;
-              if (rev >= 5)
-                 in >> b.mSlot;
-              else
-                 b.mSlot = -1;
-              mMidiBindings.push_back(b);
-           }
-       }
-    }
+            for (int r = 0; r < (int)mButtonGrid.size(); ++r)
+               for (int c = 0; c < (int)mButtonGrid[r].size(); ++c)
+               {
+                  std::string path;
+                  in >> path;
+               }
+         }
+      }
+
+      if (rev >= 4)
+      {
+         std::string controllerName;
+         in >> controllerName;
+         SetMidiController(controllerName);
+         mMidiControllerDropdown->SetShowing(false);
+
+         int numBindings;
+         in >> numBindings;
+         mMidiBindings.clear();
+         for (int i = 0; i < numBindings; ++i)
+         {
+            MidiBinding b;
+            int cellType;
+            in >> b.mControl;
+            in >> b.mChannel;
+            in >> b.mTrack;
+            in >> cellType;
+            b.mCellType = (CellType)cellType;
+            in >> b.mRow;
+            in >> b.mCol;
+            if (rev >= 5)
+               in >> b.mSlot;
+            else
+               b.mSlot = -1;
+            mMidiBindings.push_back(b);
+         }
+      }
+   }
+
+   if (rev >= 7)
+   {
+      // load pages
+      int numPages, currentPage;
+      in >> numPages;
+      in >> currentPage;
+      mNumPages = ofClamp(numPages, 1, kMaxPages);
+      mPages.clear();
+      for (int p = 0; p < mNumPages; ++p)
+      {
+         PageData page;
+         for (int i = 0; i < kMaxTracks; ++i)
+         {
+            in >> page.mCurrentPattern[i];
+            for (int s = 0; s < kMaxSlots; ++s)
+            {
+               bool hasData;
+               in >> hasData;
+               if (hasData)
+               {
+                  int size;
+                  in >> size;
+                  page.mPatternData[i][s].resize(size);
+                  in.ReadGeneric(page.mPatternData[i][s].data(), size);
+               }
+               else
+               {
+                  page.mPatternData[i][s].clear();
+               }
+            }
+         }
+         in >> page.mColor.r >> page.mColor.g >> page.mColor.b;
+         mPages.push_back(page);
+      }
+      mCurrentPage = ofClamp(currentPage, 0, mNumPages - 1);
+      RestorePage(mCurrentPage);
+   }
+   else
+   {
+      // rev < 7 : init single default page from current state
+      InitPages();
+      SnapshotPage(0);
+   }
 
    for (int i = 0; i < kMaxTracks; ++i)
       ResolveModulePtr(i);

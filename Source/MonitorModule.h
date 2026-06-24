@@ -64,4 +64,5 @@ private:
 
    static constexpr float kMinWidth = 200;
    static constexpr float kMinHeight = 150;
+
 };

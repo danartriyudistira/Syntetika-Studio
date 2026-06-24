@@ -54,6 +54,7 @@
 #include "Polyrhythms.h"
 #include "Looper.h"
 #include "Rewriter.h"
+#include "MeshInstances3D.h"
 #include "Metronome.h"
 #include "NoteRouter.h"
 #include "NoteLooper.h"
@@ -96,6 +97,9 @@
 #include "SamplerGrid.h"
 #include "SignalGenerator.h"
 #include "Lissajous.h"
+#include "Syntetiscope.h"
+#include "TriggerWaveEffect.h"
+#include "TrigMatrixFX.h"
 #include "DebugAudioSource.h"
 #include "TimerDisplay.h"
 #include "DrumSynth.h"
@@ -114,7 +118,7 @@
 #include "CommentDisplay.h"
 #include "ComboGridController.h"
 #include "DisplayManager.h"
-#include "GLSLShaderModule.h"
+#include "ShaderModule.h"
 #include "ImageLoaderModule.h"
 #include "ImageSequencerModule.h"
 #include "AudioVisualizerModule.h"
@@ -283,7 +287,7 @@
 #include <juce_core/juce_core.h>
 
 #include "PulseRouter.h"
-#include "GLSLShaderModule.h"
+#include "ShaderModule.h"
 
 #define REGISTER(class, name, type) Register(#name, &(class ::Create), &(class ::CanCreate), type, false, false, class ::AcceptsAudio(), class ::AcceptsNotes(), class ::AcceptsPulses());
 #define REGISTER_HIDDEN(class, name, type) Register(#name, &(class ::Create), &(class ::CanCreate), type, true, false, class ::AcceptsAudio(), class ::AcceptsNotes(), class ::AcceptsPulses());
@@ -340,7 +344,11 @@ ModuleFactory::ModuleFactory()
    REGISTER(SustainPedal, sustainpedal, kModuleCategory_Note);
    REGISTER(SamplerGrid, samplergrid, kModuleCategory_Audio);
    REGISTER(SignalGenerator, signalgenerator, kModuleCategory_Synth);
-   REGISTER(Lissajous, lissajous, kModuleCategory_Audio);
+   REGISTER(MeshInstances3D, meshinstances3d, kModuleCategory_Audio);
+    REGISTER(Lissajous, lissajous, kModuleCategory_Audio);
+    REGISTER(Syntetiscope, syntetiscope, kModuleCategory_Audio);
+    REGISTER(TriggerWaveEffect, triggerwave, kModuleCategory_Audio);
+   REGISTER(TrigMatrixFX, trigmatrixfx, kModuleCategory_Visual);
    REGISTER(TimerDisplay, timerdisplay, kModuleCategory_Other);
    REGISTER(DrumSynth, drumsynth, kModuleCategory_Synth);
    //REGISTER(EigenChorder, eigenchorder, kModuleCategory_Note);
@@ -351,7 +359,7 @@ ModuleFactory::ModuleFactory()
    REGISTER(NoteCanvas, notecanvas, kModuleCategory_Instrument);
      REGISTER(CommentDisplay, comment, kModuleCategory_Visual);
      REGISTER(DisplayManager, displaymanager, kModuleCategory_Visual);
-      REGISTER(GLSLShaderModule, glslshader, kModuleCategory_Visual);
+      REGISTER(ShaderModule, shader, kModuleCategory_Visual);
 REGISTER(ImageLoaderModule, imageloader, kModuleCategory_Visual);
 REGISTER(ImageSequencerModule, imagesequencer, kModuleCategory_Visual);
    REGISTER(AudioVisualizerModule, audiovisualizer, kModuleCategory_Visual);

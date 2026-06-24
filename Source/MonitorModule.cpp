@@ -9,25 +9,35 @@
 class MonitorModule::VisualOutputWindow : public juce::DocumentWindow
 {
 public:
-   VisualOutputWindow(MonitorModule* owner)
+   VisualOutputWindow(MonitorModule* owner, bool fullscreen = false)
       : juce::DocumentWindow("Visual Output",
                              juce::Colours::black,
-                             juce::DocumentWindow::minimiseButton | juce::DocumentWindow::closeButton)
+                             fullscreen ? juce::DocumentWindow::TitleBarButtons(0)
+                                        : (juce::DocumentWindow::minimiseButton | juce::DocumentWindow::closeButton))
       , mOwner(owner)
    {
       mImageComponent = new juce::ImageComponent("output");
       mImageComponent->setImage(juce::Image(), juce::RectanglePlacement::stretchToFit);
       setContentOwned(mImageComponent, true);
-      setResizable(true, true);
-      setUsingNativeTitleBar(true);
-      setSize(640, 480);
 
-      if (const auto* dpy = juce::Desktop::getInstance().getDisplays().getDisplayForRect(
-              TheSynth->GetMainComponent()->getScreenBounds()))
+      if (fullscreen)
       {
-         const auto& mainMon = dpy->userArea;
-         setTopLeftPosition(mainMon.getX() + mainMon.getWidth() / 4,
-                            mainMon.getY() + mainMon.getHeight() / 8);
+         setUsingNativeTitleBar(false);
+         setResizable(false, false);
+      }
+      else
+      {
+         setResizable(true, true);
+         setUsingNativeTitleBar(true);
+         setSize(640, 480);
+
+         if (const auto* dpy = juce::Desktop::getInstance().getDisplays().getDisplayForRect(
+                 TheSynth->GetMainComponent()->getScreenBounds()))
+         {
+            const auto& mainMon = dpy->userArea;
+            setTopLeftPosition(mainMon.getX() + mainMon.getWidth() / 4,
+                                mainMon.getY() + mainMon.getHeight() / 8);
+         }
       }
 
       setVisible(true);
@@ -152,7 +162,10 @@ void MonitorModule::DrawModule()
    {
       auto* fbo = mSource->GetFBO();
       if (fbo && fbo->IsValid())
+      {
+         fbo->ReleaseDisplayImage();
          fbo->Draw(3, contentTop, mWidth - 6, contentH);
+      }
    }
    else
    {
@@ -247,17 +260,17 @@ void MonitorModule::OpenWindowForMode(int mode)
 {
    if (mode == kDisplayMode_Popup)
    {
-      mWindow = new VisualOutputWindow(this);
+      mWindow = new VisualOutputWindow(this, false);
    }
    else if (mode == kDisplayMode_FullscreenMain)
    {
-      mWindow = new VisualOutputWindow(this);
+      mWindow = new VisualOutputWindow(this, true);
       if (mWindow)
          mWindow->setFullScreen(true);
    }
    else if (mode == kDisplayMode_FullscreenSecondary)
    {
-      mWindow = new VisualOutputWindow(this);
+      mWindow = new VisualOutputWindow(this, true);
       if (mWindow)
       {
          auto& displays = juce::Desktop::getInstance().getDisplays();

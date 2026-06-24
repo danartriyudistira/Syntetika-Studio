@@ -33,8 +33,16 @@ void ImageSequencerModule::CreateUIControls()
    mNextButton = new ClickButton(this, ">>", 175, 3);
    AddUIControl(mNextButton);
 
-   mFramesPerBeatSlider = new FloatSlider(this, "frames/beat", 3, 20, 90, 15, &mFramesPerBeat, 0.25f, 16);
+   mModeDropdown = new DropdownList(this, "mode", 150, 3, &mMode);
+   mModeDropdown->AddLabel("Sync (FPB)", 0);
+   mModeDropdown->AddLabel("Free (FPS)", 1);
+   AddUIControl(mModeDropdown);
+
+   mFramesPerBeatSlider = new FloatSlider(this, "frames/beat", 3, 20, 90, 15, &mFramesPerBeat, 0.25f, 16, 2);
    AddUIControl(mFramesPerBeatSlider);
+
+   mFpsSlider = new FloatSlider(this, "fps", 100, 20, 70, 15, &mFps, 1, 60, 0);
+   AddUIControl(mFpsSlider);
 
    mOutputCable = new PatchCableSource(this, kConnectionType_Special);
    mOutputCable->SetManualPosition(mWidth, 10);
@@ -57,7 +65,9 @@ void ImageSequencerModule::DrawModule()
    mPlayPauseButton->Draw();
    mPrevButton->Draw();
    mNextButton->Draw();
+   mModeDropdown->Draw();
    mFramesPerBeatSlider->Draw();
+   mFpsSlider->Draw();
 
    float contentTop = 40;
    float contentW = mWidth - 6;
@@ -119,11 +129,23 @@ void ImageSequencerModule::PostRender()
       LoadImageAtIndex(mPendingLoadIndex);
    }
 
-   if (!mPlaying || mImages.empty() || mFramesPerBeat <= 0)
+   if (!mPlaying || mImages.empty())
       return;
 
-   double beatMs = TheTransport->GetDuration(kInterval_4n);
-   double advanceMs = beatMs / mFramesPerBeat;
+   double advanceMs = 0;
+   if (mMode == kMode_FPB)
+   {
+      if (mFramesPerBeat <= 0)
+         return;
+      double beatMs = TheTransport->GetDuration(kInterval_4n);
+      advanceMs = beatMs / mFramesPerBeat;
+   }
+   else
+   {
+      if (mFps <= 0)
+         return;
+      advanceMs = 1000.0 / mFps;
+   }
 
    if (advanceMs <= 0)
       return;
@@ -188,6 +210,10 @@ void ImageSequencerModule::FloatSliderUpdated(FloatSlider* slider, float oldVal,
 {
 }
 
+void ImageSequencerModule::DropdownUpdated(DropdownList* list, int oldVal, double time)
+{
+}
+
 void ImageSequencerModule::GetModuleDimensions(float& width, float& height)
 {
    width = mWidth;
@@ -233,29 +259,6 @@ void ImageSequencerModule::DoScanFolder()
    {
       ImageEntry entry;
       entry.filePath = f.getFullPathName().toStdString();
-
-      auto juceImage = juce::ImageFileFormat::loadFrom(f);
-      if (!juceImage.isValid())
-         continue;
-
-      entry.width = juceImage.getWidth();
-      entry.height = juceImage.getHeight();
-
-      juce::Image::BitmapData bitmapData(juceImage, juce::Image::BitmapData::readOnly);
-      entry.decodedData.resize(entry.width * entry.height * 4);
-      for (int y = 0; y < entry.height; ++y)
-      {
-         for (int x = 0; x < entry.width; ++x)
-         {
-            int si = y * entry.width + x;
-            auto c = bitmapData.getPixelColour(x, y);
-            entry.decodedData[si * 4 + 0] = c.getRed();
-            entry.decodedData[si * 4 + 1] = c.getGreen();
-            entry.decodedData[si * 4 + 2] = c.getBlue();
-            entry.decodedData[si * 4 + 3] = c.getAlpha();
-         }
-      }
-
       mImages.push_back(entry);
    }
 
@@ -274,13 +277,32 @@ void ImageSequencerModule::LoadImageAtIndex(int index)
       return;
 
    auto& entry = mImages[index];
-   if (entry.decodedData.empty() || entry.width <= 0 || entry.height <= 0)
+   juce::File file(entry.filePath);
+   auto juceImage = juce::ImageFileFormat::loadFrom(file);
+   if (!juceImage.isValid())
       return;
 
+   entry.width = juceImage.getWidth();
+   entry.height = juceImage.getHeight();
    mImageWidth = entry.width;
    mImageHeight = entry.height;
 
-   UploadRGBAToFBO(entry.decodedData.data(), mImageWidth, mImageHeight);
+   juce::Image::BitmapData bitmapData(juceImage, juce::Image::BitmapData::readOnly);
+   std::vector<unsigned char> decodeBuf(mImageWidth * mImageHeight * 4);
+   for (int y = 0; y < mImageHeight; ++y)
+   {
+      for (int x = 0; x < mImageWidth; ++x)
+      {
+         int si = y * mImageWidth + x;
+         auto c = bitmapData.getPixelColour(x, y);
+         decodeBuf[si * 4 + 0] = c.getRed();
+         decodeBuf[si * 4 + 1] = c.getGreen();
+         decodeBuf[si * 4 + 2] = c.getBlue();
+         decodeBuf[si * 4 + 3] = c.getAlpha();
+      }
+   }
+
+   UploadRGBAToFBO(decodeBuf.data(), mImageWidth, mImageHeight);
 }
 
 void ImageSequencerModule::UploadRGBAToFBO(unsigned char* data, int w, int h)
@@ -327,6 +349,8 @@ void ImageSequencerModule::SaveState(FileStreamOut& out)
    out << mHeight;
    out << mPlaying;
    out << mFramesPerBeat;
+   out << mMode;
+   out << mFps;
 }
 
 void ImageSequencerModule::LoadState(FileStreamIn& in, int rev)
@@ -340,6 +364,13 @@ void ImageSequencerModule::LoadState(FileStreamIn& in, int rev)
    in >> mFramesPerBeat;
    if (mFramesPerBeatSlider)
       mFramesPerBeatSlider->SetValue(mFramesPerBeat, gTime);
+   if (rev >= 1)
+   {
+      in >> mMode;
+      in >> mFps;
+      if (mFpsSlider)
+         mFpsSlider->SetValue(mFps, gTime);
+   }
    if (mOutputCable)
       mOutputCable->SetManualPosition(mWidth, 10);
    if (!path.empty())
