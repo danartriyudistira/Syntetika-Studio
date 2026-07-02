@@ -237,6 +237,18 @@ target_sources(Syntetika PRIVATE
     GlShaderUtil.h
     MonitorModule.cpp
     MonitorModule.h
+    SpoutModule.cpp
+    SpoutModule.h
+    LissajousOut.cpp
+    LissajousOut.h
+    CastModule.cpp
+    CastModule.h
+    CastChannel.cpp
+    CastChannel.h
+    CastHTTPServer.cpp
+    CastHTTPServer.h
+    SSDPDiscoverer.cpp
+    SSDPDiscoverer.h
     Granulator.cpp
     Granulator.h
     GridController.cpp
@@ -312,8 +324,6 @@ target_sources(Syntetika PRIVATE
     LinnstrumentControl.h
     Lissajous.cpp
     Lissajous.h
-    Syntetiscope.cpp
-    Syntetiscope.h
     TriggerWaveEffect.cpp
     TriggerWaveEffect.h
     TrigMatrixFX.cpp
@@ -343,9 +353,9 @@ target_sources(Syntetika PRIVATE
     MainComponent.cpp
     MathUtils.cpp
     MathUtils.h
-    MeshInstances3D.cpp
-    MeshInstances3D.h
-     Metronome.cpp
+     MeshInstances3D.cpp
+     MeshInstances3D.h
+      Metronome.cpp
      Metronome.h
      ModelDVoice.cpp
      ModelDVoice.h
@@ -942,6 +952,12 @@ elseif (WIN32)
         VS_DEBUGGER_COMMAND           "$<TARGET_FILE:Syntetika>"
         VS_DEBUGGER_ENVIRONMENT       "PATH=%PATH%;${CMAKE_PREFIX_PATH}/bin")
 
+    add_custom_command(TARGET Syntetika POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/libs/Spout2/SpoutLibrary.dll"
+        "$<TARGET_FILE_DIR:Syntetika>"
+        COMMENT "Copying SpoutLibrary.dll to output directory")
+
     # Windows install rules
     install(TARGETS Syntetika
         RUNTIME DESTINATION bin
@@ -971,6 +987,7 @@ target_link_libraries(Syntetika PRIVATE
     syntetika::push2
     syntetika::pybind11
     syntetika::tinyobjloader
+    syntetika::spoutlibrary
     syntetika::xwax
 
     $<$<STREQUAL:${SYNTETIKA_SYSTEM_TUNING_LIBRARY},OFF>:tuning-library>

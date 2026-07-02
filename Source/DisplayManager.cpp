@@ -516,7 +516,7 @@ void DisplayManager::ResolveSources()
       }
    }
 
-   // Method 2: scan all modules for cables targeting THIS module (body drop)
+   // Method 2: scan for cables from other modules targeting us
    std::vector<IDrawableModule*> allModules;
    TheSynth->GetAllModules(allModules);
    IClickable* me = dynamic_cast<IClickable*>(this);
@@ -549,7 +549,7 @@ void DisplayManager::ResolveSources()
 
 void DisplayManager::SaveState(FileStreamOut& out)
 {
-   out << GetModuleSaveStateRev();
+   IDrawableModule::SaveState(out);
 
    out << mGridRows;
    out << mGridCols;
@@ -562,12 +562,34 @@ void DisplayManager::SaveState(FileStreamOut& out)
    out << (int)mCellPriority.size();
    for (int p : mCellPriority)
       out << p;
-
-   SaveStateBase(out);
 }
 
 void DisplayManager::LoadState(FileStreamIn& in, int rev)
 {
+   IDrawableModule::LoadState(in, rev);
+
+   if (rev >= 4)
+   {
+      in >> mGridRows;
+      in >> mGridCols;
+      int loadedActiveCell;
+      in >> loadedActiveCell;
+      in >> mModuleWidth;
+      in >> mModuleHeight;
+      in >> mRootNote;
+      in >> mMidiChannel;
+      in >> mAutoSwitch;
+      int priorityCount;
+      in >> priorityCount;
+      ApplyGridSize();
+      for (int i = 0; i < priorityCount && i < (int)mCellPriority.size(); ++i)
+         in >> mCellPriority[i];
+
+      if (loadedActiveCell >= 0 && loadedActiveCell < mGridRows * mGridCols)
+         mActiveCell = loadedActiveCell;
+      return;
+   }
+
    if (rev >= 2)
    {
       in >> mGridRows;

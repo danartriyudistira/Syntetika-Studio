@@ -4,6 +4,7 @@
 #include "UIControlMacros.h"
 #include "ModularSynth.h"
 #include "VisualFBO.h"
+#include "PatchCableSource.h"
 
 TriggerWaveEffect::TriggerWaveEffect()
 : IAudioProcessor(gBufferSize)
@@ -20,14 +21,21 @@ TriggerWaveEffect::~TriggerWaveEffect()
 
 void TriggerWaveEffect::CreateUIControls()
 {
-   IDrawableModule::CreateUIControls();
-   UIBLOCK0();
+    IDrawableModule::CreateUIControls();
+
+    mVisualCable = new PatchCableSource(this, kConnectionType_Special);
+    mVisualCable->SetColor(IDrawableModule::GetColor(kModuleCategory_Visual));
+    mVisualCable->SetManualSide(PatchCableSource::Side::kRight);
+    mVisualCable->SetManualPosition(mWidth - 8, mHeight / 2);
+    AddPatchCableSource(mVisualCable);
+
+    UIBLOCK0();
    DROPDOWN(mEffectModeDropdown, "mode", &mEffectMode, 50);
    DROPDOWN(mColorDropdown, "color", &mColorSelect, 55);
    UIBLOCK_NEWLINE();
    FLOATSLIDER(mSensitivitySlider, "sensitivity", &mSensitivity, 0.5f, 5.0f);
    FLOATSLIDER(mIntensitySlider, "intensity", &mIntensity, 0.0f, 2.0f);
-   ENDUIBLOCK(mWidth, mHeight);
+    ENDUIBLOCK(mHeight);
 
    mEffectModeDropdown->AddLabel("pulse", 0);
    mEffectModeDropdown->AddLabel("glitch", 1);
@@ -43,8 +51,10 @@ void TriggerWaveEffect::CreateUIControls()
 
 void TriggerWaveEffect::Resize(float w, float h)
 {
-   mWidth = ofClamp(w, 200, 2000);
-   mHeight = ofClamp(h, 150, 1500);
+    mWidth = ofClamp(w, 200, 2000);
+    mHeight = ofClamp(h, 150, 1500);
+    if (mVisualCable)
+       mVisualCable->SetManualPosition(mWidth - 8, mHeight / 2);
 }
 
 void TriggerWaveEffect::Process(double time)
@@ -333,16 +343,10 @@ void TriggerWaveEffect::DrawModule()
    if (Minimized() || IsVisible() == false)
       return;
 
-   if (mFBO && mFBO->IsValid())
-      mFBO->Draw(0, 0, mWidth, mHeight);
+    if (mFBO && mFBO->IsValid())
+       mFBO->Draw(0, 0, mWidth, mHeight);
 
-   ofPushStyle();
-   ofSetColor(80, 80, 80, 100);
-   ofFill();
-   ofRect(0, 0, mWidth, mHeight);
-   ofPopStyle();
-
-   mEffectModeDropdown->Draw();
+    mEffectModeDropdown->Draw();
    mColorDropdown->Draw();
    mSensitivitySlider->Draw();
    mIntensitySlider->Draw();
@@ -372,29 +376,53 @@ VisualFBO* TriggerWaveEffect::GetFBO()
 
 void TriggerWaveEffect::LoadLayout(const ofxJSONElement& moduleInfo)
 {
-   mModuleSaveData.LoadString("target", moduleInfo);
-   mModuleSaveData.LoadFloat("sensitivity", moduleInfo, 1.5f, 0.5f, 5.0f, true);
-   mModuleSaveData.LoadFloat("intensity", moduleInfo, 1.0f, 0.0f, 2.0f, true);
-   mModuleSaveData.LoadInt("mode", moduleInfo, 3, 0, 3, true);
-   mModuleSaveData.LoadInt("color", moduleInfo, 0, 0, 4, true);
+    mModuleSaveData.LoadString("target", moduleInfo);
+    mModuleSaveData.LoadFloat("width", moduleInfo, 500);
+    mModuleSaveData.LoadFloat("height", moduleInfo, 500);
+    mModuleSaveData.LoadFloat("sensitivity", moduleInfo, 1.5f, 0.5f, 5.0f, true);
+    mModuleSaveData.LoadFloat("intensity", moduleInfo, 1.0f, 0.0f, 2.0f, true);
+    mModuleSaveData.LoadInt("mode", moduleInfo, 3, 0, 3, true);
+    mModuleSaveData.LoadInt("color", moduleInfo, 0, 0, 4, true);
 
-   SetUpFromSaveData();
+    SetUpFromSaveData();
 }
 
 void TriggerWaveEffect::SaveLayout(ofxJSONElement& moduleInfo)
 {
-   moduleInfo["target"] = mModuleSaveData.GetString("target");
-   moduleInfo["sensitivity"] = mSensitivity;
-   moduleInfo["intensity"] = mIntensity;
-   moduleInfo["mode"] = mEffectMode;
-   moduleInfo["color"] = mColorSelect;
+    moduleInfo["width"] = mWidth;
+    moduleInfo["height"] = mHeight;
+    moduleInfo["sensitivity"] = mSensitivity;
+    moduleInfo["intensity"] = mIntensity;
+    moduleInfo["mode"] = mEffectMode;
+    moduleInfo["color"] = mColorSelect;
 }
 
 void TriggerWaveEffect::SetUpFromSaveData()
 {
-   SetTarget(TheSynth->FindModule(mModuleSaveData.GetString("target")));
-   mSensitivity = mModuleSaveData.GetFloat("sensitivity");
-   mIntensity = mModuleSaveData.GetFloat("intensity");
-   mEffectMode = mModuleSaveData.GetInt("mode");
-   mColorSelect = mModuleSaveData.GetInt("color");
+    SetTarget(TheSynth->FindModule(mModuleSaveData.GetString("target")));
+    mWidth = mModuleSaveData.GetFloat("width");
+    mHeight = mModuleSaveData.GetFloat("height");
+    mSensitivity = mModuleSaveData.GetFloat("sensitivity");
+    mIntensity = mModuleSaveData.GetFloat("intensity");
+    mEffectMode = mModuleSaveData.GetInt("mode");
+    mColorSelect = mModuleSaveData.GetInt("color");
+}
+
+void TriggerWaveEffect::SaveState(FileStreamOut& out)
+{
+    IDrawableModule::SaveState(out);
+    out << mSensitivity;
+    out << mIntensity;
+    out << mEffectMode;
+    out << mColorSelect;
+}
+
+void TriggerWaveEffect::LoadState(FileStreamIn& in, int rev)
+{
+    IDrawableModule::LoadState(in, rev);
+    if (rev < 1) return;
+    in >> mSensitivity;
+    in >> mIntensity;
+    in >> mEffectMode;
+    in >> mColorSelect;
 }

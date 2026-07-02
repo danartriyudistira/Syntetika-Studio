@@ -97,7 +97,7 @@ void ModuleContainer::DrawUnclipped()
 
 void ModuleContainer::PostRender()
 {
-   for (int i = (int)mModules.size() - 1; i >= 0; --i)
+   for (int i = 0; i < (int)mModules.size(); ++i)
       mModules[i]->PostRender();
 }
 

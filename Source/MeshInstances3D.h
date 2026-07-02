@@ -8,6 +8,7 @@
 #include "ClickButton.h"
 #include "Checkbox.h"
 #include "TextEntry.h"
+#include "PatchCableSource.h"
 
 #include <vector>
 #include <string>
@@ -49,7 +50,7 @@ public:
 
    void SaveState(FileStreamOut& out) override;
    void LoadState(FileStreamIn& in, int rev) override;
-   int GetModuleSaveStateRev() const override { return 8; }
+   int GetModuleSaveStateRev() const override { return 9; }
 
    bool IsEnabled() const override { return mEnabled; }
 
@@ -103,8 +104,15 @@ private:
    int mZeroCrossAccum{ 0 };
    int mZeroCrossCount{ 0 };
 
-   VisualFBO* mFBO{ nullptr };
-   bool mIsSVG{ false };
+   // noise gate: silent when no input (per-buffer RMS)
+   bool mGateEnabled{ true };
+   float mGateThreshold{ 0.005f };
+   float mLastInputRMS{ 0 };
+   bool mLastGateOpen{ false };
+
+    VisualFBO* mFBO{ nullptr };
+    PatchCableSource* mVisualCable{ nullptr };
+    bool mIsSVG{ false };
 
    // 3D rotation
    float mRotX{ 0 };  // degrees, around X axis
@@ -124,6 +132,8 @@ private:
    FloatSlider* mRotZSlider{ nullptr };
    FloatSlider* mPerspectiveSlider{ nullptr };
    Checkbox* mFreqFollowCheckbox{ nullptr };
+   Checkbox* mGateEnabledCheckbox{ nullptr };
+   FloatSlider* mGateThresholdSlider{ nullptr };
 
    int mShapeInt{ 0 };
     // Pre-allocated working buffers (avoid heap alloc per audio callback)

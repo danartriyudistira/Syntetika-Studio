@@ -46,14 +46,23 @@ void SpatialRender::CreateUIControls()
    mRoomDepthSlider = new FloatSlider(this, "room d (cm)", 120, kRow1Y, 110, 15, &mRoomDepth, 100, 2000);
    mRoomHeightSlider = new FloatSlider(this, "room h (cm)", 235, kRow1Y, 110, 15, &mRoomHeight, 50, 1000);
    mSpeakerCountSelector = new DropdownList(this, "speakers", 5, kRow2Y, &mNumSpeakers);
-   mSPLSlider = new FloatSlider(this, "spl (db)", 100, kRow2Y, 110, 15, &mSPL, 70, 120);
+    mSPLSlider = new FloatSlider(this, "spl (db)", 100, kRow2Y, 110, 15, &mSPL, 70, 100);
    mRoomEffectCheckbox = new Checkbox(this, "room fx", 220, kRow2Y, &mRoomEffectEnabled);
    mReverbMixSlider = new FloatSlider(this, "reverb mix", 280, kRow2Y, 100, 15, &mReverbMix, 0, 1);
    mUserXSlider = new FloatSlider(this, "user x (cm)", 5, kRow3Y, 110, 15, &mUserX, -2000, 2000);
-   mUserYSlider = new FloatSlider(this, "user y (cm)", 120, kRow3Y, 110, 15, &mUserY, -2000, 2000);
+    mUserYSlider = new FloatSlider(this, "user y (cm)", 120, kRow3Y, 110, 15, &mUserY, -2000, 2000);
+    mUserZSlider = new FloatSlider(this, "user z (cm)", 235, kRow3Y, 85, 15, &mUserZ, 0, 500);
 
-   mDirectSourceSelector = new DropdownList(this, "dir src", 235, kRow3Y, &mDirectSource);
-   mBinauralSourceSelector = new DropdownList(this, "bin src", 330, kRow3Y, &mBinauralSource);
+    mHRTFEnabledCheckbox = new Checkbox(this, "HRTF", 330, kRow3Y, &mHRTFEnabled);
+    mHRTFQualityDropdown = new DropdownList(this, "hrtfQ", 380, kRow3Y, &mHRTFQuality);
+    mHRTFQualityDropdown->AddLabel("ITD", 0);
+    mHRTFQualityDropdown->AddLabel("ITD+ILD", 1);
+    mHRTFQualityDropdown->AddLabel("Full", 2);
+
+    mHeadRadiusSlider = new FloatSlider(this, "headR", 5, kRow3Y + 18, 85, 15, &mHeadRadius, 5, 15, 2);
+
+    mDirectSourceSelector = new DropdownList(this, "dir src", 100, kRow3Y + 18, &mDirectSource);
+    mBinauralSourceSelector = new DropdownList(this, "bin src", 200, kRow3Y + 18, &mBinauralSource);
 
    mSpeakerCountSelector->AddLabel("2", 2);
    mSpeakerCountSelector->AddLabel("4", 4);
@@ -86,6 +95,16 @@ void SpatialRender::CreateUIControls()
    RebuildDropdowns();
    RebuildSpeakerCables();
    UpdateCablePositions();
+}
+
+static inline float SoftLimit(float x, float knee)
+{
+   float ax = std::fabs(x);
+   if (ax <= knee)
+      return x;
+   float over = (ax - knee) / (1.0f - knee);
+   float compressed = knee + (1.0f - knee) * over / (1.0f + over * 2.0f);
+   return (x > 0.0f) ? compressed : -compressed;
 }
 
 void SpatialRender::Process(double time)
@@ -171,7 +190,7 @@ void SpatialRender::Process(double time)
 
           float dx = src.x - userX;
           float dy = src.y - userY;
-          float dz = src.z - 170.0f;
+           float dz = src.z - mUserZ;
           float dist = std::sqrt(dx * dx + dy * dy + dz * dz);
           float distAttn = 1.0f / (1.0f + dist * 0.002f);
           float objAngle = std::atan2(dy, dx);
@@ -205,38 +224,123 @@ void SpatialRender::Process(double time)
                float spkSplGain = std::pow(10.0f, (spkSPL - 85.0f) / 20.0f);
 
                 mSpeakerSignal[spk][s] += sample * distAttn * vbapGain * splGainVal * spkSplGain * spkDistAttn;
-            }
-         }
-      }
-   }
+             }
 
-   for (int spk = 0; spk < numSpk; ++spk)
-   {
-         int outCh = (spk < numSpk) ? speakerChan[spk] : 0;
-      if (outCh == 0)
-      {
-         float speakerPan = ofClamp(speakerPositions[spk].x / (roomW * 0.4f), -1, 1);
-         float panAngle = (speakerPan + 1.0f) * FPI / 4.0f;
-         float cosPan = std::cos(panAngle);
-         float sinPan = std::sin(panAngle);
-         for (int s = 0; s < bufferSize; ++s)
-         {
-            mBinauralL[s] += mSpeakerSignal[spk][s] * cosPan;
-            mBinauralR[s] += mSpeakerSignal[spk][s] * sinPan;
-         }
-      }
-      else
-      {
-         IAudioReceiver* spkTarget = GetTarget(4 + spk);
-         if (spkTarget)
-         {
-            ChannelBuffer* out = spkTarget->GetBuffer();
-            out->SetNumActiveChannels(1);
-            for (int s = 0; s < bufferSize; ++s)
-               out->GetChannel(0)[s] += mSpeakerSignal[spk][s];
-         }
-      }
-   }
+             // HRTF binaural per-source
+              if (mHRTFEnabled)
+              {
+                 float dx = src.x - userX;
+                 float dy = src.y - userY;
+                 float dz = src.z - mUserZ;
+                 float dist = std::sqrt(dx * dx + dy * dy + dz * dz);
+                  float azimuth = std::atan2(dx, dy); // 0° = FRONT, + = RIGHT
+                  float elevation = std::atan2(dz, std::sqrt(dx * dx + dy * dy));
+                   float headAz = azimuth;
+                   if (headAz > FPI * 0.5f)
+                      headAz = FPI - headAz;
+                   else if (headAz < -FPI * 0.5f)
+                      headAz = -FPI - headAz;
+
+                   float distGain = 1.0f / (1.0f + dist * 0.002f);
+                   float c = 34300.0f;
+                   float cosElev = std::cos(elevation);
+                   float itdSec = (mHeadRadius / c) * (headAz + std::sin(headAz)) * cosElev;
+                   if (dist < 10.0f)
+                      itdSec *= 1.0f + (10.0f - dist) / 10.0f * 0.1f;
+                 float itdAbs = std::fabs(itdSec);
+                 int itdSamp = (int)(itdAbs * gSampleRate);
+                 float itdFrac = (itdAbs * gSampleRate) - itdSamp;
+                 itdSamp = ofClamp(itdSamp, 0, 220);
+
+                       float smp = src.audioBuffer[s] * distGain;
+
+                       int wp = src.hrtf.delayWritePos;
+                       src.hrtf.delayLineL[wp] = smp;
+                       src.hrtf.delayLineR[wp] = smp;
+                       int writtenPos = wp;
+                       wp = (wp + 1) & 255;
+                       src.hrtf.delayWritePos = wp;
+
+                       float smpL, smpR;
+                       if (itdSamp == 0)
+                       {
+                          smpL = src.hrtf.delayLineL[writtenPos];
+                          smpR = src.hrtf.delayLineR[writtenPos];
+                       }
+                       else if (headAz > 0.01f)
+                       {
+                          int rp = (writtenPos - itdSamp) & 255;
+                          int rp2 = (writtenPos - itdSamp - 1) & 255;
+                          smpL = src.hrtf.delayLineL[rp] * (1.0f - itdFrac) + src.hrtf.delayLineL[rp2] * itdFrac;
+                          smpR = src.hrtf.delayLineR[writtenPos];
+                       }
+                       else if (headAz < -0.01f)
+                       {
+                          int rp = (writtenPos - itdSamp) & 255;
+                          int rp2 = (writtenPos - itdSamp - 1) & 255;
+                          smpL = src.hrtf.delayLineL[writtenPos];
+                          smpR = src.hrtf.delayLineR[rp] * (1.0f - itdFrac) + src.hrtf.delayLineR[rp2] * itdFrac;
+                       }
+                       else
+                       {
+                          smpL = smp;
+                          smpR = smp;
+                       }
+
+                       if (mHRTFQuality >= 1)
+                       {
+                          float ildNorm = 2.0f * std::fabs(headAz) / FPI * std::max(0.0f, cosElev);
+                          float ildGain = 1.0f - ildNorm * 0.6f;
+                          if (headAz > 0.01f)
+                             smpL *= ildGain;
+                          else if (headAz < -0.01f)
+                             smpR *= ildGain;
+                       }
+
+                       mBinauralL[s] += smpL;
+                       mBinauralR[s] += smpR;
+                }
+        }
+     }
+     }
+
+     // Speaker binaural fallback (old pan-law, when HRTF disabled)
+    if (!mHRTFEnabled)
+    {
+       for (int spk = 0; spk < numSpk; ++spk)
+       {
+          int outCh = (spk < numSpk) ? speakerChan[spk] : 0;
+          if (outCh == 0)
+          {
+             float speakerPan = ofClamp(speakerPositions[spk].x / (roomW * 0.4f), -1, 1);
+             float panAngle = (speakerPan + 1.0f) * FPI / 4.0f;
+             float cosPan = std::cos(panAngle);
+             float sinPan = std::sin(panAngle);
+             for (int s = 0; s < bufferSize; ++s)
+             {
+                mBinauralL[s] += mSpeakerSignal[spk][s] * cosPan;
+                mBinauralR[s] += mSpeakerSignal[spk][s] * sinPan;
+             }
+          }
+       }
+    }
+
+    // Speaker physical outputs (always)
+    for (int spk = 0; spk < numSpk; ++spk)
+    {
+       int outCh = (spk < numSpk) ? speakerChan[spk] : 0;
+       if (outCh > 0)
+       {
+          IAudioReceiver* spkTarget = GetTarget(4 + spk);
+          if (spkTarget)
+          {
+             ChannelBuffer* out = spkTarget->GetBuffer();
+             out->SetNumActiveChannels(1);
+             for (int s = 0; s < bufferSize; ++s)
+                out->GetChannel(0)[s] += mSpeakerSignal[spk][s];
+          }
+       }
+    }
 
    // Index 0: Direct L
    IAudioReceiver* dirLTarget = GetTarget(0);
@@ -307,7 +411,37 @@ void SpatialRender::Process(double time)
          }
       }
 
-      IAudioReceiver* binLTarget = GetTarget(2);
+       // Master bus peak detection (after all sources + reverb accumulated)
+       float busPeak = 0.001f;
+       for (int s = 0; s < bufferSize; ++s)
+       {
+          busPeak = std::max(busPeak, std::fabs(mBinauralL[s]));
+          busPeak = std::max(busPeak, std::fabs(mBinauralR[s]));
+       }
+
+       // Debug: log binaural peak level every 60 callbacks
+       {
+          static int debugCount = 0;
+          if (++debugCount % 60 == 0)
+          {
+             int hrtfEnabled = mHRTFEnabled ? 1 : 0;
+             float peakDb = 20.0f * log10f(busPeak + 0.000001f);
+             printf("HRTF=%d BinauralPeak=%.4f (%.1fdB) numSpk=%d spl=%.1f\n",
+                hrtfEnabled, busPeak, peakDb, numSpk, spl);
+          }
+       }
+
+       if (busPeak > 0.95f)
+       {
+          float scale = 0.88f / busPeak;
+          for (int s = 0; s < bufferSize; ++s)
+          {
+             mBinauralL[s] *= scale;
+             mBinauralR[s] *= scale;
+          }
+       }
+
+       IAudioReceiver* binLTarget = GetTarget(2);
       if (binLTarget)
       {
          ChannelBuffer* out = binLTarget->GetBuffer();
@@ -655,10 +789,14 @@ void SpatialRender::DrawModule()
    mSPLSlider->Draw();
    mRoomEffectCheckbox->Draw();
    mReverbMixSlider->Draw();
-   mUserXSlider->Draw();
-   mUserYSlider->Draw();
-   mDirectSourceSelector->Draw();
-   mBinauralSourceSelector->Draw();
+    mUserXSlider->Draw();
+    mUserYSlider->Draw();
+    mUserZSlider->Draw();
+    mHRTFEnabledCheckbox->Draw();
+    mHRTFQualityDropdown->Draw();
+    mHeadRadiusSlider->Draw();
+    mDirectSourceSelector->Draw();
+    mBinauralSourceSelector->Draw();
 
    float canvasX = 5;
    float canvasY = (float)kHeaderH;
@@ -1009,9 +1147,13 @@ void SpatialRender::LoadLayout(const ofxJSONElement& moduleInfo)
    mModuleSaveData.LoadFloat("roomheight", moduleInfo, 300.0f);
    mModuleSaveData.LoadInt("numspeakers", moduleInfo, 2, 2, 16);
    mModuleSaveData.LoadFloat("spl", moduleInfo, 85.0f);
-   mModuleSaveData.LoadFloat("userx", moduleInfo, 0.0f);
-   mModuleSaveData.LoadFloat("usery", moduleInfo, -100.0f);
-   mModuleSaveData.LoadBool("roomeffect", moduleInfo, false);
+    mModuleSaveData.LoadFloat("userx", moduleInfo, 0.0f);
+    mModuleSaveData.LoadFloat("usery", moduleInfo, -100.0f);
+    mModuleSaveData.LoadFloat("userz", moduleInfo, 170.0f);
+    mModuleSaveData.LoadFloat("headradius", moduleInfo, 8.75f);
+    mModuleSaveData.LoadBool("hrtfenabled", moduleInfo, true);
+    mModuleSaveData.LoadInt("hrtfquality", moduleInfo, 2, 0, 2);
+    mModuleSaveData.LoadBool("roomeffect", moduleInfo, false);
    mModuleSaveData.LoadFloat("reverbmix", moduleInfo, 0.3f);
    mModuleSaveData.LoadInt("directsource", moduleInfo, -1);
    mModuleSaveData.LoadInt("binaurausource", moduleInfo, -1);
@@ -1046,9 +1188,13 @@ void SpatialRender::SetUpFromSaveData()
    mRoomHeight = mModuleSaveData.GetFloat("roomheight");
    mNumSpeakers = mModuleSaveData.GetInt("numspeakers");
    mSPL = mModuleSaveData.GetFloat("spl");
-   mUserX = mModuleSaveData.GetFloat("userx");
-   mUserY = mModuleSaveData.GetFloat("usery");
-   mRoomEffectEnabled = mModuleSaveData.GetBool("roomeffect");
+    mUserX = mModuleSaveData.GetFloat("userx");
+    mUserY = mModuleSaveData.GetFloat("usery");
+    mUserZ = mModuleSaveData.GetFloat("userz");
+    mHeadRadius = mModuleSaveData.GetFloat("headradius");
+    mHRTFEnabled = mModuleSaveData.GetBool("hrtfenabled");
+    mHRTFQuality = mModuleSaveData.GetInt("hrtfquality");
+    mRoomEffectEnabled = mModuleSaveData.GetBool("roomeffect");
    mReverbMix = mModuleSaveData.GetFloat("reverbmix");
    mDirectSource = mModuleSaveData.GetInt("directsource");
    mBinauralSource = mModuleSaveData.GetInt("binaurausource");

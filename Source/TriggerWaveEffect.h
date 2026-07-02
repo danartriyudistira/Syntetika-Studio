@@ -6,6 +6,7 @@
 #include "Slider.h"
 #include "DropdownList.h"
 #include "Checkbox.h"
+#include "PatchCableSource.h"
 
 #define TRIGGERWAVE_BUFFER_SIZE 4096
 #define TRIGGERWAVE_ENV_HISTORY 256
@@ -36,9 +37,13 @@ public:
 
    void LoadLayout(const ofxJSONElement& moduleInfo) override;
    void SaveLayout(ofxJSONElement& moduleInfo) override;
-   void SetUpFromSaveData() override;
+    void SetUpFromSaveData() override;
 
-   //IVisualSource
+    void SaveState(FileStreamOut& out) override;
+    void LoadState(FileStreamIn& in, int rev) override;
+    int GetModuleSaveStateRev() const override { return 1; }
+
+    //IVisualSource
    VisualFBO* GetFBO() override;
    void PostRender() override;
 
@@ -83,5 +88,6 @@ private:
    int mBeatCount{ 0 };
    float mGlitchSeed{ 0 };
 
-   VisualFBO* mFBO{ nullptr };
+    VisualFBO* mFBO{ nullptr };
+    PatchCableSource* mVisualCable{ nullptr };
 };

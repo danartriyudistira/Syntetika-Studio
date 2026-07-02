@@ -5,7 +5,7 @@
 #include "PatchCableSource.h"
 #include "DropdownList.h"
 
-class MonitorModule : public IDrawableModule, public IDropdownListener
+class MonitorModule : public IDrawableModule, public IDropdownListener, public IVisualSource
 {
 public:
    MonitorModule();
@@ -25,6 +25,8 @@ public:
 
    void PostRepatch(PatchCableSource* cableSource, bool fromUserClick) override;
    void DropdownUpdated(DropdownList* list, int oldVal, double time) override;
+
+   VisualFBO* GetFBO() override;
 
    void LoadLayout(const ofxJSONElement& moduleInfo) override;
    void SaveLayout(ofxJSONElement& moduleInfo) override;
@@ -52,6 +54,7 @@ private:
 
    IVisualSource* mSource{ nullptr };
    PatchCableSource* mInputCable{ nullptr };
+   PatchCableSource* mOutputCable{ nullptr };
 
    DropdownList* mDisplayModeDropdown{ nullptr };
    int mDisplayMode{ kDisplayMode_InModule };

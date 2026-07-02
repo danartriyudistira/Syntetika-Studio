@@ -1,5 +1,5 @@
 ## Goal
-Build audio-reactive 3D/2D visual modules (MeshInstances3D, Syntetiscope, TriggerWaveEffect) with IVisualSource FBO output for MonitorModule compatibility.
+Build audio-reactive 3D/2D visual modules (MeshInstances3D, LissajousOut, TriggerWaveEffect) with IVisualSource FBO output for MonitorModule compatibility.
 
 ## Constraints & Preferences
 - Element grids (rotary/slider/button) are global/standalone, placed to the right of pattern slots
@@ -28,10 +28,10 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, Syntetiscope, Trigge
 - PatternMatrix: pages system — PageData struct (pattern blobs per track+slot + currentPattern + color) , page tabs in bottom bar with colors, "+" button to add pages (max 8), SwitchPage/SnapshotPage/RestorePage, slot colors use page color, rev 7 save/load
 - PatternMatrix: pages store only per-slot pattern data (MIDI mapping, element grids, track assignments remain global)
 
-### Syntetiscope (session 2026-06-24)
-- Source/Syntetiscope.h/.cpp: new module (IAudioProcessor + IDrawableModule + IVisualSource), XY buffer visualization with multi-pass glow rendering, configurable scale/intensity/beam/decay/color/zoom, optional Lissajous overlay
-- Source/ModuleFactory.cpp: REGISTER(Syntetiscope, syntetiscope, kModuleCategory_Audio)
-- Source/CMakeLists.txt: added Syntetiscope.cpp/.h
+### LissajousOut (session 2026-06-24)
+- Source/LissajousOut.h/.cpp: new module (IAudioProcessor + IDrawableModule + IVisualSource), XY buffer visualization with configurable scale/intensity/line-width/decay/color/zoom, optional grid background
+- Source/ModuleFactory.cpp: REGISTER(LissajousOut, lissajousout, kModuleCategory_Audio)
+- Source/CMakeLists.txt: added LissajousOut.cpp/.h
 
 ### MeshInstances3D (session 2026-06-23)
 - libs/CMakeLists.txt: added tinyobjloader subdirectory
@@ -43,13 +43,13 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, Syntetiscope, Trigge
 - Source/ModuleFactory.cpp: registered MeshInstances3D (kModuleCategory_Audio, module name "meshinstances3d")
 
 ### IVisualSource refactor (session 2026-06-24)
-- Syntetiscope: refactored DrawModule() to draw FBO as background then controls, added PostRender() + GetFBO() from IVisualSource
+- LissajousOut: refactored DrawModule() to draw FBO as background then controls, added PostRender() + GetFBO() from IVisualSource
 - MeshInstances3D: refactored DrawModule() to draw FBO as background then controls, added PostRender() + GetFBO() from IVisualSource, inline wireframe preview → PostRender() FBO
 - Both modules: PostRender() renders glow/wireframe to VisualFBO, accessible via GetFBO() for MonitorModule/DisplayManager
 
 ### TriggerWaveEffect (session 2026-06-24)
 - Source/TriggerWaveEffect.h: module declaration (IAudioProcessor + IDrawableModule + IVisualSource), beat detection members, waveform buffer, effect mode state
-- Source/TriggerWaveEffect.cpp: audio pass-through (like Syntetiscope), energy-based beat detection (running RMS average, onset when local > avg * sensitivity), 4 effect modes (pulse/glitch/scanlines/all), HSB→RGB color conversion, FBO rendering via PostRender(), DrawModule() draws FBO then controls
+- Source/TriggerWaveEffect.cpp: audio pass-through (like LissajousOut), energy-based beat detection (running RMS average, onset when local > avg * sensitivity), 4 effect modes (pulse/glitch/scanlines/all), HSB→RGB color conversion, FBO rendering via PostRender(), DrawModule() draws FBO then controls
 - Source/ModuleFactory.cpp: REGISTER(TriggerWaveEffect, triggerwave, kModuleCategory_Audio)
 - Source/CMakeLists.txt: added TriggerWaveEffect.cpp/.h
 
@@ -58,6 +58,17 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, Syntetiscope, Trigge
 - Source/CMakeLists.txt: added GlShaderUtil.cpp/.h to build
 - Source/ShaderModule.cpp: refactored CompileShader() to use GlShaderUtil::CompileAndLink, CleanupShader() to use GlShaderUtil::DeleteProgram, uniform lookups cached via GlShaderUtil::GetUniformLocation
 - Source/MeshInstances3D.cpp: refactored SetupShaders() to use GlShaderUtil::CompileAndLink, removed private CompileShader() method, destructor uses GlShaderUtil::DeleteProgram, uniform lookups cached via GlShaderUtil::GetUniformLocation
+
+### MeshInstances3D noise gate (session 2026-07-02)
+- Added per-buffer RMS noise gate: `mGateEnabled` (checkbox), `mGateThreshold` (slider 0-0.1, default 0.005)
+- Process(): computes `inputRMS = sqrt(sum(s²)/N)` from input buffer; if RMS < threshold, output zeroed via `gateMul`
+- Gate logic: `gateOpen = !mGateEnabled || inputRMS >= mGateThreshold`
+- When gate ON and inData null (no cable), inputRMS stays 0 -> gate closed -> silent
+- When gate OFF, inputRMS forced to 1.0 -> always open
+- `mLastInputRMS` / `mLastGateOpen` stored per-callback for status bar display
+- SaveState rev 9: saves mGateEnabled, mGateThreshold
+- LoadState rev >=9: loads gate params; older revs use defaults (enabled, threshold=0.005)
+- Bugfix: else block was setting inputRMS=1.0 for both `!mGateEnabled` AND `!inData`; fixed with nested if
 
 ## Known Issues
 - tinygltf removed from build (missing nlohmann json.hpp dependency); only OBJ loading supported
@@ -78,10 +89,10 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, Syntetiscope, Trigge
 - **MeshInstances3D standalone module**: registered in ModuleFactory (kModuleCategory_Audio) like Lissajous, not in EffectFactory; uses IAudioProcessor (not IAudioEffect)
 - **OBJ-only 3D loading**: tinyobjloader is header-only with no external dependencies; tinygltf dropped due to missing nlohmann json dependency
 - **OBJ index expansion**: each face vertex is duplicated (positions/normals pushed separately for each index), then sequential indices are generated; wastes memory but correct
-- **Syntetiscope standalone module**: registered in ModuleFactory (kModuleCategory_Audio) like Lissajous; implements IAudioProcessor + IVisualSource for FBO visual output
-- **Syntetiscope multi-pass glow**: 4-passes of thick semi-transparent lines (1x, 3x, 6x, 12x width) simulate Gaussian beam profile without GLSL; open path (ofEndShape(false)) avoids closing diagonal
-- **Syntetiscope zoom as divisor**: effScale = scale / zoom — zoom counterbalances scale for fine adjustment
-- **TriggerWaveEffect standalone module**: registered in ModuleFactory (kModuleCategory_Audio) like Lissajous/Syntetiscope; implements IAudioProcessor + IVisualSource for FBO visual output
+- **LissajousOut standalone module**: registered in ModuleFactory (kModuleCategory_Audio) like Lissajous; implements IAudioProcessor + IVisualSource for FBO visual output
+- **LissajousOut grid background**: optional dark grid + crosshair background, configurable via checkbox
+- **LissajousOut zoom as divisor**: effScale = scale / zoom — zoom counterbalances scale for fine adjustment
+- **TriggerWaveEffect standalone module**: registered in ModuleFactory (kModuleCategory_Audio) like Lissajous/LissajousOut; implements IAudioProcessor + IVisualSource for FBO visual output
 - **TriggerWaveEffect FBO rendering**: DrawModule() draws FBO then controls; PostRender() renders beat-synced effects to VisualFBO, accessible via GetFBO() for MonitorModule/DisplayManager
 - **Beat detection**: simple running-RMS energy-based onset detection (256-sample window), configurable sensitivity threshold, 50ms hold to prevent double-triggers
 

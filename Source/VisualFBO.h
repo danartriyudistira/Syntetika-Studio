@@ -30,6 +30,7 @@ public:
    bool IsValid() const { return mFB != nullptr; }
    NVGcontext* GetNVGContext() const { return mNVG; }
    unsigned int GetTexture() const;
+   void Resize(int width, int height);
 
 private:
    NVGcontext* mNVG{ nullptr };

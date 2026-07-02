@@ -86,6 +86,9 @@ void MonitorModule::CreateUIControls()
    mInputCable = new PatchCableSource(this, kConnectionType_Special);
    AddPatchCableSource(mInputCable);
 
+   mOutputCable = new PatchCableSource(this, kConnectionType_Special);
+   AddPatchCableSource(mOutputCable);
+
    mDisplayModeDropdown = new DropdownList(this, "mode", 3, 2, (int*)&mDisplayMode, 110);
    mDisplayModeDropdown->AddLabel("In Module", kDisplayMode_InModule);
    mDisplayModeDropdown->AddLabel("Popup", kDisplayMode_Popup);
@@ -130,7 +133,7 @@ void MonitorModule::DrawModule()
       mSource = dynamic_cast<IVisualSource*>(target);
    }
 
-   // Method 2: check for cables targeting THIS module (body drop)
+   // Method 2: check for cables from other modules targeting us
    if (!mSource)
    {
       std::vector<IDrawableModule*> allModules;
@@ -245,6 +248,13 @@ void MonitorModule::PostRepatch(PatchCableSource* cableSource, bool fromUserClic
          mSource = nullptr;
       }
    }
+}
+
+VisualFBO* MonitorModule::GetFBO()
+{
+   if (mSource)
+      return mSource->GetFBO();
+   return nullptr;
 }
 
 void MonitorModule::DropdownUpdated(DropdownList* list, int oldVal, double time)

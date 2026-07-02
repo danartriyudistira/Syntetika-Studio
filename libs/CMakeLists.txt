@@ -1,5 +1,6 @@
 add_subdirectory(tinygltf EXCLUDE_FROM_ALL)
 add_subdirectory(tinyobjloader EXCLUDE_FROM_ALL)
+add_subdirectory(Spout2 EXCLUDE_FROM_ALL)
 add_subdirectory(exprtk EXCLUDE_FROM_ALL)
 add_subdirectory(freeverb EXCLUDE_FROM_ALL)
 if(NOT SYNTETIKA_SYSTEM_JSONCPP)

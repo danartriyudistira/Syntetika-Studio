@@ -180,3 +180,18 @@ void VisualFBO::Draw(float x, float y, float w, float h)
    nvgFillPaint(gNanoVG, imgPaint);
    nvgFill(gNanoVG);
 }
+
+void VisualFBO::Resize(int width, int height)
+{
+   if (width == mWidth && height == mHeight)
+      return;
+
+   if (width <= mWidth && height <= mHeight)
+   {
+      mWidth = width;
+      mHeight = height;
+      return;
+   }
+
+   Create(width, height);
+}

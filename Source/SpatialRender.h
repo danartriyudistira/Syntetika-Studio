@@ -47,11 +47,11 @@ public:
    void Resize(float w, float h) override;
 
 private:
-   enum
-   {
-      kRow1Y = 2, kRow2Y = 20, kRow3Y = 38,
-      kHeaderH = 55, kRowH = 18
-   };
+    enum
+    {
+       kRow1Y = 2, kRow2Y = 20, kRow3Y = 38, kRow4Y = 56,
+       kHeaderH = 73, kRowH = 18
+    };
 
    void DrawModule() override;
    void GetModuleDimensions(float& w, float& h) override;
@@ -69,16 +69,25 @@ private:
    ofVec2f PosToCanvas(float x, float y) const;
    ofVec2f CanvasToPos(float cx, float cy) const;
 
-   struct RegisteredSource
-   {
-      SpatialSource* src{ nullptr };
-      bool isInternal{ false };
-      int internalChannel{ 0 };
-      float audioBuffer[4096];
-      int bufferSize{ 0 };
-      float x{ 0.0f }, y{ 0.0f }, z{ 100.0f };
-      bool hasAudio{ false };
-   };
+    struct RegisteredSource
+    {
+       SpatialSource* src{ nullptr };
+       bool isInternal{ false };
+       int internalChannel{ 0 };
+       float audioBuffer[4096];
+       int bufferSize{ 0 };
+       float x{ 0.0f }, y{ 0.0f }, z{ 100.0f };
+       bool hasAudio{ false };
+
+       struct HRTFState
+       {
+          float delayLineL[256]{};
+          float delayLineR[256]{};
+          int delayWritePos{ 0 };
+          float ildLpState{ 0 };
+       };
+       HRTFState hrtf;
+    };
 
    int mNumSpeakers{ 2 };
    std::vector<ofVec2f> mSpeakerPositions;
@@ -88,13 +97,18 @@ private:
    int mDirectSource{ -1 };
    int mBinauralSource{ -1 };
    float mRoomWidth{ 600.0f }, mRoomDepth{ 500.0f }, mRoomHeight{ 300.0f };
-   float mUserX{ 0.0f }, mUserY{ -100.0f };
-   bool mEnabled{ true };
+    float mUserX{ 0.0f }, mUserY{ -100.0f }, mUserZ{ 170.0f };
+    bool mEnabled{ true };
    float mSPL{ 85.0f };
 
-   bool mRoomEffectEnabled{ false };
-   float mReverbMix{ 0.3f };
-   static const int kReverbBufSize = 16384;
+    bool mRoomEffectEnabled{ false };
+    float mReverbMix{ 0.3f };
+
+    bool mHRTFEnabled{ true };
+    float mHeadRadius{ 8.75f };
+    int mHRTFQuality{ 2 };
+
+    static const int kReverbBufSize = 16384;
    float mCombL1[kReverbBufSize]{}, mCombL2[kReverbBufSize]{}, mApL[kReverbBufSize]{};
    float mCombR1[kReverbBufSize]{}, mCombR2[kReverbBufSize]{}, mApR[kReverbBufSize]{};
    int mReverbIdx{ 0 };
@@ -110,11 +124,15 @@ private:
    FloatSlider* mRoomDepthSlider{ nullptr };
    FloatSlider* mRoomHeightSlider{ nullptr };
    DropdownList* mSpeakerCountSelector{ nullptr };
-   FloatSlider* mUserXSlider{ nullptr };
-   FloatSlider* mUserYSlider{ nullptr };
-   Checkbox* mRoomEffectCheckbox{ nullptr };
+    FloatSlider* mUserXSlider{ nullptr };
+    FloatSlider* mUserYSlider{ nullptr };
+    FloatSlider* mUserZSlider{ nullptr };
+    FloatSlider* mHeadRadiusSlider{ nullptr };
+    Checkbox* mRoomEffectCheckbox{ nullptr };
    FloatSlider* mReverbMixSlider{ nullptr };
-   FloatSlider* mSPLSlider{ nullptr };
+    FloatSlider* mSPLSlider{ nullptr };
+    Checkbox* mHRTFEnabledCheckbox{ nullptr };
+    DropdownList* mHRTFQualityDropdown{ nullptr };
 
    DropdownList* mDirectSourceSelector{ nullptr };
    DropdownList* mBinauralSourceSelector{ nullptr };

@@ -4,6 +4,7 @@
 #include "UIControlMacros.h"
 #include "ModularSynth.h"
 #include "VisualFBO.h"
+#include "PatchCableSource.h"
 
 #define TINYOBJLOADER_DISABLE_FAST_FLOAT
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -31,9 +32,14 @@ MeshInstances3D::~MeshInstances3D()
 
 void MeshInstances3D::CreateUIControls()
 {
-   IDrawableModule::CreateUIControls();
+    IDrawableModule::CreateUIControls();
 
-   UIBLOCK0();
+    mVisualCable = new PatchCableSource(this, kConnectionType_Special);
+    mVisualCable->SetColor(IDrawableModule::GetColor(kModuleCategory_Visual));
+    mVisualCable->SetManualSide(PatchCableSource::Side::kRight);
+    AddPatchCableSource(mVisualCable);
+
+    UIBLOCK0();
    DROPDOWN(mShapeDropdown, "shape", &mShapeInt, 40);
    ENDUIBLOCK0();
 
@@ -48,6 +54,8 @@ void MeshInstances3D::CreateUIControls()
    FLOATSLIDER(mFmDepthSlider, "fm depth", &mFmDepth, 0, 1);
    FLOATSLIDER(mAmplifySlider, "amplify", &mAmplify, 0, 3);
    CHECKBOX(mFreqFollowCheckbox, "freq follow", &mFreqFollow);
+   CHECKBOX(mGateEnabledCheckbox, "gate", &mGateEnabled);
+   FLOATSLIDER(mGateThresholdSlider, "gate thresh", &mGateThreshold, 0, 0.1f);
    ENDUIBLOCK0();
 
    UIBLOCK(80, 112, 260);
@@ -77,21 +85,22 @@ void MeshInstances3D::Process(double time)
 {
    PROFILER(MeshInstances3D);
 
-   if (!mEnabled || mPathLen < 2)
-   {
-      SyncBuffers(2);
-      GetBuffer()->Reset();
-      return;
-   }
+    if (!mEnabled || mPathLen < 2)
+    {
+       SyncBuffers(2);
+       GetBuffer()->Reset();
+       return;
+    }
 
-   IAudioReceiver* target = GetTarget();
-   if (target == nullptr)
-   {
-      GetBuffer()->Reset();
-      return;
-   }
+    IAudioReceiver* target = GetTarget();
+    if (target == nullptr)
+    {
+       SyncBuffers(2);
+       GetBuffer()->Reset();
+       return;
+    }
 
-   SyncBuffers(2);
+    SyncBuffers(2);
 
    int bufferSize = GetBuffer()->BufferSize();
    int numChannels = GetBuffer()->NumActiveChannels();
@@ -126,6 +135,27 @@ void MeshInstances3D::Process(double time)
       }
       mSampleCounter = iAbsolute;
    }
+
+   // per-buffer RMS gate: compute input energy, silence output if below threshold
+   float inputRMS = 0;
+   if (mGateEnabled)
+   {
+      if (inData)
+      {
+         for (int i = 0; i < bufferSize; ++i)
+            inputRMS += inData[i] * inData[i];
+         inputRMS = sqrtf(inputRMS / bufferSize);
+      }
+      // else: no cable / no active channels → inputRMS stays 0 → gate closed
+   }
+   else
+   {
+      inputRMS = 1.0f; // gate disabled → always open
+   }
+
+   bool gateOpen = !mGateEnabled || inputRMS >= mGateThreshold;
+   mLastInputRMS = inputRMS;
+   mLastGateOpen = gateOpen;
 
    // build rotation matrix from Euler angles (degrees)
    float rx = mRotX * kDegToRad;
@@ -205,10 +235,11 @@ void MeshInstances3D::Process(double time)
       float lx = projX[idxA] + (projX[idxB] - projX[idxA]) * frac;
       float ly = projY[idxA] + (projY[idxB] - projY[idxA]) * frac;
 
-      outL[i] += lx * mAmplify;
-      outR[i] += ly * mAmplify;
-      vizL[i] = lx * mAmplify;
-      vizR[i] = ly * mAmplify;
+      float gateMul = gateOpen ? 1.0f : 0.0f;
+      outL[i] += lx * mAmplify * gateMul;
+      outR[i] += ly * mAmplify * gateMul;
+      vizL[i] = lx * mAmplify * gateMul;
+      vizR[i] = ly * mAmplify * gateMul;
    }
 
    GetVizBuffer()->WriteChunk(vizL, bufferSize, 0);
@@ -582,18 +613,22 @@ void MeshInstances3D::ButtonClicked(ClickButton* button, double time)
                                 "*.obj;*.svg", true, false, TheSynth->GetFileChooserParent());
       if (chooser.browseForFileToOpen())
       {
-         mModelPath = chooser.getResult().getFullPathName().toStdString();
-         std::string ext = mModelPath.substr(mModelPath.find_last_of('.'));
-         if (ext == ".svg" || ext == ".SVG")
-         {
-            if (LoadModelSVG(mModelPath))
-               mShapeDropdown->SetValue(kSVG, time);
-         }
-         else
-         {
-            if (LoadModelOBJ(mModelPath))
-               mShapeDropdown->SetValue(kCustomOBJ, time);
-         }
+          mModelPath = chooser.getResult().getFullPathName().toStdString();
+          size_t dotPos = mModelPath.find_last_of('.');
+          if (dotPos != std::string::npos)
+          {
+             std::string ext = mModelPath.substr(dotPos);
+             if (ext == ".svg" || ext == ".SVG")
+             {
+                if (LoadModelSVG(mModelPath))
+                   mShapeDropdown->SetValue(kSVG, time);
+             }
+             else
+             {
+                if (LoadModelOBJ(mModelPath))
+                   mShapeDropdown->SetValue(kCustomOBJ, time);
+             }
+          }
       }
    }
 }
@@ -625,18 +660,11 @@ void MeshInstances3D::DrawModule()
 {
    if (Minimized() || IsVisible() == false) return;
 
-   // Draw FBO (contains shape preview from PostRender)
-   if (mFBO && mFBO->IsValid())
-      mFBO->Draw(0, 0, mWidth, mHeight);
+    // Draw FBO (contains shape preview from PostRender)
+    if (mFBO && mFBO->IsValid())
+       mFBO->Draw(0, 0, mWidth, mHeight);
 
-   // Background behind controls area
-   ofPushStyle();
-   ofSetColor(80, 80, 80, 100);
-   ofFill();
-   ofRect(0, 0, mWidth, mHeight);
-   ofPopStyle();
-
-   // Controls on top
+    // Controls on top
    mShapeDropdown->Draw();
    mScanFreqSlider->Draw();
    mFmDepthSlider->Draw();
@@ -646,13 +674,16 @@ void MeshInstances3D::DrawModule()
    mRotZSlider->Draw();
    mPerspectiveSlider->Draw();
    mFreqFollowCheckbox->Draw();
+   mGateEnabledCheckbox->Draw();
+   mGateThresholdSlider->Draw();
    mModelPathEntry->Draw();
    mLoadModelButton->Draw();
 
    // Stats at bottom
    ofPushStyle();
    ofSetColor(200, 200, 200);
-   DrawTextRightJustify("edges: " + ofToString(mNumEdges) + " path: " + ofToString(mPathLen), mWidth - 4, mHeight - 18);
+   std::string gateStr = mGateEnabled ? (mLastGateOpen ? "open" : "CLOSED") : "off";
+   DrawTextRightJustify("gate: " + gateStr + " rms:" + ofToString(mLastInputRMS, 4) + " thresh:" + ofToString(mGateThreshold, 4), mWidth - 4, mHeight - 18);
    ofPopStyle();
 }
 
@@ -751,8 +782,10 @@ VisualFBO* MeshInstances3D::GetFBO()
 
 void MeshInstances3D::Resize(float w, float h)
 {
-   mWidth = w;
-   mHeight = h;
+    mWidth = w;
+    mHeight = h;
+    if (mVisualCable)
+       mVisualCable->SetManualPosition(mWidth - 8, mHeight / 2);
 }
 
 void MeshInstances3D::SaveLayout(ofxJSONElement& moduleInfo)
@@ -765,22 +798,34 @@ void MeshInstances3D::SaveLayout(ofxJSONElement& moduleInfo)
 
 void MeshInstances3D::LoadLayout(const ofxJSONElement& moduleInfo)
 {
-   {
+    {
 #pragma push_macro("LoadString")
 #undef LoadString
-      mModuleSaveData.LoadString("target", moduleInfo);
-      mModuleSaveData.LoadFloat("width", moduleInfo, 360);
-      mModuleSaveData.LoadFloat("height", moduleInfo, 280);
+       mModuleSaveData.LoadString("target", moduleInfo);
+       mModuleSaveData.LoadFloat("width", moduleInfo, 360);
+       mModuleSaveData.LoadFloat("height", moduleInfo, 280);
+       mModuleSaveData.LoadString("modelPath", moduleInfo);
+       mModuleSaveData.LoadInt("shape", moduleInfo, 0, 0, 4);
 #pragma pop_macro("LoadString")
-   }
-   SetUpFromSaveData();
+    }
+    SetUpFromSaveData();
 }
 
 void MeshInstances3D::SetUpFromSaveData()
 {
-   SetTarget(TheSynth->FindModule(mModuleSaveData.GetString("target")));
-   mWidth = mModuleSaveData.GetFloat("width");
-   mHeight = mModuleSaveData.GetFloat("height");
+    SetTarget(TheSynth->FindModule(mModuleSaveData.GetString("target")));
+    mWidth = mModuleSaveData.GetFloat("width");
+    mHeight = mModuleSaveData.GetFloat("height");
+    mModelPath = mModuleSaveData.GetString("modelPath");
+    mShapeInt = mModuleSaveData.GetInt("shape");
+
+    BuiltInShape shape = (BuiltInShape)mShapeInt;
+    if (shape == kSVG && !mModelPath.empty())
+       LoadModelSVG(mModelPath);
+    else if (shape == kCustomOBJ && !mModelPath.empty())
+       LoadModelOBJ(mModelPath);
+    else
+       SelectBuiltInShape(shape);
 }
 
 void MeshInstances3D::SaveState(FileStreamOut& out)
@@ -797,6 +842,8 @@ void MeshInstances3D::SaveState(FileStreamOut& out)
    out << mPerspective;
    out << mFreqFollow;
    out << mIsSVG;
+   out << mGateEnabled;
+   out << mGateThreshold;
 }
 
 void MeshInstances3D::LoadState(FileStreamIn& in, int rev)
@@ -830,7 +877,17 @@ void MeshInstances3D::LoadState(FileStreamIn& in, int rev)
       in >> mIsSVG;
    }
 
-   BuiltInShape shape = (BuiltInShape)mShapeInt;
-   if (shape != kCustomOBJ) SelectBuiltInShape(shape);
-   else if (!mModelPath.empty()) LoadModelOBJ(mModelPath);
+   if (rev >= 9)
+   {
+      in >> mGateEnabled;
+      in >> mGateThreshold;
+   }
+
+    BuiltInShape shape = (BuiltInShape)mShapeInt;
+    if (shape == kSVG && !mModelPath.empty())
+       LoadModelSVG(mModelPath);
+    else if (shape == kCustomOBJ && !mModelPath.empty())
+       LoadModelOBJ(mModelPath);
+    else
+       SelectBuiltInShape(shape);
 }

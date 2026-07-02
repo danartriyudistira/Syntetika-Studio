@@ -97,8 +97,9 @@
 #include "SamplerGrid.h"
 #include "SignalGenerator.h"
 #include "Lissajous.h"
-#include "Syntetiscope.h"
 #include "TriggerWaveEffect.h"
+#include "SpoutModule.h"
+#include "LissajousOut.h"
 #include "TrigMatrixFX.h"
 #include "DebugAudioSource.h"
 #include "TimerDisplay.h"
@@ -125,6 +126,7 @@
 #include "LayerComposition.h"
 
 #include "MonitorModule.h"
+#include "CastModule.h"
 #include "StutterControl.h"
 #include "CircleSequencer.h"
 #ifdef SYNTETIKA_MAC
@@ -344,12 +346,12 @@ ModuleFactory::ModuleFactory()
    REGISTER(SustainPedal, sustainpedal, kModuleCategory_Note);
    REGISTER(SamplerGrid, samplergrid, kModuleCategory_Audio);
    REGISTER(SignalGenerator, signalgenerator, kModuleCategory_Synth);
-   REGISTER(MeshInstances3D, meshinstances3d, kModuleCategory_Audio);
-    REGISTER(Lissajous, lissajous, kModuleCategory_Audio);
-    REGISTER(Syntetiscope, syntetiscope, kModuleCategory_Audio);
+       REGISTER(MeshInstances3D, meshinstances3d, kModuleCategory_Audio);
+       REGISTER(CastModule, caststream, kModuleCategory_Visual);
+     REGISTER(Lissajous, lissajous, kModuleCategory_Audio);
     REGISTER(TriggerWaveEffect, triggerwave, kModuleCategory_Audio);
-   REGISTER(TrigMatrixFX, trigmatrixfx, kModuleCategory_Visual);
-   REGISTER(TimerDisplay, timerdisplay, kModuleCategory_Other);
+    REGISTER(TrigMatrixFX, trigmatrixfx, kModuleCategory_Visual);
+    REGISTER(TimerDisplay, timerdisplay, kModuleCategory_Other);
    REGISTER(DrumSynth, drumsynth, kModuleCategory_Synth);
    //REGISTER(EigenChorder, eigenchorder, kModuleCategory_Note);
    REGISTER(PitchBender, pitchbender, kModuleCategory_Note);
@@ -366,7 +368,9 @@ REGISTER(ImageSequencerModule, imagesequencer, kModuleCategory_Visual);
    REGISTER(LayerComposition, layercomposition, kModuleCategory_Visual);
 
        REGISTER(MonitorModule, monitor, kModuleCategory_Visual);
-     REGISTER(LabelDisplay, label, kModuleCategory_Visual);
+      REGISTER(SpoutModule, spoutoutput, kModuleCategory_Visual);
+      REGISTER(LissajousOut, lissajousout, kModuleCategory_Visual);
+      REGISTER(LabelDisplay, label, kModuleCategory_Visual);
    REGISTER(StutterControl, stutter, kModuleCategory_Audio);
    REGISTER(CircleSequencer, circlesequencer, kModuleCategory_Instrument);
    REGISTER(MidiOutputModule, midioutput, kModuleCategory_Note);
