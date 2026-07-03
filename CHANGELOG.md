@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.1] - 2026-07-03
+
+### Fixed
+- **SpatialRender HRTF**: Nested inner `for(s)` loop removed — root cause of 256-512× binaural amplification overload
+- **SpatialRender brace mismatch**: Mutex scope close restored — build was broken
+- **Dead code removed**: VisualNodeBase (unused), CodeEditorNode (stub), VisualNode.h (empty), Syntetiscope (deleted)
+- **Stale artifacts**: build2/ (270 MB stale build dir), build.log, dist/ (old installer), ignore/ — all deleted
 
 ## [1.3.0] - 2024-12-22
 

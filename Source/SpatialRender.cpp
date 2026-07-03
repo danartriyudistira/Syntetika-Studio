@@ -419,19 +419,7 @@ void SpatialRender::Process(double time)
           busPeak = std::max(busPeak, std::fabs(mBinauralR[s]));
        }
 
-       // Debug: log binaural peak level every 60 callbacks
-       {
-          static int debugCount = 0;
-          if (++debugCount % 60 == 0)
-          {
-             int hrtfEnabled = mHRTFEnabled ? 1 : 0;
-             float peakDb = 20.0f * log10f(busPeak + 0.000001f);
-             printf("HRTF=%d BinauralPeak=%.4f (%.1fdB) numSpk=%d spl=%.1f\n",
-                hrtfEnabled, busPeak, peakDb, numSpk, spl);
-          }
-       }
-
-       if (busPeak > 0.95f)
+        if (busPeak > 0.95f)
        {
           float scale = 0.88f / busPeak;
           for (int s = 0; s < bufferSize; ++s)
