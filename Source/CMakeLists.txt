@@ -780,8 +780,7 @@ target_sources(Syntetika PRIVATE
 
     VisualFBO.cpp
     VisualFBO.h
-    VisualNodeBase.cpp
-    VisualNodeBase.h
+
     VelocityCurve.cpp
     VelocityCurve.h
     VelocityScaler.cpp
