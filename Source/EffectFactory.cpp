@@ -45,6 +45,7 @@
 #include "PitchShiftEffect.h"
 #include "ButterworthFilterEffect.h"
 #include "GainStageEffect.h"
+#include "FormantFilterEffect.h"
 
 EffectFactory::EffectFactory()
 {
@@ -66,7 +67,7 @@ EffectFactory::EffectFactory()
    Register("basiceq", &(EQEffect::Create));
    //Register("audiounit", &(AudioUnitEffect::Create));
    Register("pitchshift", &(PitchShiftEffect::Create));
-   //Register("formant", &(FormantFilterEffect::Create));
+   Register("formant", &(FormantFilterEffect::Create));
    Register("butterworth", &(ButterworthFilterEffect::Create));
    Register("gainstage", &(GainStageEffect::Create));
 }

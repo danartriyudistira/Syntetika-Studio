@@ -100,6 +100,7 @@
 #include "TriggerWaveEffect.h"
 #include "SpoutModule.h"
 #include "LissajousOut.h"
+
 #include "TrigMatrixFX.h"
 #include "DebugAudioSource.h"
 #include "TimerDisplay.h"
@@ -183,6 +184,7 @@
 #include "Splitter.h"
 #include "Panner.h"
 #include "SamplePlayer.h"
+#include "DJPlayer.h"
 #include "AudioSend.h"
 #include "EnvelopeEditor.h"
 #include "EnvelopeModulator.h"
@@ -289,7 +291,6 @@
 #include <juce_core/juce_core.h>
 
 #include "PulseRouter.h"
-#include "ShaderModule.h"
 
 #define REGISTER(class, name, type) Register(#name, &(class ::Create), &(class ::CanCreate), type, false, false, class ::AcceptsAudio(), class ::AcceptsNotes(), class ::AcceptsPulses());
 #define REGISTER_HIDDEN(class, name, type) Register(#name, &(class ::Create), &(class ::CanCreate), type, true, false, class ::AcceptsAudio(), class ::AcceptsNotes(), class ::AcceptsPulses());
@@ -369,8 +370,9 @@ REGISTER(ImageSequencerModule, imagesequencer, kModuleCategory_Visual);
 
        REGISTER(MonitorModule, monitor, kModuleCategory_Visual);
       REGISTER(SpoutModule, spoutoutput, kModuleCategory_Visual);
-      REGISTER(LissajousOut, lissajousout, kModuleCategory_Visual);
-      REGISTER(LabelDisplay, label, kModuleCategory_Visual);
+       REGISTER(LissajousOut, lissajousout, kModuleCategory_Visual);
+
+       REGISTER(LabelDisplay, label, kModuleCategory_Visual);
    REGISTER(StutterControl, stutter, kModuleCategory_Audio);
    REGISTER(CircleSequencer, circlesequencer, kModuleCategory_Instrument);
    REGISTER(MidiOutputModule, midioutput, kModuleCategory_Note);
@@ -418,7 +420,8 @@ REGISTER(ImageSequencerModule, imagesequencer, kModuleCategory_Visual);
     REGISTER(Panner, panner, kModuleCategory_Audio);
      REGISTER(SpatialSource, spatialsource, kModuleCategory_Audio);
      REGISTER(SpatialRender, spatialrender, kModuleCategory_Audio);
-    REGISTER(SamplePlayer, sampleplayer, kModuleCategory_Synth);
+     REGISTER(SamplePlayer, sampleplayer, kModuleCategory_Synth);
+     REGISTER(DJPlayer, djplayer, kModuleCategory_Synth);
    REGISTER(AudioSend, send, kModuleCategory_Audio);
    REGISTER(EnvelopeModulator, envelope, kModuleCategory_Modulator);
    REGISTER(AudioToCV, audiotocv, kModuleCategory_Modulator);

@@ -9,6 +9,12 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, LissajousOut, Trigge
 - 3D model support: OBJ only (no GLTF until nlohmann json is available)
 - MeshInstances3D is a standalone module (kModuleCategory_Audio), not an EffectChain effect
 - Pages: differ only in pattern data stored per slot (MIDI mapping, element grids, track assignments stay global)
+- DJPlayer: Serato DJ clone with Ableton-style warp markers (grid/sync removed, warp is sole timing)
+- DJPlayer: scrollY = nudge, Shift+scrollY = zoom, scrollX = zoom
+- DJPlayer: double-click = create/delete warp markers, right-click = context menu
+- DJPlayer: click-drag always scrubs (never drags markers), double-click manages markers
+- DJPlayer: mSampleBPM = detected BPM, NEVER changes from drag/create/context menu
+- DJPlayer: pre-roll = 2 seconds (kPreRollSeconds = 2.0f)
 
 ## Done
 ### Previous work
@@ -70,6 +76,24 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, LissajousOut, Trigge
 - LoadState rev >=9: loads gate params; older revs use defaults (enabled, threshold=0.005)
 - Bugfix: else block was setting inputRMS=1.0 for both `!mGateEnabled` AND `!inData`; fixed with nested if
 
+### DJPlayer warp-aware waveform (session 2026-07-05)
+- Added "reset warp" button (row 5, next to redo): clears all markers, resets mSampleBPM to detected BPM, undoable
+- **SampleToBeat()/BeatToSample()**: new helpers converting sample↔beat positions using warp markers (piecewise-linear interpolation between markers, extrapolation from outer segments)
+- **DrawRGBWaveform()** rewritten: now takes beat ranges (startBeat, endBeat) instead of sample ranges; for each pixel, maps beat→sample via BeatToSample(), block size adapts to local warp ratio
+- **All visual elements updated to warp-aware mapping**: overview playhead, cue markers, warp markers, tempo grid; zoom pre-roll, playhead, loop overlay, cue markers, warp markers, tempo grid
+- **GetPlayPositionForMouse()** now warp-aware: overview and zoom both map pixel→beat→sample via warp markers
+- **Overview tempo grid**: iterates master beat positions (0,1,2...), maps each to pixel via warp-aware mapping; anchor from first warp marker; downbeats red + bar number, regular beats white
+- **Zoom tempo grid**: same warp-aware approach, beat positions mapped through markers
+- **ResetWarp()**: clears mWarpMarkers, resets mSampleBPM to mDetectedBPM, saves analysis file, undoable
+
+### DJPlayer drag bug fixes (session 2026-07-05)
+- **Warp marker drag feedback loop fixed**: old code used warp-aware GetPlayPositionForMouse() during drag → marker moved → warp changed → mapping changed → erratic jumping; fixed with delta-from-start approach using fixed linear samplesPerPixel
+- **Warp marker drag sort re-find fixed**: saved draggedBeat before sort, then search by beatPos+samplePos after sort
+- **FindNearestWarpMarker tolerance fixed**: was linear samplesPerPixel*10 vs warp-aware clickSample; now pixel-space tolerance (10px) using beat distance
+- **Cue drag tolerance fixed**: same pixel-space tolerance approach as warp markers
+- **Zoom scrub fixed**: was using old linear samplesPerPixel; now warp-aware (compute beat from mouse, BeatToSample, set playhead)
+- **New member variables**: mDragWarpMarkerStartSample, mDragWarpMarkerClickX, mDragWarpMarkerClickSample
+
 ## Known Issues
 - tinygltf removed from build (missing nlohmann json.hpp dependency); only OBJ loading supported
 - InstanceData struct uses float arrays, sizeof(InstanceData) must remain stable for GPU buffer upload
@@ -78,6 +102,7 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, LissajousOut, Trigge
 - Camera update via mCameraAzimuth/mCameraAltitude/mCameraDistance sliders only (no interactive orbit yet)
 - TriggerWaveEffect beat detection is mono (channel 0 only)
 - TriggerWaveEffect uses energy-based detection, no FFT/spectral flux analysis yet
+- DJPlayer: Signalsmith Stretch downloaded but not yet integrated for true time-stretch (needs Process() refactoring)
 
 ## Key Decisions
 - **Elements on the right**: element area occupies a vertical strip to the right of pattern slots, spanning the same Y range as tracks; each grid type (rotary/slider/button) occupies a column band with R/S/B header labels
@@ -95,6 +120,14 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, LissajousOut, Trigge
 - **TriggerWaveEffect standalone module**: registered in ModuleFactory (kModuleCategory_Audio) like Lissajous/LissajousOut; implements IAudioProcessor + IVisualSource for FBO visual output
 - **TriggerWaveEffect FBO rendering**: DrawModule() draws FBO then controls; PostRender() renders beat-synced effects to VisualFBO, accessible via GetFBO() for MonitorModule/DisplayManager
 - **Beat detection**: simple running-RMS energy-based onset detection (256-sample window), configurable sensitivity threshold, 50ms hold to prevent double-triggers
+- **DJPlayer warp replaces grid/sync**: user chose to remove grid system and sync — warp markers become the sole timing method
+- **Always lerp 0.3 for speed blending**: smooth blending over instant snap after sync removal
+- **Warp context menu on right-click**: Ableton-style popup with 3 actions, always available (no warp mode toggle)
+- **Double-click to create/delete warp markers**: click-drag always scrubs, double-click manages markers
+- **mSampleBPM immutable after analysis**: detected BPM never changes from warp operations
+- **Warp-aware waveform rendering**: X-axis is beat time (linear in beats); for each pixel, BeatToSample() converts beat→source sample using warp markers; block size adapts to local warp ratio
+- **Warp marker drag uses fixed linear mapping**: delta-from-start approach avoids feedback loop where moving marker changes warp mapping
+- **Pixel-space tolerance for marker/cue detection**: 10px tolerance using beat distance, consistent across warp ratios
 
 ## Relevant Files
 - Source/PatternMatrix.h: class declaration, global grids, rev 6→7, PageData struct, kMaxSlots=32
@@ -110,3 +143,5 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, LissajousOut, Trigge
 - Source/GlShaderUtil.cpp: implementation
 - libs/CMakeLists.txt: added tinyobjloader subdirectory
 - libs/tinyobjloader/CMakeLists.txt, libs/tinyobjloader/tiny_obj_loader.h: header-only OBJ loader
+- Source/DJPlayer.h: DJPlayer class — WarpMarker struct, SampleToBeat/BeatToSample, warp drag state, UI controls
+- Source/DJPlayer.cpp: warp-aware waveform rendering, drag bug fixes, reset warp, context menu, save/load (rev 11)

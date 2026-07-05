@@ -241,6 +241,7 @@ target_sources(Syntetika PRIVATE
     SpoutModule.h
     LissajousOut.cpp
     LissajousOut.h
+
     CastModule.cpp
     CastModule.h
     CastChannel.cpp
@@ -668,6 +669,8 @@ target_sources(Syntetika PRIVATE
     SampleLayerer.h
     SamplePlayer.cpp
     SamplePlayer.h
+    DJPlayer.cpp
+    DJPlayer.h
     SampleVoice.cpp
     SampleVoice.h
     Sampler.cpp
@@ -842,6 +845,7 @@ endif()
 target_include_directories(Syntetika PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${Python_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/libs/signalsmith-stretch
     )
 
 target_compile_definitions(Syntetika PRIVATE
@@ -865,6 +869,8 @@ target_compile_definitions(Syntetika PRIVATE
 
     JUCE_WASAPI=1
     JUCE_DIRECTSOUND=1
+
+    JUCE_USE_WINRT_MIDI=1
 
     JUCE_PLUGINHOST_VST3=1
     JUCE_PLUGINHOST_VST=$<BOOL:${SYNTETIKA_VST2_SDK_LOCATION}>
@@ -961,6 +967,7 @@ elseif (WIN32)
     install(TARGETS Syntetika
         RUNTIME DESTINATION bin
         BUNDLE DESTINATION .
+        RESOURCE DESTINATION .
     )
     install(DIRECTORY ${CMAKE_SOURCE_DIR}/resource DESTINATION .)
     install(FILES $<TARGET_RUNTIME_DLLS:Syntetika> DESTINATION bin OPTIONAL)
@@ -986,6 +993,7 @@ target_link_libraries(Syntetika PRIVATE
     syntetika::push2
     syntetika::pybind11
     syntetika::tinyobjloader
+    syntetika::keyfinder
     syntetika::spoutlibrary
     syntetika::xwax
 

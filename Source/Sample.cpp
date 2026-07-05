@@ -218,37 +218,37 @@ bool Sample::ConsumeData(double time, ChannelBuffer* out, int size, bool replace
       return false;
    }
 
-   LockDataMutex(true);
-   for (int i = 0; i < size; ++i)
-   {
-      if (time < mStartTime)
-      {
-         if (replace)
-         {
-            for (int ch = 0; ch < out->NumActiveChannels(); ++ch)
-               out->GetChannel(ch)[i] = 0;
-         }
-      }
-      else
-      {
-         for (int ch = 0; ch < out->NumActiveChannels(); ++ch)
-         {
-            int dataChannel = MIN(ch, mData.NumActiveChannels() - 1);
+    LockDataMutex(true);
+    for (int i = 0; i < size; ++i)
+    {
+       if (time < mStartTime)
+       {
+          if (replace)
+          {
+             for (int ch = 0; ch < out->NumActiveChannels(); ++ch)
+                out->GetChannel(ch)[i] = 0;
+          }
+       }
+       else
+       {
+          for (int ch = 0; ch < out->NumActiveChannels(); ++ch)
+          {
+             int dataChannel = MIN(ch, mData.NumActiveChannels() - 1);
 
-            float sample = 0;
-            if (mOffset < end || mLooping)
-               sample = GetInterpolatedSample(mOffset, mData.GetChannel(dataChannel), mNumSamples) * mVolume;
+             float sample = 0;
+             if (mOffset >= 0 && (mOffset < end || mLooping))
+                sample = GetInterpolatedSample(mOffset, mData.GetChannel(dataChannel), mNumSamples) * mVolume;
 
-            if (replace)
-               out->GetChannel(ch)[i] = sample;
-            else
-               out->GetChannel(ch)[i] += sample;
-         }
+             if (replace)
+                out->GetChannel(ch)[i] = sample;
+             else
+                out->GetChannel(ch)[i] += sample;
+          }
 
-         mOffset += mRate * mSampleRateRatio;
-      }
-      time += gInvSampleRateMs;
-   }
+          mOffset += mRate * mSampleRateRatio;
+       }
+       time += gInvSampleRateMs;
+    }
    LockDataMutex(false);
    mPlayMutex.unlock();
 

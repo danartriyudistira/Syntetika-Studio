@@ -46,31 +46,35 @@ bool MidiDevice::ConnectInput(const char* name)
 {
    DisconnectInput();
 
+   ofLog() << "[MIDI] Scanning for input devices...";
    bool found = false;
    auto devices = MidiInput::getAvailableDevices();
    for (int i = 0; i < devices.size(); ++i)
    {
+      ofLog() << "[MIDI]   [" << i << "] " << devices[i].name << "  id=" << devices[i].identifier;
       if (devices[i].name == name)
       {
          mDeviceInInfo = devices[i];
          found = true;
-         break;
       }
    }
 
    if (!found)
    {
+      ofLog() << "[MIDI] Device not found: " << name;
       mIsInputEnabled = false;
       return false;
    }
 
+   ofLog() << "[MIDI] Connecting input: " << name << "  id=" << mDeviceInInfo.identifier;
    auto& deviceManager = TheSynth->GetAudioDeviceManager();
    deviceManager.setMidiInputDeviceEnabled(mDeviceInInfo.identifier, true);
    deviceManager.addMidiInputDeviceCallback(mDeviceInInfo.identifier, this);
 
    mIsInputEnabled = deviceManager.isMidiInputDeviceEnabled(mDeviceInInfo.identifier);
+   ofLog() << "[MIDI] Input enabled: " << (mIsInputEnabled ? "YES" : "NO");
 
-   TheSynth->AddMidiDevice(this); //TODO(Ryan) need better place for this, but constructor is too early
+   TheSynth->AddMidiDevice(this);
 
    return mIsInputEnabled;
 }
@@ -107,17 +111,21 @@ bool MidiDevice::ConnectOutput(const char* name, int channel /*= 1*/)
 bool MidiDevice::ConnectOutput(int index, int channel /*= 1*/)
 {
    mMidiOut.reset();
-   mMidiOut = MidiOutput::openDevice(MidiOutput::getAvailableDevices()[index].identifier);
+   auto devices = MidiOutput::getAvailableDevices();
+   if (index >= 0 && index < devices.size())
+      ofLog() << "[MIDI] Connecting output: " << devices[index].name << "  id=" << devices[index].identifier;
+   mMidiOut = MidiOutput::openDevice(devices[index].identifier);
    if (mMidiOut)
    {
       mMidiOut->startBackgroundThread();
       mDeviceOutInfo = mMidiOut->getDeviceInfo();
+      ofLog() << "[MIDI] Output connected OK";
 
       assert(channel > 0 && channel <= 16);
       mOutputChannel = channel;
       return true;
    }
-
+   ofLog() << "[MIDI] Output connection FAILED";
    return false;
 }
 
@@ -127,7 +135,7 @@ void MidiDevice::DisconnectInput()
    if (mDeviceInInfo.identifier.isNotEmpty())
    {
       deviceManager.setMidiInputDeviceEnabled(mDeviceInInfo.identifier, false);
-      deviceManager.removeMidiInputDeviceCallback(mDeviceOutInfo.identifier, this);
+      deviceManager.removeMidiInputDeviceCallback(mDeviceInInfo.identifier, this);
    }
 }
 
@@ -286,12 +294,12 @@ void MidiDevice::handleIncomingMidiMessage(MidiInput* source, const MidiMessage&
    if (TheSynth->IsReady() == false)
       return;
 
+   if (gPrintMidiInput)
+      ofLog() << "[MIDI IN] " << mDeviceInInfo.name << " " << message.getDescription();
+
    if (mListener)
    {
       MidiDevice::SendMidiMessage(mListener, mDeviceInInfo.name.toRawUTF8(), message);
-
-      if (gPrintMidiInput)
-         ofLog() << mDeviceInInfo.name << " " << message.getDescription();
    }
 }
 
