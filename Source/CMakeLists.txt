@@ -67,6 +67,8 @@ target_sources(Syntetika PRIVATE
     AudioToPulse.h
     Autotalent.cpp
     Autotalent.h
+    BandLimitedOsc.cpp
+    BandLimitedOsc.h
     BandVocoder.cpp
     BandVocoder.h
     BeatBloks.cpp
@@ -174,10 +176,15 @@ target_sources(Syntetika PRIVATE
     DrumPlayer.h
     DrumSynth.cpp
     DrumSynth.h
-    EQEffect.cpp
-    EQEffect.h
-    EQModule.cpp
-    EQModule.h
+     EclipSpatialSource.cpp
+     EclipSpatialSource.h
+     EclipSpatialRender.cpp
+     EclipSpatialRender.h
+      SpatialDataSource.h
+       EQEffect.cpp
+     EQEffect.h
+     EQModule.cpp
+     EQModule.h
     EffectChain.cpp
     EffectChain.h
     EffectFactory.cpp
@@ -229,11 +236,9 @@ target_sources(Syntetika PRIVATE
     GainStageEffect.h
     GateEffect.cpp
     GateEffect.h
-    GlobalControls.cpp
-    GlobalControls.h
-    ShaderModule.cpp
-    ShaderModule.h
-    GlShaderUtil.cpp
+     GlobalControls.cpp
+     GlobalControls.h
+     GlShaderUtil.cpp
     GlShaderUtil.h
     MonitorModule.cpp
     MonitorModule.h
@@ -307,8 +312,14 @@ target_sources(Syntetika PRIVATE
     Kicker.h
     LabelDisplay.cpp
     LabelDisplay.h
+    LadderFilter.cpp
+    LadderFilter.h
     LFO.cpp
     LFO.h
+    VideoDrumSampler.cpp
+    VideoDrumSampler.h
+    VideoPlayerModule.cpp
+    VideoPlayerModule.h
     LFOController.cpp
     LFOController.h
     LaunchpadInterpreter.cpp
@@ -368,14 +379,18 @@ target_sources(Syntetika PRIVATE
     MidiClockIn.h
     MidiClockOut.cpp
     MidiClockOut.h
-    MidiControlChange.cpp
-    MidiControlChange.h
-    MidiController.cpp
+     MidiChannelFilter.cpp
+     MidiChannelFilter.h
+     MidiControlChange.cpp
+     MidiControlChange.h
+     MidiController.cpp
     MidiController.h
     MidiDevice.cpp
     MidiDevice.h
-    MidiOutput.cpp
-    MidiOutput.h
+     MidiOutput.cpp
+     MidiOutput.h
+     MidiPlayer.cpp
+     MidiPlayer.h
     MidiReader.cpp
     MidiReader.h
     Minimap.cpp
@@ -830,16 +845,16 @@ if(SYNTETIKA_PORTABLE)
 endif()
 
 if(WIN32)
-    add_custom_command(TARGET Syntetika POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E echo ""
-        COMMAND ${CMAKE_COMMAND} -E echo "*******************************"
-        COMMAND ${CMAKE_COMMAND} -E echo "  Video playback requires ffmpeg.exe"
-        COMMAND ${CMAKE_COMMAND} -E echo "  Place ffmpeg.exe next to Syntetika.exe"
-        COMMAND ${CMAKE_COMMAND} -E echo "  Download from: https://ffmpeg.org/download.html"
-        COMMAND ${CMAKE_COMMAND} -E echo "  Or install via: winget install ffmpeg"
-        COMMAND ${CMAKE_COMMAND} -E echo "*******************************"
-        COMMAND ${CMAKE_COMMAND} -E echo ""
-        )
+    set(FFMPEG_BIN "${CMAKE_SOURCE_DIR}/../ffmpeg_dev/ffmpeg-master-latest-win64-gpl-shared/bin")
+    if(EXISTS "${FFMPEG_BIN}")
+        file(GLOB FFMPEG_DLLS "${FFMPEG_BIN}/*.dll")
+        if(FFMPEG_DLLS)
+            add_custom_command(TARGET Syntetika POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FFMPEG_DLLS} "$<TARGET_FILE_DIR:Syntetika>"
+                COMMENT "Copying FFmpeg DLLs to output..."
+            )
+        endif()
+    endif()
 endif()
 
 target_include_directories(Syntetika PRIVATE
@@ -994,6 +1009,7 @@ target_link_libraries(Syntetika PRIVATE
     syntetika::pybind11
     syntetika::tinyobjloader
     syntetika::keyfinder
+    foleys_video_engine
     syntetika::spoutlibrary
     syntetika::xwax
 
@@ -1007,6 +1023,7 @@ target_link_libraries(Syntetika PRIVATE
     juce::juce_audio_formats
     juce::juce_audio_processors
     juce::juce_dsp
+    juce::juce_audio_utils
     juce::juce_cryptography
     juce::juce_gui_basics
     juce::juce_opengl

@@ -23,3 +23,6 @@
 	path = libs/exprtk
 	url = https://github.com/ArashPartow/exprtk.git
 	branch = cmake
+[submodule "libs/foleys_video_engine"]
+	path = libs/foleys_video_engine
+	url = https://github.com/ffAudio/foleys_video_engine.git

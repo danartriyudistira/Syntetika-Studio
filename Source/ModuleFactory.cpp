@@ -55,6 +55,8 @@
 #include "Looper.h"
 #include "Rewriter.h"
 #include "MeshInstances3D.h"
+#include "VideoDrumSampler.h"
+#include "VideoPlayerModule.h"
 #include "Metronome.h"
 #include "NoteRouter.h"
 #include "NoteLooper.h"
@@ -98,8 +100,11 @@
 #include "SignalGenerator.h"
 #include "Lissajous.h"
 #include "TriggerWaveEffect.h"
+#include "EclipSpatialRender.h"
+#include "EclipSpatialSource.h"
 #include "SpoutModule.h"
 #include "LissajousOut.h"
+#include "MidiPlayer.h"
 
 #include "TrigMatrixFX.h"
 #include "DebugAudioSource.h"
@@ -120,7 +125,6 @@
 #include "CommentDisplay.h"
 #include "ComboGridController.h"
 #include "DisplayManager.h"
-#include "ShaderModule.h"
 #include "ImageLoaderModule.h"
 #include "ImageSequencerModule.h"
 #include "AudioVisualizerModule.h"
@@ -262,6 +266,7 @@
 #include "NoteSorter.h"
 #include "MPESmoother.h"
 #include "MidiControlChange.h"
+#include "MidiChannelFilter.h"
 #include "MPETweaker.h"
 #include "NoteExpressionRouter.h"
 #include "NoteToggle.h"
@@ -350,8 +355,12 @@ ModuleFactory::ModuleFactory()
        REGISTER(MeshInstances3D, meshinstances3d, kModuleCategory_Audio);
        REGISTER(CastModule, caststream, kModuleCategory_Visual);
      REGISTER(Lissajous, lissajous, kModuleCategory_Audio);
-    REGISTER(TriggerWaveEffect, triggerwave, kModuleCategory_Audio);
-    REGISTER(TrigMatrixFX, trigmatrixfx, kModuleCategory_Visual);
+     REGISTER(TriggerWaveEffect, triggerwave, kModuleCategory_Audio);
+     REGISTER(EclipSpatialRender, eclipspatialrender, kModuleCategory_Audio);
+     REGISTER(EclipSpatialSource, eclipspatialsource, kModuleCategory_Audio);
+      REGISTER(VideoDrumSampler, videodrumsampler, kModuleCategory_Audio);
+      REGISTER(VideoPlayerModule, videoplayer, kModuleCategory_Audio);
+      REGISTER(TrigMatrixFX, trigmatrixfx, kModuleCategory_Visual);
     REGISTER(TimerDisplay, timerdisplay, kModuleCategory_Other);
    REGISTER(DrumSynth, drumsynth, kModuleCategory_Synth);
    //REGISTER(EigenChorder, eigenchorder, kModuleCategory_Note);
@@ -362,7 +371,6 @@ ModuleFactory::ModuleFactory()
    REGISTER(NoteCanvas, notecanvas, kModuleCategory_Instrument);
      REGISTER(CommentDisplay, comment, kModuleCategory_Visual);
      REGISTER(DisplayManager, displaymanager, kModuleCategory_Visual);
-      REGISTER(ShaderModule, shader, kModuleCategory_Visual);
 REGISTER(ImageLoaderModule, imageloader, kModuleCategory_Visual);
 REGISTER(ImageSequencerModule, imagesequencer, kModuleCategory_Visual);
    REGISTER(AudioVisualizerModule, audiovisualizer, kModuleCategory_Visual);
@@ -371,6 +379,7 @@ REGISTER(ImageSequencerModule, imagesequencer, kModuleCategory_Visual);
        REGISTER(MonitorModule, monitor, kModuleCategory_Visual);
       REGISTER(SpoutModule, spoutoutput, kModuleCategory_Visual);
        REGISTER(LissajousOut, lissajousout, kModuleCategory_Visual);
+       REGISTER(MidiPlayer, midiplayer, kModuleCategory_Note);
 
        REGISTER(LabelDisplay, label, kModuleCategory_Visual);
    REGISTER(StutterControl, stutter, kModuleCategory_Audio);
@@ -498,6 +507,7 @@ REGISTER(ImageSequencerModule, imagesequencer, kModuleCategory_Visual);
    REGISTER(NoteRatchet, noteratchet, kModuleCategory_Note);
    REGISTER(MPESmoother, mpesmoother, kModuleCategory_Note);
    REGISTER(MidiControlChange, midicc, kModuleCategory_Note);
+   REGISTER(MidiChannelFilter, midichan, kModuleCategory_Note);
    REGISTER(MPETweaker, mpetweaker, kModuleCategory_Note);
    REGISTER(GridSliders, gridsliders, kModuleCategory_Modulator);
    REGISTER(MultitrackRecorder, multitrackrecorder, kModuleCategory_Other);

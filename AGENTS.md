@@ -9,12 +9,20 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, LissajousOut, Trigge
 - 3D model support: OBJ only (no GLTF until nlohmann json is available)
 - MeshInstances3D is a standalone module (kModuleCategory_Audio), not an EffectChain effect
 - Pages: differ only in pattern data stored per slot (MIDI mapping, element grids, track assignments stay global)
-- DJPlayer: Serato DJ clone with Ableton-style warp markers (grid/sync removed, warp is sole timing)
+- DJPlayer: Serato DJ clone, fokus pada BPM sync + CUE saja (warp dihapus)
 - DJPlayer: scrollY = nudge, Shift+scrollY = zoom, scrollX = zoom
-- DJPlayer: double-click = create/delete warp markers, right-click = context menu
-- DJPlayer: click-drag always scrubs (never drags markers), double-click manages markers
-- DJPlayer: mSampleBPM = detected BPM, NEVER changes from drag/create/context menu
+- DJPlayer: click-drag always scrubs
+- DJPlayer: mSampleBPM = detected BPM, immutable
 - DJPlayer: pre-roll = 2 seconds (kPreRollSeconds = 2.0f)
+
+## Performance Decisions (session 2026-07-08)
+- **ShaderModule**: dihapus — heavy GPU (256M fragment/frame pada shader Julia), tidak esensial
+- **SpatialMonitor**: dihapus — CPU berat (bubble sort, 60+ drawing primitif kepala 3D), redundan dengan EclipSpatialRender::PostRender
+- **DJPlayer warp**: dihapus — warp-aware rendering O(P × M × B) terlalu berat, disederhanakan ke BPM sync + CUE
+- **EclipSpatialRender**: dipertahankan, optimasi nanti (bubble sort → std::sort)
+- **FFTtoAdditive**: dibiarkan (130K ops/buffer masih tolerable)
+- **MeshInstances3D**: dibiarkan, optimasi nanti (double vertex projection di Process + PostRender)
+- **BandVocoder**: dibiarkan
 
 ## Done
 ### Previous work
@@ -62,7 +70,6 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, LissajousOut, Trigge
 ### GlShaderUtil (session 2026-06-23)
 - Source/GlShaderUtil.h/.cpp: created shared utility namespace for GL shader boilerplate — CompileShader, LinkProgram, CompileAndLink (deletes intermediate shaders), DeleteShader/Program (safe null+type-check), GetUniformLocation (cached per program), ClearUniformCache
 - Source/CMakeLists.txt: added GlShaderUtil.cpp/.h to build
-- Source/ShaderModule.cpp: refactored CompileShader() to use GlShaderUtil::CompileAndLink, CleanupShader() to use GlShaderUtil::DeleteProgram, uniform lookups cached via GlShaderUtil::GetUniformLocation
 - Source/MeshInstances3D.cpp: refactored SetupShaders() to use GlShaderUtil::CompileAndLink, removed private CompileShader() method, destructor uses GlShaderUtil::DeleteProgram, uniform lookups cached via GlShaderUtil::GetUniformLocation
 
 ### MeshInstances3D noise gate (session 2026-07-02)
@@ -76,23 +83,37 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, LissajousOut, Trigge
 - LoadState rev >=9: loads gate params; older revs use defaults (enabled, threshold=0.005)
 - Bugfix: else block was setting inputRMS=1.0 for both `!mGateEnabled` AND `!inData`; fixed with nested if
 
-### DJPlayer warp-aware waveform (session 2026-07-05)
-- Added "reset warp" button (row 5, next to redo): clears all markers, resets mSampleBPM to detected BPM, undoable
-- **SampleToBeat()/BeatToSample()**: new helpers converting sample↔beat positions using warp markers (piecewise-linear interpolation between markers, extrapolation from outer segments)
-- **DrawRGBWaveform()** rewritten: now takes beat ranges (startBeat, endBeat) instead of sample ranges; for each pixel, maps beat→sample via BeatToSample(), block size adapts to local warp ratio
-- **All visual elements updated to warp-aware mapping**: overview playhead, cue markers, warp markers, tempo grid; zoom pre-roll, playhead, loop overlay, cue markers, warp markers, tempo grid
-- **GetPlayPositionForMouse()** now warp-aware: overview and zoom both map pixel→beat→sample via warp markers
-- **Overview tempo grid**: iterates master beat positions (0,1,2...), maps each to pixel via warp-aware mapping; anchor from first warp marker; downbeats red + bar number, regular beats white
-- **Zoom tempo grid**: same warp-aware approach, beat positions mapped through markers
-- **ResetWarp()**: clears mWarpMarkers, resets mSampleBPM to mDetectedBPM, saves analysis file, undoable
+### EclipSpatialSource + EclipSpatialRender rename & HRTF (session 2026-07-06)
+- Rename: EclipsaInput → EclipSpatialSource, EclipsaManager → EclipSpatialRender
+- Old files deleted, CMakeLists.txt + ModuleFactory.cpp updated, all references migrated
+- HRTF binaural added to EclipSpatialRender: ITD (Woodworth-Schlosser delay model) + ILD (contralateral attenuation), per-object HRTFState (256-sample delay lines), quality modes (ITD/ITD+ILD/Full)
+- HRTF UI: checkbox enable, quality dropdown, head radius slider
+- Save state rev 3: HRTF params saved/loaded
+- Two spatial systems coexist: EclipSpatialSource→EclipSpatialRender (animasi, occlusion, FBO, HRTF, layout presets) + SpatialSource→SpatialRender (HRTF, VBAP, multi-bus, per-source routing)
 
-### DJPlayer drag bug fixes (session 2026-07-05)
-- **Warp marker drag feedback loop fixed**: old code used warp-aware GetPlayPositionForMouse() during drag → marker moved → warp changed → mapping changed → erratic jumping; fixed with delta-from-start approach using fixed linear samplesPerPixel
-- **Warp marker drag sort re-find fixed**: saved draggedBeat before sort, then search by beatPos+samplePos after sort
-- **FindNearestWarpMarker tolerance fixed**: was linear samplesPerPixel*10 vs warp-aware clickSample; now pixel-space tolerance (10px) using beat distance
-- **Cue drag tolerance fixed**: same pixel-space tolerance approach as warp markers
-- **Zoom scrub fixed**: was using old linear samplesPerPixel; now warp-aware (compute beat from mouse, BeatToSample, set playhead)
-- **New member variables**: mDragWarpMarkerStartSample, mDragWarpMarkerClickX, mDragWarpMarkerClickSample
+### SpatialDataSource + SpatialRender getter (session 2026-07-06)
+- SpatialDataSource.h: shared struct SpatialSourceInfo (x, y, z, volume, colorHue, occlusion, name), SpatialRoomInfo (room dimensions + listener), SpatialSpeakerInfo (position + channel)
+- SpatialRender: added GetNumSpatialSources() + GetSpatialSourceInfo() + GetSpatialRoomInfo() + GetSpeakerInfo() public getters (thread-safe via mutex)
+- EclipSpatialRender: added GetNumSpatialSources() + GetSpatialSourceInfo() + GetSpatialRoomInfo() + GetNumSpeakers() + GetSpeakerInfo() wrappers
+
+### ShaderModule + SpatialMonitor removal (session 2026-07-08)
+- ShaderModule.h/.cpp deleted, CMakeLists.txt + ModuleFactory.cpp updated
+- SpatialMonitor.h/.cpp deleted, CMakeLists.txt + ModuleFactory.cpp updated
+- Reason: performance bottlenecks (ShaderModule=heavy GPU, SpatialMonitor=heavy CPU + redundant)
+
+### DJPlayer warp removal (session 2026-07-08)
+- WarpMarkers, SampleToBeat/BeatToSample, warp-aware rendering removed
+- DJPlayer simplified: BPM sync + CUE only
+- Reason: warp-aware O(P × M × B) per-pixel rendering too heavy (~3-5M CPU ops/frame)
+
+### VideoPlayerModule foleys integration (session 2026-07-07)
+- foleys_video_engine compiled as single-translation-unit (CMakeLists.txt fix)
+- FFmpeg 4.x → 8.x API migration (ch_layout, swr_alloc_set_opts2, duration, etc.)
+- avresample.lib pragma removed
+- FOLEYS_USE_OPENGL=0 (OpenGL view not needed)
+- JUCE API fixes: AudioSourceChannelInfo reference, Optional<PositionInfo> getPosition()
+- Bugfix: SetPosition + loop resets mPlayStartTime formula (gTime - mPlayhead/mSpeed)
+- VideoPlayerModule builds with foleys video engine
 
 ## Known Issues
 - tinygltf removed from build (missing nlohmann json.hpp dependency); only OBJ loading supported
@@ -102,7 +123,7 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, LissajousOut, Trigge
 - Camera update via mCameraAzimuth/mCameraAltitude/mCameraDistance sliders only (no interactive orbit yet)
 - TriggerWaveEffect beat detection is mono (channel 0 only)
 - TriggerWaveEffect uses energy-based detection, no FFT/spectral flux analysis yet
-- DJPlayer: Signalsmith Stretch downloaded but not yet integrated for true time-stretch (needs Process() refactoring)
+- VideoDrumSampler still uses ffmpeg.exe subprocess (foleys migration pending)
 
 ## Key Decisions
 - **Elements on the right**: element area occupies a vertical strip to the right of pattern slots, spanning the same Y range as tracks; each grid type (rotary/slider/button) occupies a column band with R/S/B header labels
@@ -120,14 +141,10 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, LissajousOut, Trigge
 - **TriggerWaveEffect standalone module**: registered in ModuleFactory (kModuleCategory_Audio) like Lissajous/LissajousOut; implements IAudioProcessor + IVisualSource for FBO visual output
 - **TriggerWaveEffect FBO rendering**: DrawModule() draws FBO then controls; PostRender() renders beat-synced effects to VisualFBO, accessible via GetFBO() for MonitorModule/DisplayManager
 - **Beat detection**: simple running-RMS energy-based onset detection (256-sample window), configurable sensitivity threshold, 50ms hold to prevent double-triggers
-- **DJPlayer warp replaces grid/sync**: user chose to remove grid system and sync — warp markers become the sole timing method
-- **Always lerp 0.3 for speed blending**: smooth blending over instant snap after sync removal
-- **Warp context menu on right-click**: Ableton-style popup with 3 actions, always available (no warp mode toggle)
-- **Double-click to create/delete warp markers**: click-drag always scrubs, double-click manages markers
-- **mSampleBPM immutable after analysis**: detected BPM never changes from warp operations
-- **Warp-aware waveform rendering**: X-axis is beat time (linear in beats); for each pixel, BeatToSample() converts beat→source sample using warp markers; block size adapts to local warp ratio
-- **Warp marker drag uses fixed linear mapping**: delta-from-start approach avoids feedback loop where moving marker changes warp mapping
-- **Pixel-space tolerance for marker/cue detection**: 10px tolerance using beat distance, consistent across warp ratios
+- **DJPlayer BPM sync + CUE only**: warp markers removed, DJPlayer simplified to BPM sync and cue points
+- **ShaderModule deleted**: too GPU-heavy (256M fragmen/frame pada shader Julia)
+- **SpatialMonitor deleted**: CPU-heavy + redundan dengan EclipSpatialRender::PostRender
+- **foleys_video_engine OBJ-only**: only FFmpeg format registered (no OpenGL rendering)
 
 ## Relevant Files
 - Source/PatternMatrix.h: class declaration, global grids, rev 6→7, PageData struct, kMaxSlots=32
@@ -143,5 +160,7 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, LissajousOut, Trigge
 - Source/GlShaderUtil.cpp: implementation
 - libs/CMakeLists.txt: added tinyobjloader subdirectory
 - libs/tinyobjloader/CMakeLists.txt, libs/tinyobjloader/tiny_obj_loader.h: header-only OBJ loader
-- Source/DJPlayer.h: DJPlayer class — WarpMarker struct, SampleToBeat/BeatToSample, warp drag state, UI controls
-- Source/DJPlayer.cpp: warp-aware waveform rendering, drag bug fixes, reset warp, context menu, save/load (rev 11)
+- Source/DJPlayer.h: DJPlayer class — BPM sync + CUE, warp removed
+- Source/DJPlayer.cpp: simplified DJPlayer (BPM sync + CUE only)
+- libs/foleys_video_engine/CMakeLists.txt: foleys static library, single-translation-unit, FOLEYS_USE_OPENGL=0, FFmpeg 8.x APIs
+- Source/VideoPlayerModule.h/.cpp: foleys-based video player (no ffmpeg.exe subprocess)
