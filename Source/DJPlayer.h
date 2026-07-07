@@ -60,13 +60,10 @@ public:
    bool IsEnabled() const override { return mEnabled; }
 
 private:
-    // ── CDJ display helpers ──
-    enum class PitchRange { Six = 0, Ten, Sixteen, Wide };
-    static float PitchRangeToFloat(PitchRange r);
-    static const char* PitchRangeLabel(PitchRange r);
-
-    // ── warp context menu actions ──
-    enum class WarpContextAction { None, StartHere, WarpBPM, WarpStraight };
+     // ── CDJ display helpers ──
+     enum class PitchRange { Six = 0, Ten, Sixteen, Wide };
+     static float PitchRangeToFloat(PitchRange r);
+     static const char* PitchRangeLabel(PitchRange r);
 
    void DrawModule() override;
    void GetModuleDimensions(float& width, float& height) override;
@@ -85,17 +82,15 @@ private:
     float GetZoomStartSeconds() const;
     float GetZoomEndSeconds() const;
     float GetCurrentBPM() const;
-    float GetSamplesPerBeat() const;
-    int FindNearestWarpMarker(float x, float y) const;
-    float SampleToBeat(int sample) const;
-    int BeatToSample(float beat) const;
-    void SetAutoLoop(int beats);
+     float GetSamplesPerBeat() const;
+     float SampleToBeat(int sample) const;
+     int BeatToSample(float beat) const;
+     void SetAutoLoop(int beats);
     void AnalyzeBPM();
     void AnalyzeKey();
     std::string GetKeyName() const;
-    void DrawRGBWaveform(float x, float y, float w, float h, float startBeat, float endBeat);
-    void ExecuteWarpContextAction(WarpContextAction action, int samplePos);
-    std::string GetAnalysisFilePath() const;
+     void DrawRGBWaveform(float x, float y, float w, float h, int startSample = 0, int numSamples = -1);
+     std::string GetAnalysisFilePath() const;
     void LoadAnalysisFile();
       void SaveAnalysisFile();
 
@@ -161,50 +156,11 @@ private:
    DropdownList* mCueModeDropdown{ nullptr };
    ClickButton* mHotCueButtons[8]{};
    ClickButton* mClearCuesButton{ nullptr };
-   int mActiveHotCue{ 0 };
-    bool mDraggingCue{ false };
-    int mDragCueIndex{ -1 };
+    int mActiveHotCue{ 0 };
+     bool mDraggingCue{ false };
+     int mDragCueIndex{ -1 };
 
-    // ── warp markers (Ableton-style audio warp) ──
-    struct WarpMarker {
-       int samplePos{ 0 };     // position in audio (samples)
-       float beatPos{ 0 };     // position in beats (aligned to grid)
-       bool isAnchor{ false }; // first marker = anchor (no adjust)
-    };
-    std::vector<WarpMarker> mWarpMarkers;
-    bool mDraggingWarpMarker{ false };
-    int mDragWarpMarkerIndex{ -1 };
-    int mDragWarpMarkerStartSample{ 0 };  // marker samplePos at drag start
-    float mDragWarpMarkerClickX{ 0 };     // mouse X at drag start (pixels)
-    int mDragWarpMarkerClickSample{ 0 };  // sample at mouse at drag start
-
-    // ── warp context menu (right-click popup) ──
-    bool mWarpContextMenuVisible{ false };
-    float mWarpContextMenuX{ 0 };
-    float mWarpContextMenuY{ 0 };
-    int mWarpContextClickSample{ 0 };  // sample position of the right-click
-    static constexpr float kWarpMenuWidth{ 200 };
-    static constexpr float kWarpMenuHeight{ 72 };
-    static constexpr float kWarpMenuItemHeight{ 22 };
-
-    // ── warp undo/redo ──
-    std::vector<std::vector<WarpMarker>> mWarpHistory;
-    int mWarpHistoryIndex{ -1 };
-    static constexpr int kWarpMaxHistory{ 50 };
-    ClickButton* mWarpUndoButton{ nullptr };
-    ClickButton* mWarpRedoButton{ nullptr };
-    ClickButton* mWarpResetButton{ nullptr };
-    void SaveWarpState();
-    void UndoWarp();
-    void RedoWarp();
-    void ResetWarp();
-
-    // ── double-click detection ──
-    double mLastClickTime{ 0 };
-    float mLastClickX{ 0 };
-    float mLastClickY{ 0 };
-
-    // ── loop system ──
+     // ── loop system ──
     int mLoopIn{ -1 };
     int mLoopOut{ -1 };
     bool mLoopActive{ false };

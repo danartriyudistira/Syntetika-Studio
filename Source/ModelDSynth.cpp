@@ -16,6 +16,7 @@ ModelDSynth::ModelDSynth()
 , mWriteBuffer(gBufferSize)
 {
    mPolyMgr.Init(kVoiceType_ModelD, &mVoiceParams);
+   mWriteBuffer.SetNumActiveChannels(2);
 }
 
 void ModelDSynth::CreateUIControls()

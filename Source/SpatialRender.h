@@ -7,6 +7,7 @@
 #include "DropdownList.h"
 #include "Transport.h"
 #include "PatchCableSource.h"
+#include "SpatialDataSource.h"
 #include <mutex>
 
 class SpatialSource;
@@ -33,6 +34,8 @@ public:
    void UnregisterSource(SpatialSource* src);
    void NotifySourceMoved(SpatialSource* src);
    void AcceptSourceAudio(SpatialSource* src, float* buffer, int bufferSize);
+   void SetSourceProperties(SpatialSource* src, float volume, float occlusion, int colorHue,
+                            int animMode, float animRate, float animDepth);
 
    void FloatSliderUpdated(FloatSlider* slider, float oldVal, double time) override;
    void DropdownUpdated(DropdownList* list, int oldVal, double time) override;
@@ -45,6 +48,11 @@ public:
    void SetEnabled(bool enabled) override { mEnabled = enabled; }
    bool IsResizable() const override { return true; }
    void Resize(float w, float h) override;
+
+   int GetNumSpatialSources() const;
+   bool GetSpatialSourceInfo(int index, SpatialSourceInfo& out) const;
+   bool GetSpatialRoomInfo(SpatialRoomInfo& out) const;
+   bool GetSpeakerInfo(int index, SpatialSpeakerInfo& out) const;
 
 private:
     enum
@@ -77,6 +85,14 @@ private:
        float audioBuffer[4096];
        int bufferSize{ 0 };
        float x{ 0.0f }, y{ 0.0f }, z{ 100.0f };
+       float baseX{ 0.0f }, baseY{ 0.0f }, baseZ{ 100.0f };
+       float volume{ 1.0f };
+       float occlusion{ 0.0f };
+       int colorHue{ 0 };
+       int animMode{ 0 };
+       float animRate{ 0.5f };
+       float animDepth{ 0.5f };
+       float animPhase{ 0 };
        bool hasAudio{ false };
 
        struct HRTFState

@@ -188,6 +188,39 @@ void SpatialRender::Process(double time)
          if (!src.hasAudio)
             continue;
 
+         // Apply animation offset
+         src.x = src.baseX;
+         src.y = src.baseY;
+         src.z = src.baseZ;
+         if (src.animMode != 0)
+         {
+            src.animPhase += src.animRate * bufferSize / gSampleRate * 2.0f * FPI;
+            if (src.animPhase > FPI * 2)
+               src.animPhase -= FPI * 2;
+            float d = src.animDepth;
+            float p = src.animPhase;
+            switch (src.animMode)
+            {
+            case 1: // orbit
+               src.x = src.baseX + cosf(p) * d * 300;
+               src.z = src.baseZ + sinf(p) * d * 300;
+               break;
+            case 2: // lfo x
+               src.x = src.baseX + sinf(p) * d * 300;
+               break;
+            case 3: // lfo xy
+               src.x = src.baseX + sinf(p) * d * 300;
+               src.y = src.baseY + cosf(p * 0.7f) * d * 150;
+               break;
+            case 4: // lfo xyz
+               src.x = src.baseX + sinf(p) * d * 300;
+               src.y = src.baseY + sinf(p * 0.7f + 1.0f) * d * 150;
+               src.z = src.baseZ + cosf(p * 0.5f) * d * 150;
+               break;
+            default: break;
+            }
+         }
+
           float dx = src.x - userX;
           float dy = src.y - userY;
            float dz = src.z - mUserZ;
@@ -464,9 +497,9 @@ void SpatialRender::RegisterSource(SpatialSource* src)
       }
       RegisteredSource rs;
       rs.src = src;
-      rs.x = src->GetPositionX();
-      rs.y = src->GetPositionY();
-      rs.z = src->GetPositionZ();
+      rs.baseX = rs.x = src->GetPositionX();
+      rs.baseY = rs.y = src->GetPositionY();
+      rs.baseZ = rs.z = src->GetPositionZ();
       rs.hasAudio = false;
       rs.bufferSize = 0;
       mSources.push_back(rs);
@@ -510,9 +543,9 @@ void SpatialRender::NotifySourceMoved(SpatialSource* src)
    {
       if (s.src == src)
       {
-         s.x = src->GetPositionX();
-         s.y = src->GetPositionY();
-         s.z = src->GetPositionZ();
+         s.x = s.baseX = src->GetPositionX();
+         s.y = s.baseY = src->GetPositionY();
+         s.z = s.baseZ = src->GetPositionZ();
          return;
       }
    }
@@ -529,13 +562,84 @@ void SpatialRender::AcceptSourceAudio(SpatialSource* src, float* buffer, int buf
          for (int i = 0; i < copySize; ++i)
             s.audioBuffer[i] = buffer[i];
          s.bufferSize = copySize;
-         s.x = src->GetPositionX();
-         s.y = src->GetPositionY();
-         s.z = src->GetPositionZ();
+         s.baseX = src->GetPositionX();
+         s.baseY = src->GetPositionY();
+         s.baseZ = src->GetPositionZ();
          s.hasAudio = true;
          return;
       }
    }
+}
+
+void SpatialRender::SetSourceProperties(SpatialSource* src, float volume, float occlusion, int colorHue,
+                                        int animMode, float animRate, float animDepth)
+{
+   std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
+   for (auto& s : mSources)
+   {
+      if (s.src == src)
+      {
+         s.volume = volume;
+         s.occlusion = occlusion;
+         s.colorHue = colorHue;
+         s.animMode = animMode;
+         s.animRate = animRate;
+         s.animDepth = animDepth;
+         return;
+      }
+   }
+}
+
+int SpatialRender::GetNumSpatialSources() const
+{
+   std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
+   return (int)mSources.size();
+}
+
+bool SpatialRender::GetSpatialSourceInfo(int index, SpatialSourceInfo& out) const
+{
+   std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
+   if (index < 0 || index >= (int)mSources.size())
+      return false;
+   const auto& src = mSources[index];
+   out.x = src.x;
+   out.y = src.y;
+   out.z = src.z;
+   out.volume = src.volume;
+   out.colorHue = src.colorHue;
+   out.occlusion = src.occlusion;
+   if (src.src)
+      snprintf(out.name, sizeof(out.name), "%s", src.src->Name());
+   else
+      snprintf(out.name, sizeof(out.name), "cable %d", src.internalChannel);
+   return true;
+}
+
+bool SpatialRender::GetSpatialRoomInfo(SpatialRoomInfo& out) const
+{
+   std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
+   out.roomW = mRoomWidth;
+   out.roomD = mRoomDepth;
+   out.roomH = mRoomHeight;
+   out.listenerX = mUserX;
+   out.listenerY = mUserY;
+   out.listenerZ = mUserZ;
+   out.numSpeakers = mNumSpeakers;
+   out.hrtfEnabled = mHRTFEnabled;
+   out.hrtfQuality = mHRTFQuality;
+   return true;
+}
+
+bool SpatialRender::GetSpeakerInfo(int index, SpatialSpeakerInfo& out) const
+{
+   std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
+   if (index < 0 || index >= mNumSpeakers)
+      return false;
+   out.x = mSpeakerPositions[index].x;
+   out.y = mSpeakerPositions[index].y;
+   out.z = 0;
+   out.channel = (index < 16) ? mSpeakerChannels[index] : 0;
+   return true;
 }
 
 void SpatialRender::RebuildSpeakers()

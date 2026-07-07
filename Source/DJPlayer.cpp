@@ -122,16 +122,7 @@ void DJPlayer::CreateUIControls()
 
    UIBLOCK_NEWLINE();
 
-    // ── row 5: warp controls ──
-    BUTTON(mWarpUndoButton, "undo");
-    UIBLOCK_SHIFTRIGHT();
-    BUTTON(mWarpRedoButton, "redo");
-    UIBLOCK_SHIFTRIGHT();
-    BUTTON(mWarpResetButton, "reset warp");
-
-   UIBLOCK_NEWLINE();
-
-   // ── row 6: cue mode + hot cue buttons ──
+   // ── row 5: cue mode + hot cue buttons ──
    DROPDOWN(mCueModeDropdown, "cue", (int*)&mCueMode, 60);
    UIBLOCK_SHIFTRIGHT();
    for (int i = 0; i < 8; ++i)
@@ -153,10 +144,10 @@ void DJPlayer::CreateUIControls()
    mCueModeDropdown->AddLabel("jump", (int)CueMode::Jump);
    mCueModeDropdown->AddLabel("set", (int)CueMode::Set);
    mCueModeDropdown->AddLabel("edit", (int)CueMode::Edit);
-    mCueModeDropdown->AddLabel("delete", (int)CueMode::Delete);
+   mCueModeDropdown->AddLabel("delete", (int)CueMode::Delete);
 
-    for (int i = 0; i < 8; ++i)
-       mCuePoints[i] = -1;
+   for (int i = 0; i < 8; ++i)
+      mCuePoints[i] = -1;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -198,106 +189,20 @@ float DJPlayer::GetSamplesPerBeat() const
    return gSampleRate * 60.0f / mSampleBPM;
 }
 
-int DJPlayer::FindNearestWarpMarker(float x, float y) const
-{
-   if (mSample == nullptr || mWarpMarkers.empty()) return -1;
-
-   float sampleWidth = mWidth - 10;
-   int totalSamples = mSample->LengthInSamples();
-   int preRollSamples = (int)(kPreRollSeconds * gSampleRate);
-   float pixelTolerance = 10.0f;
-
-   float clickBeat = SampleToBeat((int)GetPlayPositionForMouse(x, y));
-
-   int closestIdx = -1;
-   float closestDist = pixelTolerance;
-   for (int i = 0; i < (int)mWarpMarkers.size(); ++i)
-   {
-      float markerBeat = SampleToBeat(mWarpMarkers[i].samplePos);
-      float pixelDist = fabs(markerBeat - clickBeat) / (SampleToBeat(totalSamples) - SampleToBeat(-preRollSamples)) * sampleWidth;
-      if (pixelDist < closestDist)
-      {
-         closestDist = pixelDist;
-         closestIdx = i;
-      }
-   }
-   return closestIdx;
-}
-
 float DJPlayer::SampleToBeat(int sample) const
 {
-   if (mWarpMarkers.empty())
-   {
-      float bpm = mSampleBPM;
-      if (bpm <= 0) bpm = 120;
-      return (float)sample / (gSampleRate * 60.0f / bpm);
-   }
-   // find segment
-   for (int i = 0; i < (int)mWarpMarkers.size() - 1; ++i)
-   {
-      const WarpMarker& a = mWarpMarkers[i];
-      const WarpMarker& b = mWarpMarkers[i + 1];
-      if (sample >= a.samplePos && sample <= b.samplePos)
-      {
-         float t = (b.samplePos == a.samplePos) ? 0 : (float)(sample - a.samplePos) / (float)(b.samplePos - a.samplePos);
-         return a.beatPos + t * (b.beatPos - a.beatPos);
-      }
-   }
-   // extrapolate from last segment
-   const WarpMarker& last = mWarpMarkers.back();
-   if (sample > last.samplePos && mWarpMarkers.size() >= 2)
-   {
-      const WarpMarker& prev = mWarpMarkers[mWarpMarkers.size() - 2];
-      float ratio = (float)(last.beatPos - prev.beatPos) / (float)(last.samplePos - prev.samplePos);
-      return last.beatPos + (float)(sample - last.samplePos) * ratio;
-   }
-   // extrapolate from first segment
-   const WarpMarker& first = mWarpMarkers[0];
-   if (sample < first.samplePos && mWarpMarkers.size() >= 2)
-   {
-      const WarpMarker& second = mWarpMarkers[1];
-      float ratio = (float)(second.beatPos - first.beatPos) / (float)(second.samplePos - first.samplePos);
-      return first.beatPos + (float)(sample - first.samplePos) * ratio;
-   }
-   return first.beatPos;
+   if (mSample == nullptr || mSampleBPM <= 0) return 0;
+   float samplesPerBeat = gSampleRate * 60.0f / mSampleBPM;
+   int preRollSamples = (int)(kPreRollSeconds * gSampleRate);
+   return (sample + preRollSamples) / samplesPerBeat;
 }
 
 int DJPlayer::BeatToSample(float beat) const
 {
-   if (mWarpMarkers.empty())
-   {
-      float bpm = mSampleBPM;
-      if (bpm <= 0) bpm = 120;
-      return (int)(beat * (gSampleRate * 60.0f / bpm));
-   }
-   // find segment
-   for (int i = 0; i < (int)mWarpMarkers.size() - 1; ++i)
-   {
-      const WarpMarker& a = mWarpMarkers[i];
-      const WarpMarker& b = mWarpMarkers[i + 1];
-      if (beat >= a.beatPos && beat <= b.beatPos)
-      {
-         float t = (b.beatPos == a.beatPos) ? 0 : (beat - a.beatPos) / (b.beatPos - a.beatPos);
-         return (int)(a.samplePos + t * (b.samplePos - a.samplePos));
-      }
-   }
-   // extrapolate from last segment
-   const WarpMarker& last = mWarpMarkers.back();
-   if (beat > last.beatPos && mWarpMarkers.size() >= 2)
-   {
-      const WarpMarker& prev = mWarpMarkers[mWarpMarkers.size() - 2];
-      float ratio = (float)(last.samplePos - prev.samplePos) / (float)(last.beatPos - prev.beatPos);
-      return (int)(last.samplePos + (beat - last.beatPos) * ratio);
-   }
-   // extrapolate from first segment
-   const WarpMarker& first = mWarpMarkers[0];
-   if (beat < first.beatPos && mWarpMarkers.size() >= 2)
-   {
-      const WarpMarker& second = mWarpMarkers[1];
-      float ratio = (float)(second.samplePos - first.samplePos) / (float)(second.beatPos - first.beatPos);
-      return (int)(first.samplePos + (beat - first.beatPos) * ratio);
-   }
-   return first.samplePos;
+   if (mSample == nullptr || mSampleBPM <= 0) return 0;
+   float samplesPerBeat = gSampleRate * 60.0f / mSampleBPM;
+   int preRollSamples = (int)(kPreRollSeconds * gSampleRate);
+   return (int)(beat * samplesPerBeat) - preRollSamples;
 }
 
 void DJPlayer::SetAutoLoop(int beats)
@@ -593,33 +498,14 @@ void DJPlayer::LoadAnalysisFile()
       mDetectedBPM = mSampleBPM;
       for (int i = 0; i < 8; ++i)
          mCuePoints[i] = json["hotCues"][ofToString(i)].asInt();
-       mLoopIn = json["loopIn"].asInt();
-       mLoopOut = json["loopOut"].asInt();
-       mLoopBeats = json["loopBeats"].asInt();
-       mLoopActive = json["loopActive"].asBool();
-       mDetectedKey = json["detectedKey"].asInt();
-       mKeyName = json["keyName"].asString();
-       // warp markers (version 2+)
-       if (json.isMember("warpMarkers"))
-       {
-          mWarpMarkers.clear();
-          for (int i = 0; i < (int)json["warpMarkers"].size(); ++i)
-          {
-             WarpMarker wm;
-             wm.samplePos = json["warpMarkers"][i]["samplePos"].asInt();
-             wm.beatPos = json["warpMarkers"][i]["beatPos"].asFloat();
-             wm.isAnchor = json["warpMarkers"][i]["isAnchor"].asBool();
-             mWarpMarkers.push_back(wm);
-          }
-          std::sort(mWarpMarkers.begin(), mWarpMarkers.end(),
-             [](const WarpMarker& a, const WarpMarker& b) { return a.samplePos < b.samplePos; });
-       }
-       mAnalysisFileLoaded = true;
-       // initialize undo history with loaded state
-       mWarpHistory.clear();
-       mWarpHistory.push_back(mWarpMarkers);
-       mWarpHistoryIndex = 0;
-    }
+      mLoopIn = json["loopIn"].asInt();
+      mLoopOut = json["loopOut"].asInt();
+      mLoopBeats = json["loopBeats"].asInt();
+      mLoopActive = json["loopActive"].asBool();
+      mDetectedKey = json["detectedKey"].asInt();
+      mKeyName = json["keyName"].asString();
+      mAnalysisFileLoaded = true;
+   }
    else
    {
       AnalyzeBPM();
@@ -634,23 +520,16 @@ void DJPlayer::SaveAnalysisFile()
    if (path.empty()) return;
 
    ofxJSONElement json;
-   json["version"] = 2;
+   json["version"] = 3;
    json["bpm"] = mSampleBPM;
    for (int i = 0; i < 8; ++i)
       json["hotCues"][ofToString(i)] = mCuePoints[i];
-    json["loopIn"] = mLoopIn;
-    json["loopOut"] = mLoopOut;
-    json["loopBeats"] = mLoopBeats;
+   json["loopIn"] = mLoopIn;
+   json["loopOut"] = mLoopOut;
+   json["loopBeats"] = mLoopBeats;
    json["loopActive"] = mLoopActive;
    json["detectedKey"] = mDetectedKey;
    json["keyName"] = mKeyName;
-   // warp markers
-   for (int i = 0; i < (int)mWarpMarkers.size(); ++i)
-   {
-      json["warpMarkers"][i]["samplePos"] = mWarpMarkers[i].samplePos;
-      json["warpMarkers"][i]["beatPos"] = mWarpMarkers[i].beatPos;
-      json["warpMarkers"][i]["isAnchor"] = mWarpMarkers[i].isAnchor;
-   }
    json.save(path, true);
 }
 
@@ -674,31 +553,6 @@ void DJPlayer::Process(double time)
       // ── calculate final speed (CDJ-style) ──
       float range = PitchRangeToFloat(mPitchRange);
       float targetSpeed = 1.0f + mPitchPercent * range;
-
-      // ── warp stretch ratio from warp markers ──
-      if (mWarpMarkers.size() >= 2 && mSample && mSampleBPM > 0)
-      {
-         float samplesPerBeat = gSampleRate * 60.0f / mSampleBPM;
-         int playPos = mSample->GetPlayPosition();
-         // find surrounding markers
-         for (int i = 0; i < (int)mWarpMarkers.size() - 1; ++i)
-         {
-            if (playPos >= mWarpMarkers[i].samplePos && playPos < mWarpMarkers[i + 1].samplePos)
-            {
-               int audioLen = mWarpMarkers[i + 1].samplePos - mWarpMarkers[i].samplePos;
-               if (audioLen > 0)
-               {
-                  float beatLen = (mWarpMarkers[i + 1].beatPos - mWarpMarkers[i].beatPos) * samplesPerBeat;
-                  if (beatLen > 0)
-                  {
-                     float warpRatio = beatLen / (float)audioLen;
-                     targetSpeed *= warpRatio;
-                  }
-               }
-               break;
-            }
-         }
-      }
 
       // ── phase-aware nudge ──
       if (mNudgeSamplesRemaining > 0)
@@ -791,10 +645,10 @@ void DJPlayer::PlayNote(double time, int pitch, int velocity, int voiceIdx, Modu
       mAdsr.Start(time, velocity / 127.0f);
 
       // hot cue 0-7
-       if (pitch >= 0 && pitch < 8 && mCuePoints[pitch] >= 0)
-          mSample->SetPlayPosition(mCuePoints[pitch]);
-       else
-          mSample->SetPlayPosition(0);
+      if (pitch >= 0 && pitch < 8 && mCuePoints[pitch] >= 0)
+         mSample->SetPlayPosition(mCuePoints[pitch]);
+      else
+         mSample->SetPlayPosition(0);
    }
 
    if (velocity == 0)
@@ -832,285 +686,115 @@ void DJPlayer::ButtonClicked(ClickButton* button, double time)
       mPlay = false;
       mSwitchAndRamp.StartSwitch();
    }
-    if (button == mStopButton && mSample != nullptr)
-    {
-       mPlay = false;
-       mSwitchAndRamp.StartSwitch();
-    }
+   if (button == mStopButton && mSample != nullptr)
+   {
+      mPlay = false;
+      mSwitchAndRamp.StartSwitch();
+   }
    if (button == mLoadFileButton)
       LoadFile();
 
-    // ── nudge (phase-aware: shift 1/4 beat) ──
-    if (button == mNudgeForwardButton)
-    {
-       mNudgeForwardHeld = (mNudgeForwardHeld > 0.5f) ? 0 : 1;
-        if (mNudgeForwardHeld > 0.5f)
-        {
-           mNudgeBackwardHeld = 0;
-           float bpm = mSampleBPM;
-           if (bpm > 0 && mSample != nullptr)
-           {
-              int samplesPerBeat = (int)(gSampleRate * 60.0f / bpm + 0.5f);
-              mNudgeSamplesRemaining = samplesPerBeat / 4;
-           }
-        }
-       else
-       {
-          mNudgeSamplesRemaining = 0;
-       }
-    }
-    if (button == mNudgeBackwardButton)
-    {
-       mNudgeBackwardHeld = (mNudgeBackwardHeld > 0.5f) ? 0 : 1;
-        if (mNudgeBackwardHeld > 0.5f)
-        {
-           mNudgeForwardHeld = 0;
-           float bpm = mSampleBPM;
-           if (bpm > 0 && mSample != nullptr)
-           {
-              int samplesPerBeat = (int)(gSampleRate * 60.0f / bpm + 0.5f);
-              mNudgeSamplesRemaining = -(samplesPerBeat / 4);
-           }
-        }
-       else
-       {
-          mNudgeSamplesRemaining = 0;
-       }
-    }
+   // ── nudge (phase-aware: shift 1/4 beat) ──
+   if (button == mNudgeForwardButton)
+   {
+      mNudgeForwardHeld = (mNudgeForwardHeld > 0.5f) ? 0 : 1;
+      if (mNudgeForwardHeld > 0.5f)
+      {
+         mNudgeBackwardHeld = 0;
+         float bpm = mSampleBPM;
+         if (bpm > 0 && mSample != nullptr)
+         {
+            int samplesPerBeat = (int)(gSampleRate * 60.0f / bpm + 0.5f);
+            mNudgeSamplesRemaining = samplesPerBeat / 4;
+         }
+      }
+      else
+      {
+         mNudgeSamplesRemaining = 0;
+      }
+   }
+   if (button == mNudgeBackwardButton)
+   {
+      mNudgeBackwardHeld = (mNudgeBackwardHeld > 0.5f) ? 0 : 1;
+      if (mNudgeBackwardHeld > 0.5f)
+      {
+         mNudgeForwardHeld = 0;
+         float bpm = mSampleBPM;
+         if (bpm > 0 && mSample != nullptr)
+         {
+            int samplesPerBeat = (int)(gSampleRate * 60.0f / bpm + 0.5f);
+            mNudgeSamplesRemaining = -(samplesPerBeat / 4);
+         }
+      }
+      else
+      {
+         mNudgeSamplesRemaining = 0;
+      }
+   }
 
    // ── hot cues ──
-    for (int i = 0; i < 8; ++i)
-    {
-       if (button == mHotCueButtons[i] && mSample != nullptr)
-       {
-          switch (mCueMode)
-          {
-             case CueMode::Jump:
-                if (mCuePoints[i] >= 0)
-                {
-                   mSample->SetPlayPosition(mCuePoints[i]);
-                   mActiveHotCue = i;
-                }
-                break;
-             case CueMode::Set:
-                mCuePoints[i] = mSample->GetPlayPosition();
-                mActiveHotCue = i;
-                SaveAnalysisFile();
-                break;
-             case CueMode::Delete:
-                mCuePoints[i] = -1;
-                SaveAnalysisFile();
-                break;
-             default:
-                break;
-         }
-      }
-   }
-
-      if (button == mClearCuesButton)
-      {
-         for (int i = 0; i < 8; ++i)
-            mCuePoints[i] = -1;
-         SaveAnalysisFile();
-      }
-
-    // ── loop controls ──
-    if (button == mLoopInButton && mSample != nullptr)
-    {
-       mLoopIn = mSample->GetPlayPosition();
-       if (mLoopOut > mLoopIn)
-          mLoopActive = true;
-       SaveAnalysisFile();
-    }
-    if (button == mLoopOutButton && mSample != nullptr)
-    {
-       mLoopOut = mSample->GetPlayPosition();
-       if (mLoopIn >= 0 && mLoopOut > mLoopIn)
-          mLoopActive = true;
-       SaveAnalysisFile();
-    }
-    if (button == mLoopAuto1) SetAutoLoop(1);
-    if (button == mLoopAuto2) SetAutoLoop(2);
-    if (button == mLoopAuto4) SetAutoLoop(4);
-    if (button == mLoopAuto8) SetAutoLoop(8);
-    if (button == mLoopAuto16) SetAutoLoop(16);
-    if (button == mLoopClearButton)
-    {
-       mLoopIn = -1;
-       mLoopOut = -1;
-       mLoopActive = false;
-       SaveAnalysisFile();
-    }
-
-     if (button == mWarpUndoButton)
-        UndoWarp();
-     if (button == mWarpRedoButton)
-        RedoWarp();
-     if (button == mWarpResetButton)
-        ResetWarp();
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  Warp Context Menu Actions (Ableton-style)
-// ═══════════════════════════════════════════════════════════════════
-
-void DJPlayer::ExecuteWarpContextAction(WarpContextAction action, int samplePos)
-{
-   if (mSample == nullptr || mSampleBPM <= 0) return;
-
-   float samplesPerBeat = gSampleRate * 60.0f / mSampleBPM;
-   if (samplesPerBeat <= 0) return;
-
-   SaveWarpState(); // save before modification
-
-   switch (action)
+   for (int i = 0; i < 8; ++i)
    {
-      case WarpContextAction::StartHere:
+      if (button == mHotCueButtons[i] && mSample != nullptr)
       {
-         // "Start 1.1.1.1 here": set this position as beat 0 (anchor)
-         // clear all markers and create new anchor at click position
-         mWarpMarkers.clear();
-         WarpMarker anchor;
-         anchor.samplePos = samplePos;
-         anchor.beatPos = 0;
-         anchor.isAnchor = true;
-         mWarpMarkers.push_back(anchor);
-         break;
+         switch (mCueMode)
+         {
+            case CueMode::Jump:
+               if (mCuePoints[i] >= 0)
+               {
+                  mSample->SetPlayPosition(mCuePoints[i]);
+                  mActiveHotCue = i;
+               }
+               break;
+            case CueMode::Set:
+               mCuePoints[i] = mSample->GetPlayPosition();
+               mActiveHotCue = i;
+               SaveAnalysisFile();
+               break;
+            case CueMode::Delete:
+               mCuePoints[i] = -1;
+               SaveAnalysisFile();
+               break;
+            default:
+               break;
+         }
       }
-
-      case WarpContextAction::WarpBPM:
-      {
-         // "Warp from here (BPM master)": from anchor, align audio to master BPM grid
-         float masterBPM = TheTransport ? TheTransport->GetTempo() : mSampleBPM;
-         float masterSPB = gSampleRate * 60.0f / masterBPM;
-
-         // always use existing anchor (first marker) as reference
-         if (mWarpMarkers.empty())
-         {
-            // no anchor yet — create one at click position
-            WarpMarker anchor;
-            anchor.samplePos = samplePos;
-            anchor.beatPos = 0;
-            anchor.isAnchor = true;
-            mWarpMarkers.push_back(anchor);
-         }
-
-         // use the anchor as reference point
-         float anchorSample = (float)mWarpMarkers[0].samplePos;
-         float anchorBeat = mWarpMarkers[0].beatPos;
-
-         // remove all markers after the anchor (keep only anchor)
-         mWarpMarkers.erase(mWarpMarkers.begin() + 1, mWarpMarkers.end());
-
-         // create new markers aligned to master BPM grid from anchor
-         int totalSamples = mSample->LengthInSamples();
-         float beatSample = anchorSample;
-         float beat = anchorBeat;
-
-         for (int b = 1; b < 512; ++b)
-         {
-            beatSample += masterSPB;
-            beat += 1.0f;
-            if (beatSample >= totalSamples) break;
-
-            WarpMarker wm;
-            wm.samplePos = (int)beatSample;
-            wm.beatPos = beat;
-            wm.isAnchor = false;
-            mWarpMarkers.push_back(wm);
-         }
-         break;
-      }
-
-      case WarpContextAction::WarpStraight:
-      {
-         // "Warp from here (straight)": from anchor, audio is evenly spaced
-         // using current sample BPM
-         if (mWarpMarkers.empty())
-         {
-            // no anchor yet — create one at click position
-            WarpMarker anchor;
-            anchor.samplePos = samplePos;
-            anchor.beatPos = 0;
-            anchor.isAnchor = true;
-            mWarpMarkers.push_back(anchor);
-         }
-
-         // use the anchor as reference point
-         float anchorSample = (float)mWarpMarkers[0].samplePos;
-         float anchorBeat = mWarpMarkers[0].beatPos;
-
-         // remove all markers after the anchor (keep only anchor)
-         mWarpMarkers.erase(mWarpMarkers.begin() + 1, mWarpMarkers.end());
-
-         // create markers with equal spacing (straight timing)
-         int totalSamples = mSample->LengthInSamples();
-         float beatSample = anchorSample;
-         float beat = anchorBeat;
-
-         for (int b = 1; b < 512; ++b)
-         {
-            beatSample += samplesPerBeat;
-            beat += 1.0f;
-            if (beatSample >= totalSamples) break;
-
-            WarpMarker wm;
-            wm.samplePos = (int)beatSample;
-            wm.beatPos = beat;
-            wm.isAnchor = false;
-            mWarpMarkers.push_back(wm);
-         }
-         break;
-      }
-
-      default:
-         break;
    }
 
-   SaveAnalysisFile();
-}
+   if (button == mClearCuesButton)
+   {
+      for (int i = 0; i < 8; ++i)
+         mCuePoints[i] = -1;
+      SaveAnalysisFile();
+   }
 
-// ═══════════════════════════════════════════════════════════════════
-//  Warp Undo / Redo
-// ═══════════════════════════════════════════════════════════════════
-
-void DJPlayer::SaveWarpState()
-{
-   // remove any redo states after current index
-   if (mWarpHistoryIndex >= 0 && mWarpHistoryIndex < (int)mWarpHistory.size() - 1)
-      mWarpHistory.erase(mWarpHistory.begin() + mWarpHistoryIndex + 1, mWarpHistory.end());
-
-   // save current state
-   mWarpHistory.push_back(mWarpMarkers);
-   if ((int)mWarpHistory.size() > kWarpMaxHistory)
-      mWarpHistory.erase(mWarpHistory.begin());
-   mWarpHistoryIndex = (int)mWarpHistory.size() - 1;
-}
-
-void DJPlayer::UndoWarp()
-{
-   if (mWarpHistoryIndex <= 0) return;
-   --mWarpHistoryIndex;
-   mWarpMarkers = mWarpHistory[mWarpHistoryIndex];
-   SaveAnalysisFile();
-}
-
-void DJPlayer::RedoWarp()
-{
-   if (mWarpHistoryIndex >= (int)mWarpHistory.size() - 1) return;
-   ++mWarpHistoryIndex;
-   mWarpMarkers = mWarpHistory[mWarpHistoryIndex];
-   SaveAnalysisFile();
-}
-
-void DJPlayer::ResetWarp()
-{
-   if (mWarpMarkers.empty()) return;
-   SaveWarpState();
-   mWarpMarkers.clear();
-   if (mDetectedBPM > 0)
-      mSampleBPM = mDetectedBPM;
-   SaveAnalysisFile();
+   // ── loop controls ──
+   if (button == mLoopInButton && mSample != nullptr)
+   {
+      mLoopIn = mSample->GetPlayPosition();
+      if (mLoopOut > mLoopIn)
+         mLoopActive = true;
+      SaveAnalysisFile();
+   }
+   if (button == mLoopOutButton && mSample != nullptr)
+   {
+      mLoopOut = mSample->GetPlayPosition();
+      if (mLoopIn >= 0 && mLoopOut > mLoopIn)
+         mLoopActive = true;
+      SaveAnalysisFile();
+   }
+   if (button == mLoopAuto1) SetAutoLoop(1);
+   if (button == mLoopAuto2) SetAutoLoop(2);
+   if (button == mLoopAuto4) SetAutoLoop(4);
+   if (button == mLoopAuto8) SetAutoLoop(8);
+   if (button == mLoopAuto16) SetAutoLoop(16);
+   if (button == mLoopClearButton)
+   {
+      mLoopIn = -1;
+      mLoopOut = -1;
+      mLoopActive = false;
+      SaveAnalysisFile();
+   }
 }
 
 void DJPlayer::DropdownClicked(DropdownList* list) {}
@@ -1120,14 +804,6 @@ void DJPlayer::DropdownUpdated(DropdownList* list, int oldVal, double time) {}
 void DJPlayer::KeyPressed(int key, bool isRepeat)
 {
    IDrawableModule::KeyPressed(key, isRepeat);
-
-   if (GetKeyModifiers() & kModifier_Command)
-   {
-      if (key == 'z')
-         UndoWarp();
-      else if (key == 'y')
-         RedoWarp();
-   }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1202,119 +878,15 @@ void DJPlayer::OnClicked(float x, float y, bool right)
    if (mSample == nullptr || gHoveredUIControl != nullptr)
       return;
 
-   // ── warp context menu: check if click is on a menu item ──
-   if (mWarpContextMenuVisible)
-   {
-      if (x >= mWarpContextMenuX && x <= mWarpContextMenuX + kWarpMenuWidth &&
-          y >= mWarpContextMenuY && y <= mWarpContextMenuY + kWarpMenuHeight)
-      {
-         // click is inside menu — determine which item
-         float relY = y - mWarpContextMenuY;
-         int item = (int)(relY / kWarpMenuItemHeight);
-         if (item == 0) ExecuteWarpContextAction(WarpContextAction::StartHere, mWarpContextClickSample);
-         else if (item == 1) ExecuteWarpContextAction(WarpContextAction::WarpBPM, mWarpContextClickSample);
-         else if (item == 2) ExecuteWarpContextAction(WarpContextAction::WarpStraight, mWarpContextClickSample);
-         mWarpContextMenuVisible = false;
-         return;
-      }
-      else
-      {
-         // click outside menu → close it
-         mWarpContextMenuVisible = false;
-      }
-   }
-
-   // ── right-click: always show context menu ──
-   if (right)
-   {
-      mWarpContextMenuVisible = true;
-      mWarpContextMenuX = x;
-      mWarpContextMenuY = y;
-      mWarpContextClickSample = (int)GetPlayPositionForMouse(x, y);
-      return;
-   }
-
-   // ── double-click detection ──
-   double now = gTime;
-   double elapsed = now - mLastClickTime;
-   float distSq = (x - mLastClickX) * (x - mLastClickX) + (y - mLastClickY) * (y - mLastClickY);
-   bool isDoubleClick = (elapsed < 300 && distSq < 100); // 300ms + 10px tolerance
-
-   mLastClickTime = now;
-   mLastClickX = x;
-   mLastClickY = y;
-
-   if (isDoubleClick)
-   {
-      int nearestIdx = FindNearestWarpMarker(x, y);
-      if (nearestIdx >= 0)
-      {
-         // double-click near existing marker → delete it
-         SaveWarpState();
-         bool wasAnchor = mWarpMarkers[nearestIdx].isAnchor;
-         mWarpMarkers.erase(mWarpMarkers.begin() + nearestIdx);
-         // if we deleted the anchor, promote next marker to anchor
-         if (wasAnchor && !mWarpMarkers.empty())
-            mWarpMarkers[0].isAnchor = true;
-         SaveAnalysisFile();
-      }
-      else
-      {
-         // double-click far from markers → create new marker
-         float samplesPerBeat = gSampleRate * 60.0f / mSampleBPM;
-         if (samplesPerBeat > 0)
-         {
-            int clickSample = (int)GetPlayPositionForMouse(x, y);
-            SaveWarpState();
-            WarpMarker wm;
-            wm.samplePos = clickSample;
-            if (mWarpMarkers.empty())
-            {
-               // first marker = anchor (beat 0)
-               wm.beatPos = 0;
-               wm.isAnchor = true;
-            }
-            else
-            {
-               // subsequent markers: calculate beat position from anchor
-               int anchorPos = mWarpMarkers[0].samplePos;
-               float beatDist = (float)(clickSample - anchorPos) / samplesPerBeat;
-               wm.beatPos = roundf(beatDist);
-               wm.isAnchor = false;
-            }
-            mWarpMarkers.push_back(wm);
-            std::sort(mWarpMarkers.begin(), mWarpMarkers.end(),
-               [](const WarpMarker& a, const WarpMarker& b) { return a.samplePos < b.samplePos; });
-            SaveAnalysisFile();
-         }
-      }
-      return;
-   }
-
-   // ── single click: check for warp marker drag (zoom region only) ──
-   if (IsInZoomRegion(y))
-   {
-      int nearestIdx = FindNearestWarpMarker(x, y);
-      if (nearestIdx >= 0)
-      {
-         SaveWarpState();
-         mDraggingWarpMarker = true;
-         mDragWarpMarkerIndex = nearestIdx;
-         mDragWarpMarkerStartSample = mWarpMarkers[nearestIdx].samplePos;
-         mDragWarpMarkerClickX = x;
-         mDragWarpMarkerClickSample = (int)GetPlayPositionForMouse(x, y);
-         return;
-      }
-   }
-
    // ── single click: check for cue point drag (edit mode) ──
    if (mCueMode == CueMode::Edit)
    {
-       int totalSamples = mSample->LengthInSamples();
-       int preRollSamples = (int)(kPreRollSeconds * gSampleRate);
-       float sampleWidth = mWidth - 10;
-       float clickBeat = SampleToBeat((int)GetPlayPositionForMouse(x, y));
-       float pixelTolerance = 10.0f;
+      int totalSamples = mSample->LengthInSamples();
+      int preRollSamples = (int)(kPreRollSeconds * gSampleRate);
+      float sampleWidth = mWidth - 10;
+      float clickSample = GetPlayPositionForMouse(x, y);
+      float clickBeat = SampleToBeat((int)clickSample);
+      float pixelTolerance = 10.0f;
 
       int closestIdx = -1;
       float closestDist = pixelTolerance;
@@ -1339,24 +911,24 @@ void DJPlayer::OnClicked(float x, float y, bool right)
    }
    else if (IsInOverviewRegion(y))
    {
-       // overview waveform: jump on click, scratch on drag
-       mScratchStartX = x;
-       mScratchStartY = y;
-       mScratchStartPlayPos = mSample->GetPlayPosition();
-       mScrubbingSample = true;
-       mOverviewDragged = false;
-       mOverviewClickSample = (int)GetPlayPositionForMouse(x, y);
-    }
-     else
-     {
-        // zoom waveform: click = jump, drag = scrub playhead
-        mScratchStartX = x;
-        mScratchStartY = y;
-        mScratchStartPlayPos = mSample->GetPlayPosition();
-        mScrubbingSample = true;
-        mOverviewDragged = false;
-        mOverviewClickSample = (int)GetPlayPositionForMouse(x, y);
-     }
+      // overview waveform: jump on click, scrub on drag
+      mScratchStartX = x;
+      mScratchStartY = y;
+      mScratchStartPlayPos = mSample->GetPlayPosition();
+      mScrubbingSample = true;
+      mOverviewDragged = false;
+      mOverviewClickSample = (int)GetPlayPositionForMouse(x, y);
+   }
+   else
+   {
+      // zoom waveform: click = jump, drag = scrub playhead
+      mScratchStartX = x;
+      mScratchStartY = y;
+      mScratchStartPlayPos = mSample->GetPlayPosition();
+      mScrubbingSample = true;
+      mOverviewDragged = false;
+      mOverviewClickSample = (int)GetPlayPositionForMouse(x, y);
+   }
 }
 
 bool DJPlayer::MouseMoved(float x, float y)
@@ -1367,86 +939,53 @@ bool DJPlayer::MouseMoved(float x, float y)
 
    if (mSample == nullptr) return true;
 
-    if (mDraggingWarpMarker)
-    {
-       // Use delta from drag start with fixed linear mapping (avoids feedback loop
-       // where moving the marker changes the warp, which changes the mouse→sample mapping)
-       float sampleWidth = mWidth - 10;
-       int totalSamples = mSample->LengthInSamples();
-       int preRollSamples = (int)(kPreRollSeconds * gSampleRate);
-       float samplesPerPixel = (float)(totalSamples + preRollSamples) / sampleWidth;
-
-       float dx = x - mDragWarpMarkerClickX;
-       int deltaSamples = (int)(dx * samplesPerPixel);
-       int newPos = mDragWarpMarkerStartSample + deltaSamples;
-       newPos = (int)ofClamp(newPos, -preRollSamples, mSample->LengthInSamples() - 1);
-
-       // save beatPos before sort (only samplePos changes during drag)
-       float draggedBeat = mWarpMarkers[mDragWarpMarkerIndex].beatPos;
-       mWarpMarkers[mDragWarpMarkerIndex].samplePos = newPos;
-       // sort by samplePos so iteration in Process() finds correct pairs
-       std::sort(mWarpMarkers.begin(), mWarpMarkers.end(),
-          [](const WarpMarker& a, const WarpMarker& b) { return a.samplePos < b.samplePos; });
-       // re-find index after sort
-       for (int i = 0; i < (int)mWarpMarkers.size(); ++i)
-       {
-          if (mWarpMarkers[i].beatPos == draggedBeat && mWarpMarkers[i].samplePos == newPos)
-          {
-             mDragWarpMarkerIndex = i;
-             break;
-          }
-       }
-    }
-   else if (mDraggingCue)
+   if (mDraggingCue)
    {
       int newPos = (int)ofClamp(GetPlayPositionForMouse(x, y), 0, mSample->LengthInSamples() - 1);
       mCuePoints[mDragCueIndex] = newPos;
    }
-     else if (mScrubbingSample)
-     {
-        // check if dragged beyond click threshold
-        if (fabs(x - mScratchStartX) > 3)
-           mOverviewDragged = true;
+   else if (mScrubbingSample)
+   {
+      // check if dragged beyond click threshold
+      if (fabs(x - mScratchStartX) > 3)
+         mOverviewDragged = true;
 
-        int totalSamples = mSample->LengthInSamples();
-        int preRollSamples = (int)(kPreRollSeconds * gSampleRate);
+      int totalSamples = mSample->LengthInSamples();
+      int preRollSamples = (int)(kPreRollSeconds * gSampleRate);
 
-        if (!IsInOverviewRegion(mScratchStartY))
-        {
-           // zoom region: warp-aware — playhead follows mouse in warped view
-           float zoomStartBeat = SampleToBeat(GetZoomStartSample());
-           float zoomEndBeat = SampleToBeat(GetZoomEndSample());
-           float sampleWidth = mWidth - 10;
-           float frac = (x - 5) / sampleWidth;
-           float beat = zoomStartBeat + frac * (zoomEndBeat - zoomStartBeat);
-           int newPos = ofClamp(BeatToSample(beat), -preRollSamples, totalSamples - 1);
+      if (!IsInOverviewRegion(mScratchStartY))
+      {
+         // zoom region: linear mapping
+         float sampleWidth = mWidth - 10;
+         float frac = (x - 5) / sampleWidth;
+         int zoomStart = GetZoomStartSample();
+         int zoomEnd = GetZoomEndSample();
+         int newPos = (int)(zoomStart + frac * (zoomEnd - zoomStart));
+         newPos = ofClamp(newPos, -preRollSamples, totalSamples - 1);
 
-           mSwitchAndRamp.StartSwitch();
-           mSample->SetPlayPosition(newPos);
-        }
-        else
-        {
-           // overview region: linear mapping
-           float sampleWidth = mWidth - 10;
-           float samplesPerPixel = (float)(totalSamples + preRollSamples) / sampleWidth;
-           float deltaX = x - mScratchStartX;
-           int deltaSamples = (int)(deltaX * samplesPerPixel);
-           int newPos = mScratchStartPlayPos + deltaSamples;
-           newPos = (int)ofClamp(newPos, -preRollSamples, totalSamples - 1);
+         mSwitchAndRamp.StartSwitch();
+         mSample->SetPlayPosition(newPos);
+      }
+      else
+      {
+         // overview region: linear mapping
+         float sampleWidth = mWidth - 10;
+         float samplesPerPixel = (float)(totalSamples + preRollSamples) / sampleWidth;
+         float deltaX = x - mScratchStartX;
+         int deltaSamples = (int)(deltaX * samplesPerPixel);
+         int newPos = mScratchStartPlayPos + deltaSamples;
+         newPos = (int)ofClamp(newPos, -preRollSamples, totalSamples - 1);
 
-           mSwitchAndRamp.StartSwitch();
-           mSample->SetPlayPosition(newPos);
-        }
-     }
-    return true;
+         mSwitchAndRamp.StartSwitch();
+         mSample->SetPlayPosition(newPos);
+      }
+   }
+   return true;
 }
 
 bool DJPlayer::MouseScrolled(float x, float y, float scrollX, float scrollY, bool isSmoothScroll, bool isInvertedScroll)
 {
    if (mSample == nullptr) return false;
-
-   // close warp context menu on scroll
-   mWarpContextMenuVisible = false;
 
    if (GetKeyModifiers() & kModifier_Shift)
    {
@@ -1473,17 +1012,17 @@ bool DJPlayer::MouseScrolled(float x, float y, float scrollX, float scrollY, boo
       mNudgeSamplesRemaining += (int)(scrollY * nudgePerTick);
 
       // clamp to prevent runaway accumulation (max ±1 beat)
-       mNudgeSamplesRemaining = (int)ofClamp(mNudgeSamplesRemaining, -samplesPerBeat, samplesPerBeat);
-    }
+      mNudgeSamplesRemaining = (int)ofClamp(mNudgeSamplesRemaining, -samplesPerBeat, samplesPerBeat);
+   }
 
-    // ── scrollX: zoom in/out ──
-    if (scrollX != 0)
-    {
-       float zoomDelta = scrollX * 0.5f;
-       if (GetKeyModifiers() & kModifier_Command)
-          zoomDelta *= 2.0f;
-       mScrollZoomBeats = ofClamp(mScrollZoomBeats - zoomDelta, 4, 16);
-    }
+   // ── scrollX: zoom in/out ──
+   if (scrollX != 0)
+   {
+      float zoomDelta = scrollX * 0.5f;
+      if (GetKeyModifiers() & kModifier_Command)
+         zoomDelta *= 2.0f;
+      mScrollZoomBeats = ofClamp(mScrollZoomBeats - zoomDelta, 4, 16);
+   }
 
    return true;
 }
@@ -1498,31 +1037,24 @@ void DJPlayer::MouseReleased()
       {
          // drag finished — playhead already at dragged position, keep it
       }
-       else if (mSample != nullptr)
-       {
-          // no drag — click = jump playhead to clicked position (allow pre-roll)
-          mSwitchAndRamp.StartSwitch();
-          int preRollSamples = (int)(kPreRollSeconds * gSampleRate);
-          int pos = ofClamp(mOverviewClickSample, -preRollSamples, mSample->LengthInSamples() - 1);
-          mSample->SetPlayPosition(pos);
-       }
+      else if (mSample != nullptr)
+      {
+         // no drag — click = jump playhead to clicked position (allow pre-roll)
+         mSwitchAndRamp.StartSwitch();
+         int preRollSamples = (int)(kPreRollSeconds * gSampleRate);
+         int pos = ofClamp(mOverviewClickSample, -preRollSamples, mSample->LengthInSamples() - 1);
+         mSample->SetPlayPosition(pos);
+      }
       mScrubbingSample = false;
       mOverviewDragged = false;
    }
 
-   if (mDraggingWarpMarker)
+   if (mDraggingCue)
    {
-      mDraggingWarpMarker = false;
-      mDragWarpMarkerIndex = -1;
+      mDraggingCue = false;
+      mDragCueIndex = -1;
       SaveAnalysisFile();
    }
-
-    if (mDraggingCue)
-    {
-       mDraggingCue = false;
-       mDragCueIndex = -1;
-       SaveAnalysisFile();
-    }
 }
 
 float DJPlayer::GetPlayPositionForMouse(float mouseX, float mouseY) const
@@ -1534,23 +1066,17 @@ float DJPlayer::GetPlayPositionForMouse(float mouseX, float mouseY) const
 
    if (IsInOverviewRegion(mouseY))
    {
-      // overview: warp-aware pixel→beat→sample
-      float overviewStartBeat = SampleToBeat(-preRollSamples);
-      float overviewEndBeat = SampleToBeat(totalSamples);
-      float preRollPixels = (float)preRollSamples / (preRollSamples + totalSamples) * sampleWidth;
-      float overviewWidth = sampleWidth - preRollPixels;
-      float frac = (mouseX - 5 - preRollPixels) / overviewWidth;
-      float beat = overviewStartBeat + frac * (overviewEndBeat - overviewStartBeat);
-      return (float)BeatToSample(beat);
+      // overview: linear sample mapping from -preRollSamples to totalSamples
+      float frac = (mouseX - 5) / sampleWidth;
+      return -preRollSamples + frac * (totalSamples + preRollSamples);
    }
    else
    {
-      // zoom: warp-aware pixel→beat→sample
-      float zoomStartBeat = SampleToBeat(GetZoomStartSample());
-      float zoomEndBeat = SampleToBeat(GetZoomEndSample());
+      // zoom: linear sample mapping within zoom range
       float frac = (mouseX - 5) / sampleWidth;
-      float beat = zoomStartBeat + frac * (zoomEndBeat - zoomStartBeat);
-      return (float)BeatToSample(beat);
+      int zoomStart = GetZoomStartSample();
+      int zoomEnd = GetZoomEndSample();
+      return zoomStart + frac * (zoomEnd - zoomStart);
    }
 }
 
@@ -1631,21 +1157,26 @@ void DJPlayer::FloatSliderUpdated(FloatSlider* slider, float oldVal, double time
 //  RGB Waveform (frequency-band coloring)
 // ═══════════════════════════════════════════════════════════════════
 
-void DJPlayer::DrawRGBWaveform(float x, float y, float w, float h, float startBeat, float endBeat)
+void DJPlayer::DrawRGBWaveform(float x, float y, float w, float h, int startSample, int numSamples)
 {
    if (mDrawBuffer.BufferSize() <= 0) return;
 
    int totalSamples = mDrawBuffer.BufferSize();
+   if (startSample < 0) startSample = 0;
+   if (numSamples < 0) numSamples = totalSamples - startSample;
+   int endSample = startSample + numSamples;
+   if (endSample > totalSamples) endSample = totalSamples;
+   startSample = (int)ofClamp(startSample, 0, totalSamples - 1);
+   if (endSample <= startSample) return;
+
    int numChannels = mDrawBuffer.NumActiveChannels();
    if (numChannels <= 0) return;
 
    const float* data = mDrawBuffer.GetChannel(0);
    if (data == nullptr) return;
 
-   float totalBeats = endBeat - startBeat;
-   if (totalBeats <= 0) return;
-
-   float beatsPerPixel = totalBeats / w;
+   float samplesPerPixel = (float)(endSample - startSample) / w;
+   if (samplesPerPixel <= 0) return;
    float cy = y + h / 2.0f;
 
    ofPushStyle();
@@ -1657,15 +1188,13 @@ void DJPlayer::DrawRGBWaveform(float x, float y, float w, float h, float startBe
 
    for (float px = 0; px < w; px += 1)
    {
-      float beat = startBeat + (px / w) * totalBeats;
-      int sampleIdx = BeatToSample(beat);
-      if (sampleIdx < 0 || sampleIdx >= totalSamples) continue;
+      int sampleIdx = startSample + (int)(px * samplesPerPixel);
+      if (sampleIdx < startSample || sampleIdx >= endSample) continue;
 
-      // block size adapts to local warp ratio (how many source samples per pixel)
-      float nextBeat = startBeat + ((px + 1) / w) * totalBeats;
-      int nextSample = BeatToSample(nextBeat);
-      int blockLen = juce::jmax(1, juce::jmin(abs(nextSample - sampleIdx), 64));
-      if (sampleIdx + blockLen > totalSamples) blockLen = totalSamples - sampleIdx;
+      int nextSample = startSample + (int)((px + 1) * samplesPerPixel);
+      if (nextSample >= endSample) nextSample = endSample - 1;
+      int blockLen = juce::jmax(1, juce::jmin(nextSample - sampleIdx, 64));
+      if (sampleIdx + blockLen > endSample) blockLen = endSample - sampleIdx;
 
       // ── find min/max for this pixel (shows actual waveform shape) ──
       float sampleMin = data[sampleIdx];
@@ -1764,9 +1293,6 @@ void DJPlayer::DrawModule()
    mLoopAuto8->Draw();
    mLoopAuto16->Draw();
    mLoopClearButton->Draw();
-   mWarpUndoButton->Draw();
-   mWarpRedoButton->Draw();
-   mWarpResetButton->Draw();
    mCueModeDropdown->Draw();
    for (int i = 0; i < 8; ++i)
       mHotCueButtons[i]->Draw();
@@ -1845,140 +1371,106 @@ void DJPlayer::DrawModule()
       DrawTextNormal(mErrorString, 10, 10, 8);
       ofPopStyle();
    }
-    else if (mSample && mSample->LengthInSamples() > 0)
-    {
-       int playPosition = mSample->GetPlayPosition();
-       bool isScrubbing = (mScrubbingSample || mOverviewDragged);
-       if (mAdsr.Value(gTime) == 0 && !isScrubbing) playPosition = -1;
+   else if (mSample && mSample->LengthInSamples() > 0)
+   {
+      int playPosition = mSample->GetPlayPosition();
+      bool isScrubbing = (mScrubbingSample || mOverviewDragged);
+      if (mAdsr.Value(gTime) == 0 && !isScrubbing) playPosition = -1;
 
-       int zoomStart = GetZoomStartSample();
-       int zoomEnd = GetZoomEndSample();
-       int totalSamples = mSample->LengthInSamples();
-       int preRollSamples = (int)(kPreRollSeconds * gSampleRate);
+      int zoomStart = GetZoomStartSample();
+      int zoomEnd = GetZoomEndSample();
+      int totalSamples = mSample->LengthInSamples();
+      int preRollSamples = (int)(kPreRollSeconds * gSampleRate);
 
-       // ── top half: overview with pre-roll ──
-       ofPushMatrix();
-       ofPushStyle();
-       ofFill();
-       ofSetColor(0, 0, 0, 180);
-       ofRect(0, 0, sampleWidth, halfH);
+      // ── top half: overview with pre-roll ──
+      ofPushMatrix();
+      ofPushStyle();
+      ofFill();
+      ofSetColor(0, 0, 0, 180);
+      ofRect(0, 0, sampleWidth, halfH);
 
-       // pre-roll region
-       float preRollPixels = (float)preRollSamples / (preRollSamples + totalSamples) * sampleWidth;
-       ofSetColor(20, 20, 30, 200);
-       ofRect(0, 0, preRollPixels, halfH);
+      // pre-roll region
+      float preRollPixels = (float)preRollSamples / (preRollSamples + totalSamples) * sampleWidth;
+      ofSetColor(20, 20, 30, 200);
+      ofRect(0, 0, preRollPixels, halfH);
 
-       // draw waveform after pre-roll (beat-based, warp-aware)
-       {
-          float overviewStartBeat = SampleToBeat(-preRollSamples);
-          float overviewEndBeat = SampleToBeat(totalSamples);
-          DrawRGBWaveform(preRollPixels, 0, sampleWidth - preRollPixels, halfH, overviewStartBeat, overviewEndBeat);
-       }
+      // draw waveform after pre-roll (linear sample mapping)
+      if (totalSamples > 0)
+      {
+         float overviewWidth = sampleWidth - preRollPixels;
+         float samplesPerPixel = (float)totalSamples / overviewWidth;
+         DrawRGBWaveform(preRollPixels, 0, overviewWidth, halfH);
+      }
 
-       // playhead on overview (warp-aware)
-       if (playPosition >= -preRollSamples)
-       {
-          float playBeat = SampleToBeat(playPosition);
-          float obStart = SampleToBeat(-preRollSamples);
-          float obEnd = SampleToBeat(totalSamples);
-          float overviewWidth = sampleWidth - preRollPixels;
-          float px = preRollPixels + ((playBeat - obStart) / (obEnd - obStart)) * overviewWidth;
-          ofSetColor(0, 255, 100, 200);
-          ofSetLineWidth(2);
-          ofLine(px, 0, px, halfH);
-       }
+      // playhead on overview (linear)
+      if (playPosition >= -preRollSamples)
+      {
+         float frac = (float)(playPosition + preRollSamples) / (totalSamples + preRollSamples);
+         float px = frac * sampleWidth;
+         ofSetColor(0, 255, 100, 200);
+         ofSetLineWidth(2);
+         ofLine(px, 0, px, halfH);
+      }
 
-       // overview tempo grid — warp-aware: grid at master beat positions, mapped through warp
-       {
-          float masterBPM = TheTransport ? TheTransport->GetTempo() : mSampleBPM;
-          if (masterBPM > 0 && totalSamples > 0)
-          {
-             float overviewStartBeat = SampleToBeat(-preRollSamples);
-             float overviewEndBeat = SampleToBeat(totalSamples);
-             float overviewWidth = sampleWidth - preRollPixels;
-             // find first master beat in range
-             float anchorBeat = 0;
-             if (!mWarpMarkers.empty())
-                anchorBeat = SampleToBeat(mWarpMarkers[0].samplePos);
-             float firstBeat = ceilf(overviewStartBeat - anchorBeat) + anchorBeat;
-             for (float beat = firstBeat; beat <= overviewEndBeat; beat += 1.0f)
-             {
-                int beatNum = (int)roundf(beat - anchorBeat);
-                float bx = preRollPixels + ((beat - overviewStartBeat) / (overviewEndBeat - overviewStartBeat)) * overviewWidth;
-                bool isDownbeat = (beatNum % 4 == 0);
-                if (isDownbeat)
-                {
-                   ofSetColor(255, 80, 80, 140);
-                   ofSetLineWidth(1);
-                   ofLine(bx, 0, bx, halfH);
-                   int barNum = (beatNum >= 0) ? (beatNum / 4 + 1) : -((-beatNum + 3) / 4);
-                   ofSetColor(255, 80, 80, 100);
-                   DrawTextNormal(ofToString(barNum), bx + 2, 10, 7);
-                }
-                else
-                {
-                   ofSetColor(255, 255, 255, 30);
-                   ofSetLineWidth(1);
-                   ofLine(bx, 0, bx, halfH);
-                }
-             }
-             ofSetLineWidth(1);
-          }
-       }
+      // overview tempo grid (linear — evenly spaced beats)
+      {
+         float masterBPM = TheTransport ? TheTransport->GetTempo() : mSampleBPM;
+         if (masterBPM > 0 && totalSamples > 0)
+         {
+            float samplesPerBeat = gSampleRate * 60.0f / mSampleBPM;
+            if (samplesPerBeat > 0)
+            {
+               float overviewStartBeat = SampleToBeat(-preRollSamples);
+               float overviewEndBeat = SampleToBeat(totalSamples);
+               float firstBeat = ceilf(overviewStartBeat);
+               for (float beat = firstBeat; beat <= overviewEndBeat; beat += 1.0f)
+               {
+                  int beatNum = (int)roundf(beat);
+                  float frac = (beat - overviewStartBeat) / (overviewEndBeat - overviewStartBeat);
+                  float bx = frac * sampleWidth;
+                  bool isDownbeat = (beatNum % 4 == 0);
+                  if (isDownbeat)
+                  {
+                     ofSetColor(255, 80, 80, 140);
+                     ofSetLineWidth(1);
+                     ofLine(bx, 0, bx, halfH);
+                     int barNum = (beatNum >= 0) ? (beatNum / 4 + 1) : -((-beatNum + 3) / 4);
+                     ofSetColor(255, 80, 80, 100);
+                     DrawTextNormal(ofToString(barNum), bx + 2, 10, 7);
+                  }
+                  else
+                  {
+                     ofSetColor(255, 255, 255, 30);
+                     ofSetLineWidth(1);
+                     ofLine(bx, 0, bx, halfH);
+                  }
+               }
+            }
+         }
+         ofSetLineWidth(1);
+      }
 
-       // overview cue markers (warp-aware)
-       {
-          float obStart = SampleToBeat(-preRollSamples);
-          float obEnd = SampleToBeat(totalSamples);
-          float overviewWidth = sampleWidth - preRollPixels;
-          for (int i = 0; i < 8; ++i)
-          {
-             if (mCuePoints[i] >= 0)
-             {
-                float cueBeat = SampleToBeat(mCuePoints[i]);
-                float cx = preRollPixels + ((cueBeat - obStart) / (obEnd - obStart)) * overviewWidth;
-                ofSetColor(0, 200, 255, 150);
-                ofSetLineWidth(1);
-                ofLine(cx, 0, cx, halfH);
-                ofSetColor(0, 200, 255, 180);
-                DrawTextNormal(ofToString(i + 1), cx + 2, 10, 7);
-             }
-          }
-       }
+      // overview cue markers (linear)
+      {
+         float overviewStartBeat = SampleToBeat(-preRollSamples);
+         float overviewEndBeat = SampleToBeat(totalSamples);
+         for (int i = 0; i < 8; ++i)
+         {
+            if (mCuePoints[i] >= 0)
+            {
+               float cueBeat = SampleToBeat(mCuePoints[i]);
+               float frac = (cueBeat - overviewStartBeat) / (overviewEndBeat - overviewStartBeat);
+               float cx = frac * sampleWidth;
+               ofSetColor(0, 200, 255, 150);
+               ofSetLineWidth(1);
+               ofLine(cx, 0, cx, halfH);
+               ofSetColor(0, 200, 255, 180);
+               DrawTextNormal(ofToString(i + 1), cx + 2, 10, 7);
+            }
+         }
+      }
 
-       // overview warp markers (warp-aware)
-       {
-          float obStart = SampleToBeat(-preRollSamples);
-          float obEnd = SampleToBeat(totalSamples);
-          float overviewWidth = sampleWidth - preRollPixels;
-          for (int i = 0; i < (int)mWarpMarkers.size(); ++i)
-          {
-             float markerBeat = SampleToBeat(mWarpMarkers[i].samplePos);
-             float wx = preRollPixels + ((markerBeat - obStart) / (obEnd - obStart)) * overviewWidth;
-             if (mWarpMarkers[i].isAnchor)
-          {
-             // anchor: orange triangle down
-             ofSetColor(255, 160, 0, 200);
-             ofFill();
-             ofTriangle(wx - 4, 0, wx + 4, 0, wx, 6);
-             ofSetColor(255, 160, 0, 150);
-             ofSetLineWidth(1);
-             ofLine(wx, 0, wx, halfH);
-          }
-          else
-          {
-             // warp marker: yellow triangle down
-             ofSetColor(255, 255, 0, 200);
-             ofFill();
-             ofTriangle(wx - 3, 0, wx + 3, 0, wx, 5);
-             ofSetColor(255, 255, 0, 120);
-             ofSetLineWidth(1);
-              ofLine(wx, 0, wx, halfH);
-           }
-          }
-       }
-
-       // "FULL" label
+      // "FULL" label
       ofSetColor(255, 255, 255, 60);
       DrawTextNormal("FULL", sampleWidth - 25, 10, 7);
       ofPopStyle();
@@ -1993,28 +1485,24 @@ void DJPlayer::DrawModule()
       ofSetColor(0, 0, 0, 200);
       ofRect(0, 0, sampleWidth, halfH);
 
-       // pre-roll region in zoom (darker, striped, warp-aware)
-       if (zoomStart < 0)
-       {
-          float zStartBeat = SampleToBeat(zoomStart);
-          float zEndBeat = SampleToBeat(zoomEnd);
-          float zeroBeat = SampleToBeat(0);
-          float preRollEndPx = ((zeroBeat - zStartBeat) / (zEndBeat - zStartBeat)) * sampleWidth;
-          if (preRollEndPx > 0)
-          {
-             ofSetColor(20, 20, 30, 200);
-             ofRect(0, 0, preRollEndPx, halfH);
-             ofSetColor(255, 80, 80, 120);
-             ofSetLineWidth(1);
-             for (float sy = 0; sy < halfH; sy += 6)
+      // pre-roll region in zoom (darker, striped, linear)
+      if (zoomStart < 0)
+      {
+         float frac = (float)(-zoomStart) / (zoomEnd - zoomStart);
+         float preRollEndPx = frac * sampleWidth;
+         if (preRollEndPx > 0)
+         {
+            ofSetColor(20, 20, 30, 200);
+            ofRect(0, 0, preRollEndPx, halfH);
+            ofSetColor(255, 80, 80, 120);
+            ofSetLineWidth(1);
+            for (float sy = 0; sy < halfH; sy += 6)
                ofLine(preRollEndPx, sy, preRollEndPx, sy + 3);
          }
       }
 
       {
-         float zoomStartBeat = SampleToBeat(zoomStart);
-         float zoomEndBeat = SampleToBeat(zoomEnd);
-         DrawRGBWaveform(0, 0, sampleWidth, halfH, zoomStartBeat, zoomEndBeat);
+         DrawRGBWaveform(0, 0, sampleWidth, halfH, zoomStart, zoomEnd - zoomStart);
       }
 
       // center playhead (always visible)
@@ -2028,15 +1516,13 @@ void DJPlayer::DrawModule()
          ofTriangle(cx - 4, 0, cx + 4, 0, cx, 5);
       }
 
-      // loop region overlay (warp-aware)
+      // loop region overlay (linear)
       if (mLoopActive && mLoopIn >= 0 && mLoopOut > mLoopIn)
       {
-         float zStartBeat = SampleToBeat(zoomStart);
-         float zEndBeat = SampleToBeat(zoomEnd);
-         float loopInBeat = SampleToBeat(mLoopIn);
-         float loopOutBeat = SampleToBeat(mLoopOut);
-         float lx1 = ((loopInBeat - zStartBeat) / (zEndBeat - zStartBeat)) * sampleWidth;
-         float lx2 = ((loopOutBeat - zStartBeat) / (zEndBeat - zStartBeat)) * sampleWidth;
+         float frac1 = (float)(mLoopIn - zoomStart) / (zoomEnd - zoomStart);
+         float frac2 = (float)(mLoopOut - zoomStart) / (zoomEnd - zoomStart);
+         float lx1 = frac1 * sampleWidth;
+         float lx2 = frac2 * sampleWidth;
          if (lx2 >= 0 && lx1 <= sampleWidth)
          {
             ofFill();
@@ -2051,21 +1537,19 @@ void DJPlayer::DrawModule()
          }
       }
 
-      // zoom tempo grid — warp-aware: grid at master beat positions, mapped through warp
+      // zoom tempo grid (linear — evenly spaced beats)
       {
          float masterBPM = TheTransport ? TheTransport->GetTempo() : mSampleBPM;
          if (masterBPM > 0)
          {
             float zoomStartBeat = SampleToBeat(zoomStart);
             float zoomEndBeat = SampleToBeat(zoomEnd);
-            float anchorBeat = 0;
-            if (!mWarpMarkers.empty())
-               anchorBeat = SampleToBeat(mWarpMarkers[0].samplePos);
-            float firstBeat = ceilf(zoomStartBeat - anchorBeat) + anchorBeat;
+            float firstBeat = ceilf(zoomStartBeat);
             for (float beat = firstBeat; beat <= zoomEndBeat; beat += 1.0f)
             {
-               int beatNum = (int)roundf(beat - anchorBeat);
-               float bx = ((beat - zoomStartBeat) / (zoomEndBeat - zoomStartBeat)) * sampleWidth;
+               int beatNum = (int)roundf(beat);
+               float frac = (beat - zoomStartBeat) / (zoomEndBeat - zoomStartBeat);
+               float bx = frac * sampleWidth;
                bool isDownbeat = (beatNum % 4 == 0);
                if (isDownbeat)
                {
@@ -2087,16 +1571,17 @@ void DJPlayer::DrawModule()
          }
       }
 
-      // zoom cue markers (warp-aware)
+      // zoom cue markers (linear)
       {
-         float zStartBeat = SampleToBeat(zoomStart);
-         float zEndBeat = SampleToBeat(zoomEnd);
+         float zoomStartBeat = SampleToBeat(zoomStart);
+         float zoomEndBeat = SampleToBeat(zoomEnd);
          for (int i = 0; i < 8; ++i)
          {
             if (mCuePoints[i] >= 0)
             {
                float cueBeat = SampleToBeat(mCuePoints[i]);
-               float cx = ((cueBeat - zStartBeat) / (zEndBeat - zStartBeat)) * sampleWidth;
+               float frac = (cueBeat - zoomStartBeat) / (zoomEndBeat - zoomStartBeat);
+               float cx = frac * sampleWidth;
                if (cx >= 0 && cx <= sampleWidth)
                {
                   if (mCueMode == CueMode::Delete)
@@ -2112,44 +1597,6 @@ void DJPlayer::DrawModule()
                   DrawTextNormal(ofToString(i + 1), cx + 3, 24, 9);
                }
             }
-         }
-      }
-
-      // zoom warp markers (warp-aware)
-      {
-         float zStartBeat = SampleToBeat(zoomStart);
-         float zEndBeat = SampleToBeat(zoomEnd);
-         for (int i = 0; i < (int)mWarpMarkers.size(); ++i)
-         {
-            float markerBeat = SampleToBeat(mWarpMarkers[i].samplePos);
-            float wx = ((markerBeat - zStartBeat) / (zEndBeat - zStartBeat)) * sampleWidth;
-            if (wx >= 0 && wx <= sampleWidth)
-          {
-             if (mWarpMarkers[i].isAnchor)
-             {
-                // anchor: orange triangle down
-                ofSetColor(255, 160, 0, 240);
-                ofFill();
-                ofTriangle(wx - 5, 0, wx + 5, 0, wx, 7);
-                ofSetColor(255, 160, 0, 180);
-                ofSetLineWidth(1);
-                ofLine(wx, 0, wx, halfH);
-                ofSetColor(255, 160, 0, 200);
-                DrawTextNormal("1", wx + 6, 18, 8);
-             }
-             else
-             {
-                // warp marker: yellow triangle down
-                ofSetColor(255, 255, 0, 240);
-                ofFill();
-                ofTriangle(wx - 4, 0, wx + 4, 0, wx, 6);
-                ofSetColor(255, 255, 0, 150);
-                ofSetLineWidth(1);
-                ofLine(wx, 0, wx, halfH);
-                ofSetColor(255, 255, 0, 200);
-                DrawTextNormal(ofToString(i + 1), wx + 5, 18, 8);
-             }
-          }
          }
       }
 
@@ -2177,48 +1624,7 @@ void DJPlayer::DrawModule()
       ofPopStyle();
    }
 
-    ofPopMatrix();
-
-    // ── warp context menu (drawn on top of everything) ──
-    if (mWarpContextMenuVisible)
-    {
-       ofPushStyle();
-       ofFill();
-
-       // menu background
-       ofSetColor(30, 30, 35, 240);
-       ofRect(mWarpContextMenuX, mWarpContextMenuY, kWarpMenuWidth, kWarpMenuHeight);
-
-       // menu border
-       ofNoFill();
-       ofSetColor(255, 200, 0, 180);
-       ofSetLineWidth(1);
-       ofRect(mWarpContextMenuX, mWarpContextMenuY, kWarpMenuWidth, kWarpMenuHeight);
-
-       // menu items
-       ofFill();
-       const char* items[] = {
-          "Start 1.1.1.1 here",
-          "Warp from here (BPM master)",
-          "Warp from here (straight)"
-       };
-       for (int i = 0; i < 3; ++i)
-       {
-          float itemY = mWarpContextMenuY + i * kWarpMenuItemHeight;
-          ofSetColor(200, 200, 200, 220);
-          DrawTextNormal(items[i], mWarpContextMenuX + 8, itemY + 15, 8);
-
-          // separator line
-          if (i < 2)
-          {
-             ofSetColor(80, 80, 80, 100);
-             ofLine(mWarpContextMenuX + 4, itemY + kWarpMenuItemHeight,
-                    mWarpContextMenuX + kWarpMenuWidth - 4, itemY + kWarpMenuItemHeight);
-          }
-       }
-
-       ofPopStyle();
-    }
+   ofPopMatrix();
 }
 
 void DJPlayer::GetModuleDimensions(float& width, float& height)
@@ -2245,18 +1651,18 @@ void DJPlayer::SaveState(FileStreamOut& out)
    out << mMasterTempo;
    out << mSampleBPM;
    out << mVolume;
-    for (int i = 0; i < 8; ++i)
-        out << mCuePoints[i];
-    out << mScrollZoomBeats;
-    out << mLoopIn;
-    out << mLoopOut;
-    out << mLoopActive;
-    out << mLoopBeats;
-    out << mDetectedBPM;
-    out << mLoop;
-    out << mDetectedKey;
-     out << mBPMConfidence;
-     out << mFirstBeatSample;
+   for (int i = 0; i < 8; ++i)
+      out << mCuePoints[i];
+   out << mScrollZoomBeats;
+   out << mLoopIn;
+   out << mLoopOut;
+   out << mLoopActive;
+   out << mLoopBeats;
+   out << mDetectedBPM;
+   out << mLoop;
+   out << mDetectedKey;
+   out << mBPMConfidence;
+   out << mFirstBeatSample;
 }
 
 void DJPlayer::LoadState(FileStreamIn& in, int rev)
@@ -2272,76 +1678,71 @@ void DJPlayer::LoadState(FileStreamIn& in, int rev)
       UpdateSample(sample, true);
    }
 
-    if (rev >= 2)
-    {
-       int rangeInt;
-       in >> mPitchPercent;
-       in >> rangeInt;
-       mPitchRange = (PitchRange)rangeInt;
-       in >> mMasterTempo;
-       in >> mSampleBPM;
-       in >> mVolume;
-       for (int i = 0; i < 8; ++i)
-          in >> mCuePoints[i];
-       if (rev >= 3 && rev < 11)
-       {
-          bool dummyBool;
-          in >> dummyBool;  // old mShowBeatGrid
-          in >> dummyBool;  // old mSnapToGrid
-       }
-       if (rev >= 4 && rev < 6)
-       {
-          int modeInt;
-          in >> modeInt;  // read and discard old waveform mode
-          int zoomBeatsInt;
-          in >> zoomBeatsInt;
-          mScrollZoomBeats = (float)zoomBeatsInt;
-       }
-       if (rev >= 6 && rev < 11)
-       {
-          in >> mScrollZoomBeats;
-       }
-       if (rev >= 5 && rev < 11)
-       {
-          float dummyFloat;
-          in >> dummyFloat;  // old mBeatGridOffset
-          in >> mLoopIn;
-          in >> mLoopOut;
-          in >> mLoopActive;
-          in >> mLoopBeats;
-          in >> mDetectedBPM;
-       }
-       if (rev >= 11)
-       {
-          in >> mScrollZoomBeats;
-          in >> mLoopIn;
-          in >> mLoopOut;
-          in >> mLoopActive;
-          in >> mLoopBeats;
-          in >> mDetectedBPM;
-       }
-       if (rev >= 7)
-       {
-          in >> mLoop;
-          if (mSample != nullptr)
-             mSample->SetLooping(mLoop);
-       }
-       if (rev >= 8)
-       {
-          in >> mDetectedKey;
-          mKeyName = GetKeyName();
-       }
-       if (rev >= 9)
-       {
-          in >> mBPMConfidence;
-          in >> mFirstBeatSample;
-       }
-       if (rev >= 10 && rev < 11)
-       {
-          bool dummyBool;
-          in >> dummyBool;  // old mWarpMode
-       }
-    }
+   if (rev >= 2)
+   {
+      int rangeInt;
+      in >> mPitchPercent;
+      in >> rangeInt;
+      mPitchRange = (PitchRange)rangeInt;
+      in >> mMasterTempo;
+      in >> mSampleBPM;
+      in >> mVolume;
+      for (int i = 0; i < 8; ++i)
+         in >> mCuePoints[i];
+      if (rev >= 3 && rev < 11)
+      {
+         bool dummyBool;
+         in >> dummyBool;  // old mShowBeatGrid
+         in >> dummyBool;  // old mSnapToGrid
+      }
+      if (rev >= 4 && rev < 6)
+      {
+         int modeInt;
+         in >> modeInt;  // read and discard old waveform mode
+         int zoomBeatsInt;
+         in >> zoomBeatsInt;
+         mScrollZoomBeats = (float)zoomBeatsInt;
+      }
+      if (rev >= 6 && rev < 11)
+      {
+         in >> mScrollZoomBeats;
+      }
+      if (rev >= 5 && rev < 11)
+      {
+         float dummyFloat;
+         in >> dummyFloat;  // old mBeatGridOffset
+         in >> mLoopIn;
+         in >> mLoopOut;
+         in >> mLoopActive;
+         in >> mLoopBeats;
+         in >> mDetectedBPM;
+      }
+      if (rev >= 11)
+      {
+         in >> mScrollZoomBeats;
+         in >> mLoopIn;
+         in >> mLoopOut;
+         in >> mLoopActive;
+         in >> mLoopBeats;
+         in >> mDetectedBPM;
+      }
+      if (rev >= 7)
+      {
+         in >> mLoop;
+         if (mSample != nullptr)
+            mSample->SetLooping(mLoop);
+      }
+      if (rev >= 8)
+      {
+         in >> mDetectedKey;
+         mKeyName = GetKeyName();
+      }
+      if (rev >= 9)
+      {
+         in >> mBPMConfidence;
+         in >> mFirstBeatSample;
+      }
+   }
    else if (rev == 1)
    {
       // v1 had mMasterBPM between mSyncEnabled and mVolume — skip it

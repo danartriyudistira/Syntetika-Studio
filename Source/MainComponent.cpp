@@ -197,15 +197,7 @@ public:
 
       mSynth.LoadResources(mVG, mFontBoundsVG);
 
-      /*for (auto deviceType : mGlobalManagers.mDeviceManager.getAvailableDeviceTypes())
-      {
-         ofLog() << "inputs:";
-         for (auto input : deviceType->getDeviceNames(true))
-            ofLog() << input.toStdString();
-         ofLog() << "outputs:";
-         for (auto output : deviceType->getDeviceNames(false))
-            ofLog() << output.toStdString();
-      }*/
+
 
       const std::string kAutoDevice = "auto";
       const std::string kNoneDevice = "none";
@@ -242,71 +234,76 @@ public:
       if (outputDevice == kNoneDevice)
          outputChannels = 0;
 
-      String audioError = mGlobalManagers.mDeviceManager.initialise(inputChannels,
-                                                                    outputChannels,
-                                                                    nullptr,
-                                                                    true,
-                                                                    "",
-                                                                    &preferredSetupOptions);
+       String audioError = mGlobalManagers.mDeviceManager.initialise(inputChannels,
+                                                                     outputChannels,
+                                                                     nullptr,
+                                                                     true,
+                                                                     "",
+                                                                     &preferredSetupOptions);
 
-      if (audioError.isEmpty())
+      if (audioError.isNotEmpty())
+      {
+         ofLog() << "audio init failed with preferred device, retrying with auto: " << audioError;
+         audioError = mGlobalManagers.mDeviceManager.initialise(inputChannels, outputChannels, nullptr, true);
+      }
+
+      if (audioError.isNotEmpty())
+      {
+         mSynth.SetFatalError("error initializing audio device: " + audioError.toStdString() +
+                              "\n\nattempted to set output to: " + outputDevice + " and input to: " + inputDevice +
+                              "\n\ntry changing buffer size, sample rate, or devices in userprefs.json" +
+                              "\n(use \"auto\" for default device, \"none\" for no input)" +
+                              "\n\n\nvalid devices:\n" + GetAudioDevices());
+         return;
+      }
+
       {
          auto loadedSetup = mGlobalManagers.mDeviceManager.getAudioDeviceSetup();
+
          if (outputDevice != kAutoDevice && outputDevice != kNoneDevice &&
              loadedSetup.outputDeviceName.toStdString() != outputDevice)
          {
-            mSynth.SetFatalError("error setting output device to '" + outputDevice + "', fix this in userprefs.json (use \"auto\" for default device)" +
-                                 "\n\n\nvalid devices:\n" + GetAudioDevices());
+            ofLog() << "warning: requested output device '" << outputDevice << "' not found, using '"
+                    << loadedSetup.outputDeviceName << "' instead";
          }
          else if (inputDevice != kAutoDevice && inputDevice != kNoneDevice &&
                   loadedSetup.inputDeviceName.toStdString() != inputDevice)
          {
-            mSynth.SetFatalError("error setting input device to '" + inputDevice + "', fix this in userprefs.json (use \"auto\" for default device, or \"none\" for no device)" +
-                                 "\n\n\nvalid devices:\n" + GetAudioDevices());
+            ofLog() << "warning: requested input device '" << inputDevice << "' not found, using '"
+                    << loadedSetup.inputDeviceName << "' instead";
          }
          else if (loadedSetup.bufferSize != gBufferSize / UserPrefs.oversampling.Get())
          {
-            mSynth.SetFatalError("error setting buffer size to " + ofToString(gBufferSize / UserPrefs.oversampling.Get()) + " on device '" + loadedSetup.outputDeviceName.toStdString() + "', fix this in userprefs.json" +
-                                 "\n\n(a valid buffer size might be: " + ofToString(loadedSetup.bufferSize) + ")");
+            ofLog() << "warning: requested buffer size " << (gBufferSize / UserPrefs.oversampling.Get())
+                    << " not available, using " << loadedSetup.bufferSize;
          }
          else if (loadedSetup.sampleRate != gSampleRate / UserPrefs.oversampling.Get())
          {
-            mSynth.SetFatalError("error setting sample rate to " + ofToString(gSampleRate / UserPrefs.oversampling.Get()) + " on device '" + loadedSetup.outputDeviceName.toStdString() + "', fix this in userprefs.json" +
-                                 "\n\n(a valid sample rate might be: " + ofToString(loadedSetup.sampleRate) + ")");
+            ofLog() << "warning: requested sample rate " << (gSampleRate / UserPrefs.oversampling.Get())
+                    << " not available, using " << loadedSetup.sampleRate;
          }
-         else
+
+         ofLog() << "output: " << loadedSetup.outputDeviceName << "   input: " << loadedSetup.inputDeviceName;
+
+         int numInputChannels = 0;
+         int64 inputMask = loadedSetup.inputChannels.toInteger();
+         while (inputMask != 0)
          {
-            ofLog() << "output: " << loadedSetup.outputDeviceName << "   input: " << loadedSetup.inputDeviceName;
-
-            int numInputChannels = 0;
-            int64 inputMask = loadedSetup.inputChannels.toInteger();
-            while (inputMask != 0)
-            {
-               ++numInputChannels;
-               inputMask >>= 1;
-            }
-
-            int numOutputChannels = 0;
-            int64 outputMask = loadedSetup.outputChannels.toInteger();
-            while (outputMask != 0)
-            {
-               ++numOutputChannels;
-               outputMask >>= 1;
-            }
-
-            mSynth.InitIOBuffers(numInputChannels, numOutputChannels);
-
-            mGlobalManagers.mDeviceManager.addAudioCallback(this);
+            ++numInputChannels;
+            inputMask >>= 1;
          }
-      }
-      else
-      {
-         if (audioError.startsWith("No such device"))
-            audioError += "\n\nfix this in userprefs.json (you can use \"auto\" for the default device)";
-         else
-            audioError += juce::String("\n\nattempted to set output to: " + outputDevice + " and input to: " + inputDevice + "\n\ninitialization errors could potentially be fixed by changing buffer size, sample rate, or input/output devices in userprefs.json\nto use no input device, specify \"none\" for \"audio_input_device\"");
-         mSynth.SetFatalError("error initializing audio device: " + audioError.toStdString() +
-                              "\n\n\nvalid devices:\n" + GetAudioDevices());
+
+         int numOutputChannels = 0;
+         int64 outputMask = loadedSetup.outputChannels.toInteger();
+         while (outputMask != 0)
+         {
+            ++numOutputChannels;
+            outputMask >>= 1;
+         }
+
+         mSynth.InitIOBuffers(numInputChannels, numOutputChannels);
+
+         mGlobalManagers.mDeviceManager.addAudioCallback(this);
       }
 
       for (int i = 0; i < JUCEApplication::getCommandLineParameterArray().size(); ++i)

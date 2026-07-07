@@ -4,6 +4,7 @@
 #include "Profiler.h"
 #include "SynthGlobals.h"
 #include "PatchCableSource.h"
+#include "UIControlMacros.h"
 
 SpatialSource::SpatialSource()
 : IAudioProcessor(gBufferSize)
@@ -13,9 +14,37 @@ SpatialSource::SpatialSource()
 void SpatialSource::CreateUIControls()
 {
    IDrawableModule::CreateUIControls();
-   mXSlider = new FloatSlider(this, "x (cm)", 5, 2, 120, 15, &mX, -2000, 2000);
-   mYSlider = new FloatSlider(this, "y (cm)", 5, 20, 120, 15, &mY, -2000, 2000);
-   mZSlider = new FloatSlider(this, "z (cm)", 5, 38, 120, 15, &mZ, 0, 1000);
+
+   GetPatchCableSource()->AddTypeFilter("spatialrender");
+
+   UIBLOCK0();
+   FLOATSLIDER(mXSlider, "x (cm)", &mX, -2000, 2000);
+   FLOATSLIDER(mYSlider, "y (cm)", &mY, -2000, 2000);
+   FLOATSLIDER(mZSlider, "z (cm)", &mZ, 0, 1000);
+   FLOATSLIDER(mVolumeSlider, "vol", &mVolume, 0, 2);
+   FLOATSLIDER(mOcclusionSlider, "occlusion", &mOcclusion, 0, 1);
+   DROPDOWN(mAnimModeDropdown, "anim", &mAnimMode, 60);
+   UIBLOCK_SHIFTRIGHT();
+   FLOATSLIDER(mAnimRateSlider, "rate", &mAnimRate, 0, 5);
+   FLOATSLIDER(mAnimDepthSlider, "depth", &mAnimDepth, 0, 1);
+   UIBLOCK_NEWLINE();
+   DROPDOWN(mColorDropdown, "color", &mColorHue, 60);
+   ENDUIBLOCK0();
+
+   mAnimModeDropdown->AddLabel("static", 0);
+   mAnimModeDropdown->AddLabel("orbit", 1);
+   mAnimModeDropdown->AddLabel("lfo x", 2);
+   mAnimModeDropdown->AddLabel("lfo xy", 3);
+   mAnimModeDropdown->AddLabel("lfo xyz", 4);
+
+   mColorDropdown->AddLabel("red", 0);
+   mColorDropdown->AddLabel("orange", 30);
+   mColorDropdown->AddLabel("yellow", 60);
+   mColorDropdown->AddLabel("green", 120);
+   mColorDropdown->AddLabel("cyan", 180);
+   mColorDropdown->AddLabel("blue", 240);
+   mColorDropdown->AddLabel("magenta", 300);
+   mColorDropdown->AddLabel("white", -1);
 }
 
 SpatialSource::~SpatialSource()
@@ -35,6 +64,8 @@ void SpatialSource::Process(double time)
    {
       float* audioIn = GetBuffer()->GetChannel(0);
       mRegisteredRender->AcceptSourceAudio(this, audioIn, bufferSize);
+      mRegisteredRender->SetSourceProperties(this, mVolume, mOcclusion, mColorHue,
+                                              mAnimMode, mAnimRate, mAnimDepth);
    }
 
    GetBuffer()->Reset();
@@ -84,12 +115,47 @@ void SpatialSource::DrawModule()
    mXSlider->Draw();
    mYSlider->Draw();
    mZSlider->Draw();
+   mVolumeSlider->Draw();
+   mOcclusionSlider->Draw();
+   mAnimModeDropdown->Draw();
+   mAnimRateSlider->Draw();
+   mAnimDepthSlider->Draw();
+   mColorDropdown->Draw();
 }
 
 void SpatialSource::FloatSliderUpdated(FloatSlider* slider, float oldVal, double time)
 {
    if (mRegisteredRender)
       mRegisteredRender->NotifySourceMoved(this);
+}
+
+void SpatialSource::SaveState(FileStreamOut& out)
+{
+   IDrawableModule::SaveState(out);
+   out << mX;
+   out << mY;
+   out << mZ;
+   out << mVolume;
+   out << mOcclusion;
+   out << mColorHue;
+   out << mAnimMode;
+   out << mAnimRate;
+   out << mAnimDepth;
+}
+
+void SpatialSource::LoadState(FileStreamIn& in, int rev)
+{
+   IDrawableModule::LoadState(in, rev);
+   if (rev < 1) return;
+   in >> mX;
+   in >> mY;
+   in >> mZ;
+   in >> mVolume;
+   in >> mOcclusion;
+   in >> mColorHue;
+   in >> mAnimMode;
+   in >> mAnimRate;
+   in >> mAnimDepth;
 }
 
 void SpatialSource::LoadLayout(const ofxJSONElement& moduleInfo)
