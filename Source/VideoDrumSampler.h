@@ -61,6 +61,7 @@ public:
 
    bool IsEnabled() const override { return mEnabled; }
    bool IsResizable() const override { return true; }
+   bool ShouldSuppressAutomaticOutputCable() override { return true; }
    void Resize(float w, float h) override;
 
    static const int kNumPads = 16;
@@ -84,11 +85,15 @@ private:
 
       std::shared_ptr<foleys::MovieClip> mClip;
       bool mLoaded{ false };
-      bool mActive{ false };
-      double mStartTime{ 0 };
+      bool mIsImage{ false };
       int mNvgHandle{ -1 };
       int mLastTimecode{ -1 };
       int mCachedW{ 0 }, mCachedH{ 0 };
+
+      bool mActive{ false };
+      double mStartTime{ 0 };
+      double mTriggerFlashTime{ 0 };
+      int mCurrentFrame{ 0 };
    };
 
    void OnClicked(float x, float y, bool right) override;

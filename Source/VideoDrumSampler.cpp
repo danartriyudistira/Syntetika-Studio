@@ -80,11 +80,23 @@ void VideoDrumSampler::CreateUIControls()
    AddUIControl(mPlayPadButton); AddUIControl(mStopPadButton);
    AddUIControl(mLoadVideoButton); AddUIControl(mClearPadButton);
 
+   // Cables — right side, clearly separated
    mOutputCable = new PatchCableSource(this, kConnectionType_Audio);
-   mOutputCable->SetManualPosition(mWidth, mHeight / 2); AddPatchCableSource(mOutputCable);
+   mOutputCable->SetManualPosition(mWidth, mHeight - 45);
+   mOutputCable->SetManualSide(PatchCableSource::Side::kRight);
+   AddPatchCableSource(mOutputCable);
+
    mVisualCable = new PatchCableSource(this, kConnectionType_Special);
    mVisualCable->SetColor(IDrawableModule::GetColor(kModuleCategory_Visual));
-   mVisualCable->SetManualPosition(mWidth, mHeight / 2 + 15); AddPatchCableSource(mVisualCable);
+   mVisualCable->SetManualPosition(mWidth, mHeight - 25);
+   mVisualCable->SetManualSide(PatchCableSource::Side::kRight);
+   AddPatchCableSource(mVisualCable);
+
+   // explicit note input (prevent auto-generated one)
+   PatchCableSource* noteIn = new PatchCableSource(this, kConnectionType_Note);
+   noteIn->SetManualPosition(mWidth, mHeight - 10);
+   noteIn->SetManualSide(PatchCableSource::Side::kRight);
+   AddPatchCableSource(noteIn);
 }
 
 void VideoDrumSampler::Init() { IDrawableModule::Init(); TheTransport->AddListener(this, mQuantizeInterval, OffsetInfo(0, true), false); }
@@ -161,6 +173,7 @@ void VideoDrumSampler::TriggerPad(int index, double time)
 
    pad.mActive = true;
    pad.mStartTime = gTime * 0.001;
+   pad.mTriggerFlashTime = gTime * 0.001;
    pad.mLastTimecode = -1;
 
    if (pad.mClip) {
@@ -238,11 +251,25 @@ void VideoDrumSampler::DrawModule()
 
       ofPushStyle(); ofSetColor(200, 200, 220);
       DrawTextNormal(juce::String(i + 1).toStdString(), px + 3, py + 12, 10);
-      if (pad.mLoaded) DrawTextNormal("V", px + kPadSize - 14, py + 12, 10);
-      if (pad.mLoaded && pad.mClip && pad.mClip->hasAudio()) DrawTextNormal("A", px + kPadSize - 14, py + 24, 10);
+      if (pad.mLoaded) {
+         DrawTextNormal(pad.mIsImage ? "I" : "V", px + kPadSize - 14, py + 12, 10);
+         if (pad.mClip && pad.mClip->hasAudio()) DrawTextNormal("A", px + kPadSize - 14, py + 24, 10);
+      }
       ofPopStyle();
 
       ofPushStyle(); ofSetColor(60, 60, 70); ofNoFill(); ofRect(px, py, kPadSize, kPadSize); ofPopStyle();
+
+      // trigger flash indicator
+      double flashElapsed = gTime * 0.001 - pad.mTriggerFlashTime;
+      if (flashElapsed >= 0 && flashElapsed < 0.15 && pad.mLoaded) {
+         float flashAlpha = 1.0f - (float)(flashElapsed / 0.15);
+         ofPushStyle();
+         ofSetColor(255, 255, 255, (int)(255 * flashAlpha));
+         ofNoFill();
+         ofSetLineWidth(2);
+         ofRect(px, py, kPadSize, kPadSize);
+         ofPopStyle();
+      }
 
       if (mEditMode && i == mEditIndex) { ofPushStyle(); ofSetColor(255, 200, 50); ofNoFill(); ofRect(px - 1, py - 1, kPadSize + 2, kPadSize + 2); ofPopStyle(); }
       else if (!mEditMode && i == mLastClickedPad) { ofPushStyle(); ofSetColor(200, 200, 100); ofNoFill(); ofRect(px - 1, py - 1, kPadSize + 2, kPadSize + 2); ofPopStyle(); }
@@ -326,7 +353,25 @@ void VideoDrumSampler::PostRender()
    bool anyActive = false;
 
    for (auto& pad : mPads) {
-      if (!pad.mLoaded || !pad.mClip || !pad.mActive) continue;
+      if (!pad.mLoaded || !pad.mActive) continue;
+
+      // image: hold single frame for half-second then deactivate
+      if (pad.mIsImage) {
+         double elapsed = gTime * 0.001 - pad.mStartTime;
+         if (elapsed > 0.5 && !pad.mLooping) { pad.mActive = false; continue; }
+         if (pad.mNvgHandle >= 0) {
+            float dx, dy, dw, dh;
+            float ir = (float)pad.mCachedW / pad.mCachedH;
+            if (mDisplayMode == kDisplay_Fill) { dx = 0; dy = 0; dw = fbw; dh = fbh; }
+            else { float tr = (mDisplayMode == kDisplay_16x9) ? 16.0f/9.0f : (mDisplayMode == kDisplay_4x3) ? 4.0f/3.0f : (mDisplayMode == kDisplay_1x1) ? 1.0f : ir; float s = std::min(fbw / tr, fbh); dw = tr * s; dh = s; dx = (fbw - dw) / 2; dy = (fbh - dh) / 2; }
+            NVGpaint p = nvgImagePattern(gNanoVG, dx, dy, dw, dh, 0, pad.mNvgHandle, pad.mVol);
+            nvgBeginPath(gNanoVG); nvgRect(gNanoVG, dx, dy, dw, dh); nvgFillPaint(gNanoVG, p); nvgFill(gNanoVG);
+         }
+         anyActive = true;
+         continue;
+      }
+
+      if (!pad.mClip) continue;
 
       double dur = pad.mClip->getLengthInSeconds();
       double fd = pad.mClip->getFrameDurationInSeconds();
@@ -476,7 +521,8 @@ void VideoDrumSampler::SyncEditVars()
    mEditLoop = pad.mLooping; mEditStartOffset = pad.mStartOffset;
 
    int total = 100;
-   if (pad.mClip) {
+   if (pad.mIsImage) total = 1;
+   else if (pad.mClip) {
       double dur = pad.mClip->getLengthInSeconds();
       double fd = pad.mClip->getFrameDurationInSeconds();
       if (dur <= 0 || dur > 36000.0) dur = (fd > 0 ? fd * 100 : 10.0);
@@ -493,7 +539,7 @@ void VideoDrumSampler::DropdownUpdated(DropdownList* list, int oldVal, double ti
 }
 
 void VideoDrumSampler::GetModuleDimensions(float& w, float& h) { w = mWidth; h = mEditMode ? 400.0f : mHeight; }
-void VideoDrumSampler::Resize(float w, float h) { mWidth = ofClamp(w, 300, 9999); mHeight = ofClamp(h, 250, 9999); if (mOutputCable) mOutputCable->SetManualPosition(mWidth, mHeight / 2); if (mVisualCable) mVisualCable->SetManualPosition(mWidth, mHeight / 2 + 15); }
+void VideoDrumSampler::Resize(float w, float h) { mWidth = ofClamp(w, 300, 9999); mHeight = ofClamp(h, 250, 9999); if (mOutputCable) mOutputCable->SetManualPosition(mWidth, mHeight - 45); if (mVisualCable) mVisualCable->SetManualPosition(mWidth, mHeight - 25); }
 
 void VideoDrumSampler::LoadPadVideo(int index)
 {
@@ -502,6 +548,27 @@ void VideoDrumSampler::LoadPadVideo(int index)
    if (pad.mVideoPath.empty()) return;
    juce::File f(pad.mVideoPath); if (!f.existsAsFile()) return;
 
+   // detect image files (static, single frame)
+   juce::String ext = f.getFileExtension().toLowerCase();
+   if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".webp") {
+      juce::Image img = juce::ImageFileFormat::loadFrom(f);
+      if (!img.isValid()) return;
+      if (!mFBO) { mFBO = new VisualFBO(); mFBO->Create(512, 512); }
+      int w = img.getWidth(), h = img.getHeight();
+      juce::Image::BitmapData bmp(img, juce::Image::BitmapData::readOnly);
+      const uint8_t* sd = (const uint8_t*)bmp.data;
+      size_t sz = (size_t)w * h * 4; if (mConvertBuffer.size() < sz) mConvertBuffer.resize(sz);
+      for (int y = 0; y < h; ++y) { const uint8_t* s = sd + (size_t)y * bmp.lineStride; uint8_t* d = mConvertBuffer.data() + (size_t)y * w * 4; for (int x = 0; x < w; ++x) { d[x*4+0]=s[x*4+2]; d[x*4+1]=s[x*4+1]; d[x*4+2]=s[x*4+0]; d[x*4+3]=s[x*4+3]; } }
+      NVGcontext* nvg = mFBO->GetNVGContext();
+      pad.mNvgHandle = nvgCreateImageRGBA(nvg, w, h, 0, mConvertBuffer.data());
+      pad.mCachedW = w; pad.mCachedH = h;
+      pad.mIsImage = true; pad.mLoaded = true;
+      pad.mTrimStart = 0; pad.mTrimEnd = 1; pad.mFps = 30.0f;
+      if (mEditIndex == index) SyncEditVars();
+      return;
+   }
+
+   // video/GIF via MovieClip
    auto clip = mVideoEngine.createClipFromFile(juce::URL(f));
    pad.mClip = std::dynamic_pointer_cast<foleys::MovieClip>(clip);
    if (!pad.mClip) return;
@@ -527,7 +594,7 @@ void VideoDrumSampler::ClearPad(int index)
    if (index < 0 || index >= kNumPads) return;
    auto& pad = mPads[index];
    if (mFBO) { NVGcontext* n = mFBO->GetNVGContext(); if (n && pad.mNvgHandle >= 0) { nvgDeleteImage(n, pad.mNvgHandle); pad.mNvgHandle = -1; } }
-   pad.mClip.reset(); pad.mLoaded = false; pad.mActive = false;
+   pad.mClip.reset(); pad.mLoaded = false; pad.mActive = false; pad.mIsImage = false;
    pad.mTrimStart = 0; pad.mTrimEnd = 0; pad.mCachedW = 0; pad.mCachedH = 0;
 }
 
