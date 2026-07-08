@@ -108,6 +108,8 @@ private:
    void ClearPad(int index);
    void SaveKit();
    void LoadKit();
+   void ConsolidateAll();
+   static std::string FindFFmpeg();
 
    std::array<Pad, kNumPads> mPads;
    NoteInputBuffer mNoteInputBuffer;
@@ -115,6 +117,7 @@ private:
    foleys::VideoEngine mVideoEngine;
    std::vector<uint8_t> mConvertBuffer;
    ChannelBuffer mWriteBuffer{ gBufferSize };
+   std::string mKitFilePath;
 
    PatchCableSource* mOutputCable{ nullptr };
    PatchCableSource* mVisualCable{ nullptr };
@@ -138,9 +141,10 @@ private:
    Checkbox* mEditLoopCheckbox{ nullptr };
    ClickButton* mLoadVideoButton{ nullptr }, *mClearPadButton{ nullptr };
    ClickButton* mPlayPadButton{ nullptr }, *mStopPadButton{ nullptr };
+   ClickButton* mConsolidateButton{ nullptr };
 
    float mEditVol{ 1 }, mEditSpeed{ 1 }, mEditPan{ 0 }, mEditFps{ 30 };
-   float mEditTrimStart{ 0 }, mEditTrimEnd{ 1 }, mEditStartOffset{ 0 };
+   float mEditTrimStart{ 0 }, mEditTrimEnd{ 1 };
    bool mEditLoop{ false };
 
    NoteInterval mQuantizeInterval{ kInterval_None };

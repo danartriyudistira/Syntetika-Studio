@@ -72,6 +72,7 @@ void VideoDrumSampler::CreateUIControls()
    mStopPadButton = new ClickButton(this, "stop", 70, ey3);
    mLoadVideoButton = new ClickButton(this, "load video", 120, ey3);
    mClearPadButton = new ClickButton(this, "clear", 195, ey3);
+   mConsolidateButton = new ClickButton(this, "consolidate", 260, ey3);
 
    AddUIControl(mEditVolSlider); AddUIControl(mEditSpeedSlider);
    AddUIControl(mEditPanSlider); AddUIControl(mEditFpsSlider);
@@ -79,6 +80,7 @@ void VideoDrumSampler::CreateUIControls()
    AddUIControl(mEditLoopCheckbox);
    AddUIControl(mPlayPadButton); AddUIControl(mStopPadButton);
    AddUIControl(mLoadVideoButton); AddUIControl(mClearPadButton);
+   AddUIControl(mConsolidateButton);
 
    // Cables — right side, clearly separated
    mOutputCable = new PatchCableSource(this, kConnectionType_Audio);
@@ -288,6 +290,7 @@ void VideoDrumSampler::DrawEditPanel()
    mEditLoopCheckbox->Draw();
    mPlayPadButton->Draw(); mStopPadButton->Draw();
    mLoadVideoButton->Draw(); mClearPadButton->Draw();
+   mConsolidateButton->Draw();
 }
 
 void VideoDrumSampler::DrawWaveformTimeline()
@@ -464,6 +467,7 @@ void VideoDrumSampler::ButtonClicked(ClickButton* button, double time)
       if (chooser.browseForFileToOpen()) { mPads[mEditIndex].mVideoPath = chooser.getResult().getFullPathName().toStdString(); LoadPadVideo(mEditIndex); }
    }
    else if (button == mClearPadButton && mEditIndex >= 0 && mEditIndex < kNumPads) ClearPad(mEditIndex);
+   else if (button == mConsolidateButton) ConsolidateAll();
 }
 
 void VideoDrumSampler::FloatSliderUpdated(FloatSlider* slider, float oldVal, double time)
@@ -475,7 +479,6 @@ void VideoDrumSampler::FloatSliderUpdated(FloatSlider* slider, float oldVal, dou
    else if (slider == mEditSpeedSlider) pad.mSpeed = mEditSpeed;
    else if (slider == mEditPanSlider) pad.mPan = mEditPan;
    else if (slider == mEditFpsSlider) pad.mFps = mEditFps;
-   else if (slider == mEditStartOffsetSlider) pad.mStartOffset = mEditStartOffset;
    else if (slider == mEditTrimStartSlider || slider == mEditTrimEndSlider) {
       int total = 100;
       if (pad.mClip) {
@@ -518,7 +521,7 @@ void VideoDrumSampler::SyncEditVars()
    if (mEditIndex < 0 || mEditIndex >= kNumPads) return;
    auto& pad = mPads[mEditIndex];
    mEditVol = pad.mVol; mEditSpeed = pad.mSpeed; mEditPan = pad.mPan; mEditFps = pad.mFps;
-   mEditLoop = pad.mLooping; mEditStartOffset = pad.mStartOffset;
+   mEditLoop = pad.mLooping;
 
    int total = 100;
    if (pad.mIsImage) total = 1;
@@ -596,6 +599,76 @@ void VideoDrumSampler::ClearPad(int index)
    if (mFBO) { NVGcontext* n = mFBO->GetNVGContext(); if (n && pad.mNvgHandle >= 0) { nvgDeleteImage(n, pad.mNvgHandle); pad.mNvgHandle = -1; } }
    pad.mClip.reset(); pad.mLoaded = false; pad.mActive = false; pad.mIsImage = false;
    pad.mTrimStart = 0; pad.mTrimEnd = 0; pad.mCachedW = 0; pad.mCachedH = 0;
+   pad.mTriggerFlashTime = 0;
+}
+
+std::string VideoDrumSampler::FindFFmpeg()
+{
+   juce::File exeDir = juce::File::getSpecialLocation(juce::File::currentExecutableFile).getParentDirectory();
+   juce::File local = exeDir.getChildFile("ffmpeg.exe");
+   if (local.existsAsFile()) return local.getFullPathName().toStdString();
+   const char* pathEnv = std::getenv("PATH");
+   if (pathEnv) {
+      std::string paths(pathEnv); size_t s = 0, e;
+      while ((e = paths.find(';', s)) != std::string::npos) {
+         juce::File f(paths.substr(s, e - s) + "\\ffmpeg.exe"); if (f.existsAsFile()) return f.getFullPathName().toStdString();
+         s = e + 1;
+      }
+      juce::File f(paths.substr(s) + "\\ffmpeg.exe"); if (f.existsAsFile()) return f.getFullPathName().toStdString();
+   }
+   return "ffmpeg.exe";
+}
+
+void VideoDrumSampler::ConsolidateAll()
+{
+   if (mKitFilePath.empty()) {
+      SaveKit();
+      if (mKitFilePath.empty()) return;
+   }
+
+   juce::File kitFile(mKitFilePath);
+   juce::File outDir = kitFile.getParentDirectory().getChildFile(kitFile.getFileNameWithoutExtension() + "_consolidated");
+   outDir.createDirectory();
+
+   std::string ffmpeg = FindFFmpeg();
+   bool any = false;
+
+   for (int i = 0; i < kNumPads; ++i) {
+      auto& pad = mPads[i];
+      if (!pad.mLoaded || pad.mIsImage || pad.mVideoPath.empty()) continue;
+
+      int ts = pad.mTrimStart, te = pad.mTrimEnd;
+      if (te <= ts) continue;
+
+      double startSec = 0, endSec = 10;
+      if (pad.mClip) {
+         double fd = pad.mClip->getFrameDurationInSeconds();
+         if (fd > 0) { startSec = ts * fd; endSec = te * fd; }
+      }
+
+      juce::File src(pad.mVideoPath);
+      juce::File dst = outDir.getChildFile("pad_" + juce::String(i + 1) + "_" + src.getFileName());
+      if (dst.existsAsFile()) dst.deleteFile();
+
+      std::string cmd = "\"" + ffmpeg + "\" -y -i \"" + pad.mVideoPath + "\" -ss " +
+         juce::String(startSec, 3).toStdString() + " -to " + juce::String(endSec, 3).toStdString() +
+         " -c copy \"" + dst.getFullPathName().toStdString() + "\" 2>nul";
+      system(cmd.c_str());
+
+      if (dst.existsAsFile() && dst.getSize() > 0) {
+         pad.mVideoPath = dst.getFullPathName().toStdString();
+         pad.mTrimStart = 0;
+         pad.mTrimEnd = (int)((endSec - startSec) / (pad.mClip->getFrameDurationInSeconds() > 0 ? pad.mClip->getFrameDurationInSeconds() : 1.0/30.0));
+         LoadPadVideo(i);
+         any = true;
+      }
+   }
+
+   if (any) {
+      mKitFilePath = outDir.getChildFile(kitFile.getFileName()).getFullPathName().toStdString();
+      SaveKit(); // re-save with new paths
+   }
+   if (mEditIndex >= 0) SyncEditVars();
 }
 
 void VideoDrumSampler::SaveKit()
@@ -603,6 +676,7 @@ void VideoDrumSampler::SaveKit()
    juce::FileChooser chooser("Save Drum Kit", juce::File::getSpecialLocation(juce::File::userDocumentsDirectory), "*.vds", true, false, TheSynth->GetFileChooserParent());
    if (!chooser.browseForFileToSave(true)) return;
    juce::File file = chooser.getResult(); if (file.getFileExtension().isEmpty()) file = file.withFileExtension(".vds");
+   mKitFilePath = file.getFullPathName().toStdString();
 
    juce::DynamicObject::Ptr root = new juce::DynamicObject();
    root->setProperty("quantizeInterval", (int)mQuantizeInterval);
@@ -618,7 +692,7 @@ void VideoDrumSampler::SaveKit()
       po->setProperty("pan", mPads[i].mPan); po->setProperty("fps", mPads[i].mFps);
       po->setProperty("loop", mPads[i].mLooping); po->setProperty("linkId", mPads[i].mLinkId);
       po->setProperty("trimStart", mPads[i].mTrimStart); po->setProperty("trimEnd", mPads[i].mTrimEnd);
-      po->setProperty("startOffset", mPads[i].mStartOffset);
+      po->setProperty("startOffset", mPads[i].mStartOffset); po->setProperty("isImage", mPads[i].mIsImage);
       pads.add(juce::var(po.get()));
    }
    root->setProperty("pads", pads);
@@ -649,6 +723,7 @@ void VideoDrumSampler::LoadKit()
          mPads[i].mLooping = p.getProperty("loop", false); mPads[i].mLinkId = p.getProperty("linkId", -1);
          mPads[i].mTrimStart = p.getProperty("trimStart", 0); mPads[i].mTrimEnd = p.getProperty("trimEnd", 0);
          mPads[i].mStartOffset = p.getProperty("startOffset", 0.0f);
+         mPads[i].mIsImage = p.getProperty("isImage", false);
          if (!mPads[i].mVideoPath.empty()) LoadPadVideo(i);
       }
    }
