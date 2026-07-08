@@ -5,6 +5,7 @@
 #include "ModularSynth.h"
 #include "Profiler.h"
 #include "IAudioReceiver.h"
+#include "Transport.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include <algorithm>
@@ -51,8 +52,14 @@ void VideoPlayerModule::CreateUIControls()
    mStopButton = new ClickButton(this, "stop", x, kControlY); x += 42;
    AddUIControl(mStopButton);
 
-   // Row 2: cue + loop + speed
+   // Row 2: nudge + cue + loop + speed
    x = 3;
+   mNudgeLeftButton = new ClickButton(this, "<", x, kRow2Y); x += 22;
+   AddUIControl(mNudgeLeftButton);
+
+   mNudgeRightButton = new ClickButton(this, ">", x, kRow2Y); x += 22;
+   AddUIControl(mNudgeRightButton);
+
    mCueButton = new ClickButton(this, "cue", x, kRow2Y); x += 38;
    AddUIControl(mCueButton);
 
@@ -69,10 +76,10 @@ void VideoPlayerModule::CreateUIControls()
    AddUIControl(mLoopClearButton);
 
    x += 2;
-   mSpeedSlider = new FloatSlider(this, "spd", x, kRow2Y, 80, kControlH, &mSpeed, 0.05f, 8.0f, 2);
+   mSpeedSlider = new FloatSlider(this, "spd", x, kRow2Y, 80, kControlH, &mSpeed, 0.1f, 8.0f, 2);
    AddUIControl(mSpeedSlider);
 
-   // Row 3: dropdowns + hotcues
+   // Row 3: dropdowns + BPM sync + hotcues
    mSpeedRangeDropdown = new DropdownList(this, "range", 3, kRow3Y, (int*)&mSpeedRange);
    mSpeedRangeDropdown->AddLabel("1x", kSpeedRange_1x);
    mSpeedRangeDropdown->AddLabel("2x", kSpeedRange_2x);
@@ -80,17 +87,23 @@ void VideoPlayerModule::CreateUIControls()
    mSpeedRangeDropdown->AddLabel("8x", kSpeedRange_8x);
    AddUIControl(mSpeedRangeDropdown);
 
-   mCueModeDropdown = new DropdownList(this, "cue mode", 75, kRow3Y, (int*)&mCueMode);
+   mCueModeDropdown = new DropdownList(this, "cue mode", 80, kRow3Y, (int*)&mCueMode);
    mCueModeDropdown->AddLabel("jump", kCueMode_Jump);
    mCueModeDropdown->AddLabel("set", kCueMode_Set);
    AddUIControl(mCueModeDropdown);
 
-   float hx = 162;
+   mTempoSlider = new FloatSlider(this, "bpm", 160, kRow3Y, 55, kControlH, &mTempo, 40.0f, 250.0f, 1);
+   AddUIControl(mTempoSlider);
+
+   mSyncCheckbox = new Checkbox(this, "sync", 220, kRow3Y, &mSync);
+   AddUIControl(mSyncCheckbox);
+
+   float hx = 250;
    for (int i = 0; i < kNumHotcues; ++i)
    {
       mHotcuePosition[i] = -1;
       mHotcueButton[i] = new ClickButton(this, ofToString(i + 1).c_str(), hx, kRow3Y);
-      hx += 28;
+      hx += 26;
       AddUIControl(mHotcueButton[i]);
    }
 
@@ -117,6 +130,15 @@ void VideoPlayerModule::Process(double time)
 {
    PROFILER(VideoPlayerModule);
 
+   if (mSeekPending.exchange(false, std::memory_order_acquire))
+   {
+      if (mClip)
+      {
+         mClip->setNextReadPosition((int64_t)(mSeekTarget * mClip->getSampleRate()));
+         mClip->waitForSamplesReady(512, 30);
+      }
+   }
+
    IAudioReceiver* target = GetTarget();
    if (!mEnabled || target == nullptr)
       return;
@@ -125,16 +147,6 @@ void VideoPlayerModule::Process(double time)
 
    int bufferSize = target->GetBuffer()->BufferSize();
    mWriteBuffer.Clear();
-
-   if (mSeekPending.load(std::memory_order_acquire))
-   {
-      mSeekPending.store(false, std::memory_order_relaxed);
-      if (mClip)
-      {
-         mClip->setNextReadPosition((int64_t)(mSeekTarget * mClip->getSampleRate()));
-         mClip->waitForSamplesReady(bufferSize, 30);
-      }
-   }
 
    if (mClip && mClip->hasAudio() && mPlaying)
    {
@@ -193,6 +205,9 @@ void VideoPlayerModule::ButtonClicked(ClickButton* button, double time)
              SetPosition(0);
           mPlaying = true;
           mPlayStartTime = gTime * 0.001 - mPlayhead / mSpeed;
+          mSeekTarget = mPlayhead;
+          mSeekPending.store(true, std::memory_order_release);
+          mLastFrameTimecode = -1;
        }
     }
    else if (button == mPauseButton)
@@ -202,19 +217,28 @@ void VideoPlayerModule::ButtonClicked(ClickButton* button, double time)
       mPlaying = false;
       SetPosition(0);
    }
-   else if (button == mCueButton)
-   {
-      if (mCueMode == kCueMode_Set)
-      {
-         mHasCue = true;
-         mCuePoint = mPlayhead;
-      }
-      else
-      {
-         if (mHasCue)
-            SetPosition(mCuePoint);
-      }
-   }
+    else if (button == mCueButton)
+    {
+       if (mHasCue)
+       {
+          SetPosition(mCuePoint);
+       }
+       else
+       {
+          mHasCue = true;
+          mCuePoint = mPlayhead;
+       }
+    }
+    else if (button == mNudgeLeftButton)
+    {
+       double nudgeSec = mDuration > 0 ? 0.1 : 0.05;
+       SetPosition(mPlayhead - nudgeSec);
+    }
+    else if (button == mNudgeRightButton)
+    {
+       double nudgeSec = mDuration > 0 ? 0.1 : 0.05;
+       SetPosition(mPlayhead + nudgeSec);
+    }
    else if (button == mLoopInButton)
    {
       if (mLoopOut >= 0 && mPlayhead > mLoopOut)
@@ -241,23 +265,25 @@ void VideoPlayerModule::ButtonClicked(ClickButton* button, double time)
     }
     else
     {
-       for (int i = 0; i < kNumHotcues; ++i)
-       {
-          if (button == mHotcueButton[i])
-          {
-          if (mHotcuePosition[i] < 0)
-          {
-             mHotcuePosition[i] = mPlayhead;
-          }
-          else
-          {
-             if (!mPlaying)
-                mPlaying = true;
-             SetPosition(mHotcuePosition[i]);
-          }
-             return;
-          }
-       }
+        for (int i = 0; i < kNumHotcues; ++i)
+        {
+           if (button == mHotcueButton[i])
+           {
+              if (!mHasVideo)
+                 return;
+              if (mHotcuePosition[i] < 0)
+              {
+                 mHotcuePosition[i] = mPlayhead;
+              }
+              else
+              {
+                 if (!mPlaying)
+                    mPlaying = true;
+                 SetPosition(mHotcuePosition[i]);
+              }
+              return;
+           }
+        }
     }
 }
 
@@ -268,9 +294,18 @@ void VideoPlayerModule::FloatSliderUpdated(FloatSlider* slider, float oldVal, do
       SetPosition(mPlayheadFloat * mDuration);
    }
 
-   if (slider == mSpeedSlider && mPlaying)
+   if (slider == mSpeedSlider)
    {
-      mPlayStartTime = gTime * 0.001 - mPlayhead / mSpeed;
+      if (mPlaying)
+         mPlayStartTime = gTime * 0.001 - mPlayhead / mSpeed;
+   }
+
+   if (slider == mTempoSlider)
+   {
+      if (!mSync)
+      {
+         mBaseBPM = mTempo;
+      }
    }
 }
 
@@ -282,10 +317,11 @@ void VideoPlayerModule::DropdownUpdated(DropdownList* list, int oldVal, double t
 {
    if (list == mSpeedRangeDropdown)
    {
-      mSpeedSlider->SetExtents(0.05f, mSpeedRangeValues[mSpeedRange]);
-      mSpeed = ofClamp(mSpeed, 0.05f, mSpeedRangeValues[mSpeedRange]);
-       if (mPlaying)
-          mPlayStartTime = gTime * 0.001 - mPlayhead / mSpeed;
+      float maxSpd = mSpeedRangeValues[mSpeedRange];
+      mSpeedSlider->SetExtents(0.1f, maxSpd);
+      mSpeed = ofClamp(mSpeed, 0.1f, maxSpd);
+      if (mPlaying)
+         mPlayStartTime = gTime * 0.001 - mPlayhead / mSpeed;
    }
 }
 
@@ -335,6 +371,8 @@ void VideoPlayerModule::DrawModule()
    mPlayButton->Draw();
    mPauseButton->Draw();
    mStopButton->Draw();
+   mNudgeLeftButton->Draw();
+   mNudgeRightButton->Draw();
    mCueButton->Draw();
    mSpeedSlider->Draw();
    mLoopCheckbox->Draw();
@@ -344,6 +382,8 @@ void VideoPlayerModule::DrawModule()
    mPositionSlider->Draw();
     mSpeedRangeDropdown->Draw();
     mCueModeDropdown->Draw();
+    mTempoSlider->Draw();
+    mSyncCheckbox->Draw();
     for (int i = 0; i < kNumHotcues; ++i)
        mHotcueButton[i]->Draw();
 
@@ -366,11 +406,13 @@ void VideoPlayerModule::DrawModule()
    std::string info = std::string(TimeStr(mPlayhead)) + " / " + std::string(TimeStr(mDuration))
       + "  " + ofToString((int)(mFps + 0.5f)) + "fps"
       + "  f" + ofToString(currentFrame);
-   if (mPlaying)
-      info += "  [PLAY]";
-   else
-      info += "  [STOP]";
-   if (mLoop)
+    if (mPlaying)
+       info += "  [PLAY]";
+    else
+       info += "  [STOP]";
+    if (mSync)
+       info += "  [SYNC " + ofToString((int)(mTempo + 0.5f)) + "bpm]";
+    if (mLoop)
       info += "  [LOOP]";
    if (mLoopSectionActive)
       info += "  [A-LOOP " + std::string(TimeStr(mLoopIn)) + "-" + std::string(TimeStr(mLoopOut)) + "]";
@@ -490,6 +532,12 @@ void VideoPlayerModule::PostRender()
 
    double t = gTime * 0.001;
 
+   if (mSync && TheTransport)
+   {
+      mTempo = TheTransport->GetTempo();
+      mSpeed = ofClamp(mTempo / mBaseBPM, 0.1f, 8.0f);
+   }
+
    if (mPlaying)
    {
       double elapsed = t - mPlayStartTime;
@@ -523,11 +571,11 @@ void VideoPlayerModule::PostRender()
       mPlayheadFloat = (float)(mDuration > 0 ? mPlayhead / mDuration : 0);
    }
 
-   // sync playhead from slider drag (slider directly writes mPlayheadFloat, may not fire callback)
+   // sync playhead from slider drag (slider directly writes mPlayheadFloat)
    if (!mPlaying && mDuration > 0)
    {
       double sliderPosition = (double)mPlayheadFloat * mDuration;
-      if (std::abs(sliderPosition - mPlayhead) > 0.0005)
+      if (std::abs(sliderPosition - mPlayhead) > 0.0001)
       {
          mPlayhead = ofClamp(sliderPosition, 0.0, mDuration);
          mLastFrameTimecode = -1;
@@ -564,23 +612,14 @@ void VideoPlayerModule::PostRender()
       }
       else
       {
-         // slider scrub: seek decoder then pull from FIFO (non-blocking, 1-frame delay)
+         // paused scrubbing: use thumbnail reader for instant frame (no FIFO clear)
          if (mLastFrameTimecode < 0)
          {
-            if (mClip->hasAudio())
-               mClip->setNextReadPosition((int64_t)(mPlayhead * mClip->getSampleRate()));
-            else
-               mClip->setNextReadPosition(0);
-            mLastFrameTimecode = -2; // mark as "seeking, wait for decoder"
-         }
-
-         if (mLastFrameTimecode == -2 && mClip->isFrameAvailable(mPlayhead))
-         {
-            foleys::VideoFrame& frame = mClip->getFrame(mPlayhead);
-            if (frame.image.isValid())
+            foleys::Size sz = mClip->getVideoSize();
+            img = mClip->getStillImage(mPlayhead, sz);
+            if (img.isValid())
             {
-               mLastFrameTimecode = frame.timecode;
-               img = frame.image;
+               mLastFrameTimecode = (juce::int64)(mPlayhead * 1000.0);
                newFrame = true;
             }
          }
@@ -588,26 +627,26 @@ void VideoPlayerModule::PostRender()
 
       if (newFrame)
       {
-         int w = img.getWidth();
-         int h = img.getHeight();
+          int w = img.getWidth();
+          int h = img.getHeight();
 
-         if (!mFBO)
-            mFBO = new VisualFBO();
-         if (!mFBO->IsValid() || mFBO->GetWidth() != w || mFBO->GetHeight() != h)
-         {
-            delete mFBO;
-            mFBO = new VisualFBO();
-            mFBO->Create(std::max(64, w), std::max(64, h));
-         }
+          if (!mFBO || !mFBO->IsValid() || mFBO->GetWidth() != w || mFBO->GetHeight() != h)
+          {
+             delete mFBO;
+             mFBO = new VisualFBO();
+             mFBO->Create(std::max(64, w), std::max(64, h));
+          }
 
          juce::Image::BitmapData bmp(img, juce::Image::BitmapData::readOnly);
          const uint8_t* srcData = (const uint8_t*)bmp.data;
-         std::vector<uint8_t> rgba((size_t)w * h * 4);
+         size_t bufSize = (size_t)w * h * 4;
+         if (mConvertBuffer.size() < bufSize)
+            mConvertBuffer.resize(bufSize);
 
          for (int y = 0; y < h; ++y)
          {
             const uint8_t* src = srcData + (size_t)y * bmp.lineStride;
-            uint8_t* dst = rgba.data() + (size_t)y * w * 4;
+            uint8_t* dst = mConvertBuffer.data() + (size_t)y * w * 4;
             for (int x = 0; x < w; ++x)
             {
                dst[x * 4 + 0] = src[x * 4 + 2];
@@ -621,7 +660,7 @@ void VideoPlayerModule::PostRender()
 
          if (mCurrentFrameHandle >= 0)
             nvgDeleteImage(gNanoVG, mCurrentFrameHandle);
-         mCurrentFrameHandle = nvgCreateImageRGBA(gNanoVG, w, h, 0, rgba.data());
+         mCurrentFrameHandle = nvgCreateImageRGBA(gNanoVG, w, h, 0, mConvertBuffer.data());
 
          if (mCurrentFrameHandle >= 0)
          {
@@ -656,11 +695,17 @@ void VideoPlayerModule::LoadFromPath(const std::string& path)
 
    auto clip = mVideoEngine.createClipFromFile(juce::URL(juce::File(path)));
    if (!clip)
+   {
+      mVideoPath.clear();
       return;
+   }
 
    mClip = std::dynamic_pointer_cast<foleys::MovieClip>(clip);
    if (!mClip)
+   {
+      mVideoPath.clear();
       return;
+   }
 
    // Metadata
    foleys::Size size = mClip->getVideoSize();
@@ -697,6 +742,8 @@ void VideoPlayerModule::UnloadVideo()
          nvgDeleteImage(fboNVG, mCurrentFrameHandle);
       mCurrentFrameHandle = -1;
    }
+   delete mFBO;
+   mFBO = nullptr;
    mClip.reset();
    mWaveformOverview.clear();
    mHasVideo = false;
@@ -707,6 +754,9 @@ void VideoPlayerModule::UnloadVideo()
    mVideoH = 0;
    mFps = 30.0;
    mLastFrameTimecode = -1;
+   mSeekPending.store(false, std::memory_order_relaxed);
+   for (int i = 0; i < kNumHotcues; ++i)
+      mHotcuePosition[i] = -1;
 }
 
 void VideoPlayerModule::SetPosition(double seconds)
@@ -903,6 +953,9 @@ void VideoPlayerModule::SaveState(FileStreamOut& out)
    out << mLoop;
    out << mSpeedRange;
    out << mCueMode;
+   out << mTempo;
+   out << mBaseBPM;
+   out << mSync;
    out << mHasCue;
    if (mHasCue)
       out << mCuePoint;
@@ -925,6 +978,12 @@ void VideoPlayerModule::LoadState(FileStreamIn& in, int rev)
       in >> mSpeedRange;
       in >> mCueMode;
    }
+   if (rev >= 3)
+   {
+      in >> mTempo;
+      in >> mBaseBPM;
+      in >> mSync;
+   }
    in >> mHasCue;
    if (mHasCue)
       in >> mCuePoint;
@@ -938,11 +997,11 @@ void VideoPlayerModule::LoadState(FileStreamIn& in, int rev)
          in >> mHotcuePosition[i];
    }
 
-   if (rev >= 1 && mSpeedSlider)
-   {
-      mSpeedSlider->SetExtents(0.05f, mSpeedRangeValues[mSpeedRange]);
-      mSpeed = ofClamp(mSpeed, 0.05f, mSpeedRangeValues[mSpeedRange]);
-   }
+    if (rev >= 1 && mSpeedSlider)
+    {
+       mSpeedSlider->SetExtents(0.1f, mSpeedRangeValues[mSpeedRange]);
+       mSpeed = ofClamp(mSpeed, 0.1f, mSpeedRangeValues[mSpeedRange]);
+    }
 
    if (!mVideoPath.empty())
    {

@@ -4,17 +4,18 @@
 #include "INoteReceiver.h"
 #include "IDrawableModule.h"
 #include "IVisualSource.h"
-#include "Sample.h"
 #include "Slider.h"
 #include "ClickButton.h"
 #include "Checkbox.h"
 #include "DropdownList.h"
 #include "PatchCableSource.h"
 #include "Transport.h"
+#include "foleys_video_engine.h"
 
 #include <vector>
 #include <string>
 #include <array>
+#include <memory>
 
 class VisualFBO;
 
@@ -24,7 +25,8 @@ class VideoDrumSampler : public IAudioSource,
                          public IVisualSource,
                          public IFloatSliderListener,
                          public IButtonListener,
-                         public IDropdownListener
+                         public IDropdownListener,
+                         public ITimeListener
 {
 public:
    VideoDrumSampler();
@@ -36,11 +38,14 @@ public:
    static bool AcceptsPulses() { return false; }
 
    void CreateUIControls() override;
+   void Init() override;
 
    void Process(double time) override;
    void PlayNote(double time, int pitch, int velocity, int voiceIdx = -1, ModulationParameters modulation = ModulationParameters()) override;
    void SendCC(int control, int value, int voiceIdx = -1) override {}
    void SetEnabled(bool enabled) override { mEnabled = enabled; }
+
+   void OnTimeEvent(double time) override;
 
    void ButtonClicked(ClickButton* button, double time) override;
    void CheckboxUpdated(Checkbox* checkbox, double time) override;
@@ -49,18 +54,20 @@ public:
 
    void SaveState(FileStreamOut& out) override;
    void LoadState(FileStreamIn& in, int rev) override;
-   int GetModuleSaveStateRev() const override { return 1; }
+   int GetModuleSaveStateRev() const override { return 3; }
 
    VisualFBO* GetFBO() override;
    void PostRender() override;
 
    bool IsEnabled() const override { return mEnabled; }
+   bool IsResizable() const override { return true; }
+   void Resize(float w, float h) override;
 
    static const int kNumPads = 16;
-   static constexpr float kPadSize = 65;
-   static constexpr float kPadGap = 4;
+   static constexpr float kPadSize = 55;
+   static constexpr float kPadGap = 3;
    static constexpr float kGridX = 5;
-   static constexpr float kGridY = 25;
+   static constexpr float kGridY = 38;
 
 private:
    void DrawModule() override;
@@ -69,80 +76,75 @@ private:
    struct Pad
    {
       std::string mVideoPath;
-      std::string mTempDir;
-      std::string mAudioPath;
-      float mVol{ 1.0f };
-      float mSpeed{ 1.0f };
-      float mPan{ 0.0f };
-      float mFps{ 30.0f };
+      float mVol{ 1.0f }, mSpeed{ 1.0f }, mPan{ 0.0f }, mFps{ 30.0f };
       bool mLooping{ false };
       int mLinkId{ -1 };
+      int mTrimStart{ 0 }, mTrimEnd{ 0 };
+      float mStartOffset{ 0 };
 
-      std::vector<int> mImageHandles;
-      int mNumFrames{ 0 };
-      int mImageW{ 0 };
-      int mImageH{ 0 };
+      std::shared_ptr<foleys::MovieClip> mClip;
       bool mLoaded{ false };
-
-      Sample mAudioSample;
-
       bool mActive{ false };
-      double mLastAdvanceTime{ 0 };
-      int mCurrentFrame{ 0 };
+      double mStartTime{ 0 };
+      int mNvgHandle{ -1 };
+      int mLastTimecode{ -1 };
+      int mCachedW{ 0 }, mCachedH{ 0 };
    };
 
    void OnClicked(float x, float y, bool right) override;
    void SyncEditVars();
+   void DrawEditPanel();
+   void DrawWaveformTimeline();
+   void RenderPadFrame(Pad& pad, double playheadSec, float fbw, float fbh);
 
    int PadFromClick(float x, float y) const;
    void TriggerPad(int index, double time);
    void LoadPadVideo(int index);
    void ClearPad(int index);
-
-   static std::string FindFFmpeg();
-   static std::string CreateTempDir();
-   static bool ExtractFramesFFmpeg(const std::string& videoPath, const std::string& tempDir);
-   static void RemoveTempDir(const std::string& tempDir);
+   void SaveKit();
+   void LoadKit();
 
    std::array<Pad, kNumPads> mPads;
    NoteInputBuffer mNoteInputBuffer;
    VisualFBO* mFBO{ nullptr };
-
+   foleys::VideoEngine mVideoEngine;
+   std::vector<uint8_t> mConvertBuffer;
    ChannelBuffer mWriteBuffer{ gBufferSize };
 
    PatchCableSource* mOutputCable{ nullptr };
    PatchCableSource* mVisualCable{ nullptr };
 
-   ClickButton* mBrowseButton{ nullptr };
-   DropdownList* mModeDropdown{ nullptr };
-   FloatSlider* mFpsSlider{ nullptr };
-   FloatSlider* mFramesPerBeatSlider{ nullptr };
-   Checkbox* mEditCheckbox{ nullptr };
-   bool mEditMode{ false };
+   ClickButton* mSaveButton{ nullptr }, *mLoadButton{ nullptr };
+   DropdownList* mQuantizeDropdown{ nullptr };
+   DropdownList* mDisplayModeDropdown{ nullptr };
+   Checkbox* mNoteRepeatCheckbox{ nullptr }, *mFullVelocityCheckbox{ nullptr };
+   Checkbox* mSingleVoiceCheckbox{ nullptr }, *mEditCheckbox{ nullptr };
+   Checkbox* mPianoModeCheckbox{ nullptr };
+   ClickButton* mOctDownButton{ nullptr }, *mOctUpButton{ nullptr };
 
-   int mEditIndex{ -1 };
-   ClickButton* mLoadAudioButton{ nullptr };
-   ClickButton* mLoadVideoButton{ nullptr };
-   ClickButton* mClearPadButton{ nullptr };
-   FloatSlider* mEditVolSlider{ nullptr };
-   FloatSlider* mEditSpeedSlider{ nullptr };
-   FloatSlider* mEditPanSlider{ nullptr };
-   FloatSlider* mEditFpsSlider{ nullptr };
+   bool mEditMode{ false };
+   int mEditIndex{ -1 }, mLastClickedPad{ -1 };
+   bool mPianoMode{ false };
+   int mPianoRootNote{ 36 };
+
+   FloatSlider* mEditVolSlider{ nullptr }, *mEditSpeedSlider{ nullptr }, *mEditPanSlider{ nullptr };
+   FloatSlider* mEditFpsSlider{ nullptr }, *mEditTrimStartSlider{ nullptr }, *mEditTrimEndSlider{ nullptr };
+   FloatSlider* mEditStartOffsetSlider{ nullptr };
    Checkbox* mEditLoopCheckbox{ nullptr };
-   float mEditVol{ 1.0f };
-   float mEditSpeed{ 1.0f };
-   float mEditPan{ 0.0f };
-   float mEditFps{ 30.0f };
+   ClickButton* mLoadVideoButton{ nullptr }, *mClearPadButton{ nullptr };
+   ClickButton* mPlayPadButton{ nullptr }, *mStopPadButton{ nullptr };
+
+   float mEditVol{ 1 }, mEditSpeed{ 1 }, mEditPan{ 0 }, mEditFps{ 30 };
+   float mEditTrimStart{ 0 }, mEditTrimEnd{ 1 }, mEditStartOffset{ 0 };
    bool mEditLoop{ false };
 
-   enum { kMode_FPS, kMode_FPB };
-   int mMode{ kMode_FPS };
-   float mFramesPerBeat{ 2.0f };
-   float mGlobalFps{ 30.0f };
+   NoteInterval mQuantizeInterval{ kInterval_None };
+   bool mNoteRepeat{ false }, mFullVelocity{ false }, mSingleVoice{ false };
+   float mButtonHeldVelocity[kNumPads]{};
 
-   float mWidth{ 500 };
+   enum { kDisplay_Fit, kDisplay_Fill, kDisplay_16x9, kDisplay_4x3, kDisplay_1x1 };
+   int mDisplayMode{ kDisplay_Fit };
+
+   float mWidth{ 520 };
    float mHeight{ 340 };
-   static constexpr float kMinWidth = 300;
-   static constexpr float kMinHeight = 200;
-   static constexpr float kEditPanelWidth = 200;
 };

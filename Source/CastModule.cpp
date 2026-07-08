@@ -25,7 +25,6 @@
 
 void CastModule::LoadLayout(const ofxJSONElement& moduleInfo)
 {
-   // Test: does LoadString exist as a member of ModuleSaveData?
    mModuleSaveData.LoadInt("outputRes", moduleInfo, kOutputRes_720p, 0, 4);
    mModuleSaveData.LoadFloat("framerate", moduleInfo, 30, 1, 60);
    mModuleSaveData.LoadFloat("width", moduleInfo, 320);
@@ -36,8 +35,6 @@ void CastModule::LoadLayout(const ofxJSONElement& moduleInfo)
       mTargetPort = "8009";
    else
       mTargetPort = moduleInfo["targetPort"].asString();
-   mModuleSaveData.LoadInt("outputRes", moduleInfo, kOutputRes_720p, 0, 4);
-   mModuleSaveData.LoadFloat("framerate", moduleInfo, 30, 1, 60);
    SetUpFromSaveData();
 }
 
@@ -71,9 +68,6 @@ void CastModule::CreateUIControls()
 
    mInputCable = new PatchCableSource(this, kConnectionType_Special);
    AddPatchCableSource(mInputCable);
-
-   mOutputCable = new PatchCableSource(this, kConnectionType_Special);
-   AddPatchCableSource(mOutputCable);
 
    UIBLOCK0();
    TEXTENTRY(mTargetIPEntry, "target IP", 15, &mTargetIP);
@@ -279,15 +273,16 @@ void CastModule::StartStream()
 
    ofLog() << "CastModule: starting ffmpeg: " << cmd;
 
-   mFFmpegPipe = _popen(cmd.c_str(), "wb");
-   if (mFFmpegPipe == nullptr)
-   {
-      ofLog() << "CastModule: failed to start ffmpeg";
-      RemoveDirectoryA(mStreamDir.c_str());
-      mCastState = kCastState_Error;
-      mCastError = "ffmpeg start failed";
-      return;
-   }
+    mFFmpegPipe = _popen(cmd.c_str(), "wb");
+    if (mFFmpegPipe == nullptr)
+    {
+       int err = errno;
+       ofLog() << "CastModule: failed to start ffmpeg (errno=" << err << ")";
+       RemoveDirectoryA(mStreamDir.c_str());
+       mCastState = kCastState_Error;
+       mCastError = "ffmpeg not found or failed to start";
+       return;
+    }
 
    // Wait for first HLS segment to appear (up to 12 seconds)
    std::string segPath = mStreamDir + "\\stream_000.ts";
@@ -389,7 +384,21 @@ void CastModule::StartStream()
       return;
    }
 
-   ofLog() << "CastModule: TLS connected to TV";
+    ofLog() << "CastModule: TLS connected to TV";
+
+    // handle incoming messages from TV (STOP, PAUSE, etc.)
+    mCastChannel->SetOnMessage([this](const CastChannel::Message& msg) {
+       if (msg.namespace_ == "urn:x-cast:com.google.cast.tp.connection" && msg.payload.find("CLOSE") != std::string::npos)
+       {
+          ofLog() << "CastModule: TV closed connection";
+          StopStream();
+       }
+       else if (msg.namespace_ == "urn:x-cast:com.google.cast.tp.media" && msg.payload.find("STOPPED") != std::string::npos)
+       {
+          ofLog() << "CastModule: TV stopped playback";
+          StopStream();
+       }
+    });
 
    // Build stream URL
    std::string localIP = GetLocalIP();

@@ -49,7 +49,7 @@ public:
 
    void SaveState(FileStreamOut& out) override;
    void LoadState(FileStreamIn& in, int rev) override;
-   int GetModuleSaveStateRev() const override { return 2; }
+   int GetModuleSaveStateRev() const override { return 3; }
 
    VisualFBO* GetFBO() override;
    void PostRender() override;
@@ -96,6 +96,9 @@ private:
    bool mLoop{ false };
 
    float mSpeed{ 1.0f };
+   float mTempo{ 120.0f };
+   float mBaseBPM{ 120.0f };
+   bool mSync{ false };
    double mCuePoint{ 0 };
    bool mHasCue{ false };
 
@@ -129,6 +132,7 @@ private:
    VisualFBO* mFBO{ nullptr };
    ChannelBuffer mWriteBuffer{ gBufferSize };
 
+   std::vector<uint8_t> mConvertBuffer;
    std::vector<float> mWaveformOverview;
 
    PatchCableSource* mOutputCable{ nullptr };
@@ -139,13 +143,17 @@ private:
    ClickButton* mPauseButton{ nullptr };
    ClickButton* mStopButton{ nullptr };
    ClickButton* mCueButton{ nullptr };
+   ClickButton* mNudgeLeftButton{ nullptr };
+   ClickButton* mNudgeRightButton{ nullptr };
    ClickButton* mLoopInButton{ nullptr };
    ClickButton* mLoopOutButton{ nullptr };
    ClickButton* mLoopClearButton{ nullptr };
    Checkbox* mLoopCheckbox{ nullptr };
    FloatSlider* mSpeedSlider{ nullptr };
+   FloatSlider* mTempoSlider{ nullptr };
    FloatSlider* mPositionSlider{ nullptr };
    DropdownList* mSpeedRangeDropdown{ nullptr };
+   Checkbox* mSyncCheckbox{ nullptr };
    DropdownList* mCueModeDropdown{ nullptr };
 
    float mWidth{ 460 };

@@ -49,7 +49,7 @@ public:
    void LoadState(FileStreamIn& in, int rev) override;
    int GetModuleSaveStateRev() const override { return 0; }
 
-   bool IsResizable() const override { return true; }
+   bool IsResizable() const override { return false; }
    void Resize(float w, float h) override;
    bool IsEnabled() const override { return true; }
 
@@ -81,7 +81,6 @@ private:
    void PopulateDeviceDropdown();
 
    PatchCableSource* mInputCable{ nullptr };
-   PatchCableSource* mOutputCable{ nullptr };
 
    IVisualSource* mSource{ nullptr };
 
