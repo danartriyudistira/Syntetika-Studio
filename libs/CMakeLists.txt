@@ -5,6 +5,11 @@ add_subdirectory(freeverb EXCLUDE_FROM_ALL)
 
 # libkeyfinder: custom wrapper (bypass submodule CMakeLists.txt)
 find_package(FFTW3 REQUIRED)
+if(FFTW3_FOUND AND NOT FFTW3_INCLUDE_DIR)
+  # vcpkg FFTW3 might use different variable names
+  find_path(FFTW3_INCLUDE_DIR fftw3.h)
+  find_library(FFTW3_LIBRARY fftw3)
+endif()
 add_library(syntetika_keyfinder STATIC
   libkeyfinder/src/audiodata.cpp
   libkeyfinder/src/chromagram.cpp
@@ -23,7 +28,9 @@ add_library(syntetika_keyfinder STATIC
   libkeyfinder/src/constants.cpp
 )
 target_include_directories(syntetika_keyfinder PUBLIC libkeyfinder/src)
-target_include_directories(syntetika_keyfinder PRIVATE ${FFTW3_INCLUDE_DIR})
+if(FFTW3_INCLUDE_DIR)
+  target_include_directories(syntetika_keyfinder PRIVATE ${FFTW3_INCLUDE_DIR})
+endif()
 target_link_libraries(syntetika_keyfinder PRIVATE ${FFTW3_LIBRARY})
 add_library(syntetika::keyfinder ALIAS syntetika_keyfinder)
 
