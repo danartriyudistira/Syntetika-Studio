@@ -193,23 +193,23 @@ void SpatialRender::Process(double time)
          if (!src.hasAudio)
             continue;
 
-         // Apply animation offset
-         src.x = src.baseX;
-         src.y = src.baseY;
-         src.z = src.baseZ;
-         if (src.animMode != 0)
-         {
-            src.animPhase += src.animRate * bufferSize / gSampleRate * 2.0f * FPI;
-            if (src.animPhase > FPI * 2)
-               src.animPhase -= FPI * 2;
-            float d = src.animDepth;
-            float p = src.animPhase;
-            switch (src.animMode)
-            {
-            case 1: // orbit (X-Y circle, visible in top-down)
-               src.x = src.baseX + cosf(p) * d * 300;
-               src.y = src.baseY + sinf(p) * d * 300;
-               break;
+          // Apply animation offset
+          src.x = src.baseX;
+          src.y = src.baseY;
+          src.z = src.baseZ;
+          if (src.animMode != 0)
+          {
+             src.animPhase += src.animRate * bufferSize / gSampleRate * 2.0f * FPI;
+             if (src.animPhase > FPI * 2)
+                src.animPhase -= FPI * 2;
+             float d = src.animDepth;
+             float p = src.animPhase;
+             switch (src.animMode)
+             {
+             case 1: // orbit (X-Y circle, top-down visible)
+                src.x = src.baseX + cosf(p) * d * 500;
+                src.y = src.baseY + sinf(p) * d * 500;
+                break;
             case 2: // lfo x
                src.x = src.baseX + sinf(p) * d * 300;
                break;
