@@ -316,10 +316,6 @@ target_sources(Syntetika PRIVATE
     LadderFilter.h
     LFO.cpp
     LFO.h
-    VideoDrumSampler.cpp
-    VideoDrumSampler.h
-    $<$<NOT:$<BOOL:${SYNTETIKA_DISABLE_FOLEYS}>>:VideoPlayerModule.cpp>
-    $<$<NOT:$<BOOL:${SYNTETIKA_DISABLE_FOLEYS}>>:VideoPlayerModule.h>
     LFOController.cpp
     LFOController.h
     LaunchpadInterpreter.cpp
@@ -831,6 +827,15 @@ target_sources(Syntetika PRIVATE
     ofxJSONElement.cpp
     ofxJSONElement.h
     )
+
+if(NOT SYNTETIKA_DISABLE_FOLEYS)
+  target_sources(Syntetika PRIVATE
+    VideoDrumSampler.cpp
+    VideoDrumSampler.h
+    VideoPlayerModule.cpp
+    VideoPlayerModule.h
+    )
+endif()
 
 if(SYNTETIKA_NIGHTLY)
     target_compile_definitions(Syntetika PRIVATE
