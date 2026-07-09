@@ -434,9 +434,11 @@ build_release.cmd
 # Local build directories
 build_ninja/
 build_ninja_release/
+build_release/
 
 # Development notes
 current-summary.md
+BUG_REPORT.md
 
 # WebView2 dependency (removed from build)
 libs/webview2/
