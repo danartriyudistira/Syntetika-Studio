@@ -26,3 +26,6 @@
 [submodule "libs/foleys_video_engine"]
 	path = libs/foleys_video_engine
 	url = https://github.com/ffAudio/foleys_video_engine.git
+[submodule "libs/libkeyfinder"]
+	path = libs/libkeyfinder
+	url = https://github.com/mixxxdj/libkeyfinder.git
