@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.3.0] - 2026-07-09
+## [1.1.2] - 2026-07-09
 
 ### Added
 - **LissajousOut**: XY audio buffer visualization with FBO output, grid background, configurable scale/color/zoom
