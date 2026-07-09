@@ -73,10 +73,17 @@ if(EXISTS "${FFMPEG_ROOT}/include")
   target_include_directories(foleys_video_engine PUBLIC
     foleys_video_engine
     ${FFMPEG_ROOT}/include
-    ${SYNTETIKA_JUCE_LOCATION}/modules
   )
-  target_compile_definitions(foleys_video_engine PRIVATE FOLEYS_USE_OPENGL=0)
+  target_compile_definitions(foleys_video_engine PRIVATE
+    FOLEYS_USE_OPENGL=0
+    JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1
+    JUCE_MODAL_LOOPS_PERMITTED=1
+    JUCE_STRICT_REFCOUNTEDPOINTER=1
+  )
   target_link_libraries(foleys_video_engine PUBLIC
+    juce::juce_core
+    juce::juce_gui_basics
+    juce::juce_opengl
     ${FFMPEG_ROOT}/lib/avcodec.lib
     ${FFMPEG_ROOT}/lib/avformat.lib
     ${FFMPEG_ROOT}/lib/avutil.lib
