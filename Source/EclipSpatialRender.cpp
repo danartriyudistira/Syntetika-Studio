@@ -118,6 +118,7 @@ void EclipSpatialRender::Process(double time)
 
    for (int i = 0; i < kMaxObjects; ++i)
    {
+      std::lock_guard<std::mutex> lock(mObjectMutex);
       const ObjectData& obj = mObjects[i];
       if (!obj.mActive || obj.mMuted)
          continue;
@@ -171,8 +172,14 @@ void EclipSpatialRender::SpatializeObject(int index, float** outputs, int numCha
    float vol = obj.mVolume * mMasterVolume * distGain;
 
    float pan = ofClamp(obj.mX, -1.0f, 1.0f);
+   float panL = ofClamp(pan - 0.25f, -1.0f, 1.0f);
+   float panR = ofClamp(pan + 0.25f, -1.0f, 1.0f);
    float leftGain = cosf((pan + 1.0f) * PI / 4.0f);
    float rightGain = sinf((pan + 1.0f) * PI / 4.0f);
+   float gainL_L = cosf((panL + 1.0f) * PI / 4.0f);
+   float gainL_R = sinf((panL + 1.0f) * PI / 4.0f);
+   float gainR_L = cosf((panR + 1.0f) * PI / 4.0f);
+   float gainR_R = sinf((panR + 1.0f) * PI / 4.0f);
    float zGain = ofClamp(1.0f - fabs(obj.mZ) * 0.3f, 0.5f, 1.0f);
 
    if (numChannels == 2)
@@ -181,8 +188,8 @@ void EclipSpatialRender::SpatializeObject(int index, float** outputs, int numCha
       {
          float sL = buf[s * 2] * vol * zGain;
          float sR = buf[s * 2 + 1] * vol * zGain;
-         outputs[0][s] += sL * leftGain + sR * leftGain * 0.5f;
-         outputs[1][s] += sR * rightGain + sL * rightGain * 0.5f;
+         outputs[0][s] += sL * gainL_L + sR * gainR_L;
+         outputs[1][s] += sR * gainR_R + sL * gainL_R;
       }
    }
    else
@@ -227,7 +234,7 @@ void EclipSpatialRender::SpatializeObject(int index, float** outputs, int numCha
 
 void EclipSpatialRender::ProcessHRTF(int index, float** outputs, int numChannels, int bufferSize)
 {
-   const ObjectData& obj = mObjects[index];
+   ObjectData& obj = mObjects[index];
    const float* buf = obj.mAudioBuffer.data();
 
    float dx = obj.mX;
@@ -259,11 +266,11 @@ void EclipSpatialRender::ProcessHRTF(int index, float** outputs, int numChannels
       float smp = (buf[s * 2] + buf[s * 2 + 1]) * 0.5f * vol;
 
       int wp = obj.mHRTF.delayWritePos;
-      const_cast<ObjectData&>(obj).mHRTF.delayLineL[wp] = smp;
-      const_cast<ObjectData&>(obj).mHRTF.delayLineR[wp] = smp;
+      obj.mHRTF.delayLineL[wp] = smp;
+      obj.mHRTF.delayLineR[wp] = smp;
       int writtenPos = wp;
       wp = (wp + 1) & 255;
-      const_cast<ObjectData&>(obj).mHRTF.delayWritePos = wp;
+      obj.mHRTF.delayWritePos = wp;
 
       float smpL, smpR;
       if (itdSamp == 0)
@@ -339,11 +346,10 @@ void EclipSpatialRender::ProcessReverb(float* outL, float* outR, int bufferSize)
 
 void EclipSpatialRender::UpdateAnimations(double time)
 {
-   static double lastTime = 0;
-   double dt = (time - lastTime) / 1000.0;
+   double dt = (time - mLastAnimTime) / 1000.0;
    if (dt < 0 || dt > 0.1)
       dt = 0.001;
-   lastTime = time;
+   mLastAnimTime = time;
 
    for (int i = 0; i < kMaxObjects; ++i)
    {
@@ -387,6 +393,7 @@ void EclipSpatialRender::SetObjectAudio(int index, const float* left, const floa
    if (index < 0 || index >= kMaxObjects)
       return;
 
+   std::lock_guard<std::mutex> lock(mObjectMutex);
    ObjectData& obj = mObjects[index];
    obj.mActive = true;
    if (obj.mAnim.mMode == kAnim_Static)
@@ -586,18 +593,9 @@ void EclipSpatialRender::PostRender()
          ++numSorted;
       }
    }
-   for (int i = 0; i < numSorted - 1; ++i)
-   {
-      for (int j = 0; j < numSorted - 1 - i; ++j)
-      {
-         if (sorted[j].y < sorted[j + 1].y)
-         {
-            ObjSort tmp = sorted[j];
-            sorted[j] = sorted[j + 1];
-            sorted[j + 1] = tmp;
-         }
-      }
-   }
+   std::sort(sorted, sorted + numSorted, [](const ObjSort& a, const ObjSort& b) {
+      return a.y > b.y;
+   });
 
    for (int si = 0; si < numSorted; ++si)
    {

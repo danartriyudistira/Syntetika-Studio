@@ -8,6 +8,7 @@
 #include "Checkbox.h"
 #include "DropdownList.h"
 #include "PatchCableSource.h"
+#include <mutex>
 
 class VisualFBO;
 
@@ -179,4 +180,8 @@ private:
    float mRoomControlHeight{ 80 };
 
    PatchCableSource* mVisualCable{ nullptr };
+
+   double mLastAnimTime{ 0 };
+
+   mutable std::mutex mObjectMutex;
 };
