@@ -4,6 +4,46 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.3.0] - 2026-07-09
+
+### Added
+- **LissajousOut**: XY audio buffer visualization with FBO output, grid background, configurable scale/color/zoom
+- **MeshInstances3D**: Audio-reactive 3D OBJ model viewer with orbit camera, instancing, FFT analysis
+- **TriggerWaveEffect**: Beat-synced visual effects (Pulse, Glitch, Scanlines, All) with FBO output
+- **IVisualSource**: FBO output interface for visual module chaining (Source → MonitorModule)
+- **GlShaderUtil**: Shared GL shader compilation/linking utility with uniform caching
+- **DJPlayer**: Serato-style DJ player with BPM sync, CUE points, waveform display
+- **EclipSpatialRender HRTF**: Binaural spatial audio with ITD (Woodworth-Schlosser) and ILD
+- **EclipSpatialSource**: Renamed from EclipsaInput, spatial animation/occlusion sources
+- **VideoPlayerModule**: Foleys-based video player with hotcues, waveform timeline, async seek
+- **VideoDrumSampler**: Audio/video drum sampler with image/GIF trigger support
+- **FormantFilterEffect**: 4 parallel formant bands filter
+- **SpatialDataSource**: Shared spatial data structures (SpatialSourceInfo, SpatialRoomInfo)
+- **LadderFilter**: Classic ladder filter module
+- **MidiChannelFilter**: Per-channel MIDI filtering
+- **MidiPlayer**: MIDI file playback module
+- **BandLimitedOsc**: Band-limited oscillator with alias suppression
+- **PatternMatrix**: Pages system (8 pages), 32 max slots, element grids on right side, save rev 7
+- **tinyobjloader**: Header-only OBJ 3D model loader
+
+### Changed
+- **DJPlayer**: Warp markers removed — simplified to BPM sync + CUE only
+- **EclipSpatialRender**: Renamed from EclipsaManager, HRTF system integrated
+- **VideoPlayerModule**: Migrated from ffmpeg.exe subprocess to foleys video engine
+- **Save format**: Rev 6→7 (global element bindings, page data)
+- **Element grids**: Moved to right side of pattern slots (R/S/B column bands)
+- **Module dimensions**: Not user-resizable (fixed content size)
+
+### Fixed
+- **Release installer**: Python stdlib now bundled via `SYNTETIKA_PORTABLE` (was only DLLs)
+- **SpatialRender HRTF**: Nested inner loop removed — 256-512× binaural amplification overload
+- **PatternMatrix**: 11 layout bugs (dangling pointers, div-by-zero, OOB)
+
+### Removed
+- **ShaderModule**: Deleted — heavy GPU (256M fragment/frame), not essential
+- **SpatialMonitor**: Deleted — CPU-heavy, redundant with EclipSpatialRender::PostRender
+- **DJPlayer warp**: Removed — warp-aware rendering O(P×M×B) too heavy
+
 ## [1.1.1] - 2026-07-03
 
 ### Fixed

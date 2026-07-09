@@ -27,7 +27,7 @@ jobs:
         uses: lukka/get-cmake@latest
 
       - name: Configure CMake
-        run: cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release
+          run: cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DSYNTETIKA_PORTABLE=True
 
       - name: Build
         run: cmake --build build --config Release --parallel
@@ -41,6 +41,7 @@ jobs:
           Copy-Item "$releaseDir\Syntetika.exe" -Destination $payloadDir
           Copy-Item "$releaseDir\python3.dll" -Destination $payloadDir -ErrorAction SilentlyContinue
           Copy-Item "$releaseDir\python313.dll" -Destination $payloadDir -ErrorAction SilentlyContinue
+          Copy-Item -Recurse "$releaseDir\python" -Destination $payloadDir -ErrorAction SilentlyContinue
           Copy-Item -Recurse "$releaseDir\resource" -Destination $payloadDir
           Compress-Archive -Path "$payloadDir\*" -DestinationPath "$env:RUNNER_TEMP\Syntetika-Studio.zip" -CompressionLevel Optimal -Force
 
