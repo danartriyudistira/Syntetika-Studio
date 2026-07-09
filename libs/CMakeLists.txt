@@ -4,6 +4,7 @@ add_subdirectory(exprtk EXCLUDE_FROM_ALL)
 add_subdirectory(freeverb EXCLUDE_FROM_ALL)
 
 # libkeyfinder: custom wrapper (bypass submodule CMakeLists.txt)
+find_package(FFTW3 REQUIRED)
 add_library(syntetika_keyfinder STATIC
   libkeyfinder/src/audiodata.cpp
   libkeyfinder/src/chromagram.cpp
@@ -22,7 +23,8 @@ add_library(syntetika_keyfinder STATIC
   libkeyfinder/src/constants.cpp
 )
 target_include_directories(syntetika_keyfinder PUBLIC libkeyfinder/src)
-target_link_libraries(syntetika_keyfinder PUBLIC FFTW3::fftw3)
+target_include_directories(syntetika_keyfinder PRIVATE ${FFTW3_INCLUDE_DIR})
+target_link_libraries(syntetika_keyfinder PRIVATE ${FFTW3_LIBRARY})
 add_library(syntetika::keyfinder ALIAS syntetika_keyfinder)
 
 if(NOT SYNTETIKA_SYSTEM_JSONCPP)
