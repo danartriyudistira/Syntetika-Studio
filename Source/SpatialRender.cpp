@@ -46,7 +46,7 @@ void SpatialRender::CreateUIControls()
    IDrawableModule::CreateUIControls();
 
    mFBO = new VisualFBO();
-   mFBO->SetDimensions(400, 300);
+   mFBO->Create(400, 300);
    mRoomWidthSlider = new FloatSlider(this, "room w (cm)", 5, kRow1Y, 110, 15, &mRoomWidth, 100, 2000);
    mRoomDepthSlider = new FloatSlider(this, "room d (cm)", 120, kRow1Y, 110, 15, &mRoomDepth, 100, 2000);
    mRoomHeightSlider = new FloatSlider(this, "room h (cm)", 235, kRow1Y, 110, 15, &mRoomHeight, 50, 1000);
@@ -1401,50 +1401,54 @@ void SpatialRender::LoadState(FileStreamIn& in, int rev)
 
 void SpatialRender::PostRender()
 {
-   if (!mFBO)
+   if (!mFBO || !mFBO->IsValid())
       return;
 
-   int bufferSize = gBufferSize;
    float w = (float)mFBO->GetWidth();
    float h = (float)mFBO->GetHeight();
 
-   mFBO->Begin();
-   ofClear(10, 12, 20, 255);
+   mFBO->Bind();
+   ofPushStyle();
 
-   float groundY = h * 0.65f;
-   float horizonY = h * 0.4f;
+   ofSetColor(10, 12, 20);
+   ofFill();
+   ofRect(0, 0, w, h);
 
-   for (int py = 0; py < (int)h; ++py)
+   float cx = w * 0.5f;
+   float horizonY = h * 0.55f;
+   float groundBottom = h - 10;
+   float groundH = groundBottom - horizonY;
+
+   for (int py = (int)horizonY; py < (int)groundBottom; ++py)
    {
-      float t = (py - horizonY) / (h - horizonY);
+      float t = (py - horizonY) / groundH;
       t = ofClamp(t, 0, 1);
-      if (py < horizonY)
-      {
-         int b = (int)(20 + t * 30);
-         ofSetColor(10, 12, b);
-      }
-      else
-      {
-         int g = (int)(25 + t * 15);
-         ofSetColor(g, g + 5, g);
-      }
+      int val = (int)(25 + t * 15);
+      ofSetColor(val, val + 5, val);
+      ofLine(0, py, w, py);
+   }
+   for (int py = 0; py < (int)horizonY; ++py)
+   {
+      float t = (horizonY - py) / horizonY;
+      int b = (int)(15 + t * 25);
+      ofSetColor(10, 12, b);
       ofLine(0, py, w, py);
    }
 
-   ofSetColor(30, 35, 55, 120);
+   ofSetColor(30, 35, 55, 80);
    for (float gx = 0; gx < w; gx += 25)
    {
       float t = gx / w;
-      float x = w / 2 + (gx - w / 2) * (1 - t * 0.7f);
-      ofLine(x, horizonY, x, groundY);
+      float x = cx + (gx - cx) * (1 - t * 0.7f);
+      ofLine(x, horizonY, x, groundBottom);
    }
-   for (float gy = horizonY; gy < groundY; gy += 20)
+   float step = std::max(10.0f, groundH / 10.0f);
+   for (float gy = horizonY + step; gy < groundBottom; gy += step)
       ofLine(0, gy, w, gy);
 
-   float scale = 0.45f;
    float groundW = std::max(mRoomWidth, mRoomDepth) + 600.0f;
    float halfRange = groundW * 0.5f;
-   float cxc = w * 0.5f;
+   float scale = 0.35f;
 
    typedef struct { int index; float y; } ObjSort;
    ObjSort sorted[32];
@@ -1468,56 +1472,77 @@ void SpatialRender::PostRender()
       const auto& src = mSources[sorted[si].index];
       float ox = src.x, oy = src.y, oz = src.z;
       float depthT = (oy + halfRange) / (halfRange * 2);
+      depthT = ofClamp(depthT, 0, 1);
       float perspScale = 1.0f - depthT * 0.6f;
-      float px = cxc + ox * scale * perspScale;
-      float py = groundY - depthT * (groundY - horizonY);
-      float pz = py - oz * 0.5f * perspScale;
+      float px = cx + ox * scale * perspScale;
+      float py = groundBottom - depthT * groundH;
+      float pz = py - oz * 0.3f * perspScale;
 
-      ofColor c;
+      ofColor col;
       if (src.colorHue < 0)
-         c = ofColor(180, 180, 180);
+         col = ofColor(180, 180, 180);
       else
-         c = ofColor::fromHsb(src.colorHue % 360, 200, 240);
+      {
+         float h = (src.colorHue % 360) / 360.0f;
+         float f = h * 6.0f - floorf(h * 6.0f);
+         int i = (int)floorf(h * 6.0f);
+         float r, g, b;
+         switch (i % 6)
+         {
+         case 0: r = 1; g = f; b = 0; break;
+         case 1: r = 1 - f; g = 1; b = 0; break;
+         case 2: r = 0; g = 1; b = f; break;
+         case 3: r = 0; g = 1 - f; b = 1; break;
+         case 4: r = f; g = 0; b = 1; break;
+         default: r = 1; g = 0; b = 1 - f; break;
+         }
+         col = ofColor((int)(r * 255), (int)(g * 255), (int)(b * 255));
+      }
 
-      // Shadow
-      ofSetColor(0, 0, 0, 60);
-      ofEllipse(px, py, 18 * perspScale, 5 * perspScale);
+      float radius = 8 * perspScale;
+
+      // Ground shadow
+      ofSetColor(0, 0, 0, (int)(80 * perspScale));
+      ofFill();
+      ofCircle(px * 0.7f + cx * 0.3f, py + 2, radius * 0.8f);
       // Drop line
-      ofSetColor(c.r * 0.3f, c.g * 0.3f, c.b * 0.3f, 50);
+      ofSetColor(col.r * 0.3f, col.g * 0.3f, col.b * 0.3f, 60);
       ofLine(px, pz, px, py);
       // Glow
-      ofSetColor(c.r, c.g, c.b, 40);
-      ofCircle(px, pz, 14 * perspScale);
-      // Sphere
-      ofSetColor(c);
+      ofSetColor(col.r, col.g, col.b, (int)(60 * perspScale));
       ofFill();
-      ofCircle(px, pz, 8 * perspScale);
+      ofCircle(px, pz, radius + 6);
+      // Sphere
+      ofSetColor(col.r, col.g, col.b, (int)(200 * perspScale));
+      ofFill();
+      ofCircle(px, pz, radius);
       // Highlight
-      ofSetColor(255, 255, 255, 80);
-      ofCircle(px - 2 * perspScale, pz - 2 * perspScale, 3 * perspScale);
+      ofSetColor(255, 255, 255, (int)(100 * perspScale));
+      ofCircle(px - radius * 0.25f, pz - radius * 0.25f, radius * 0.35f);
       // Wireframe
-      ofSetColor(c.r / 2, c.g / 2, c.b / 2);
+      ofSetColor(col.r, col.g, col.b, (int)(220 * perspScale));
       ofNoFill();
-      ofCircle(px, pz, 8 * perspScale);
+      ofCircle(px, pz, radius);
       // Label
       ofSetColor(255, 255, 255);
       const char* name = src.src ? src.src->Name() : "S";
-      DrawTextNormal(name, (int)px - 12, (int)pz - 20);
-      // Orbit ring for animated
+      DrawTextNormal(name, (int)px - 12, (int)pz - 22);
+      // Orbit ring
       if (src.animMode > 0)
       {
-         ofSetColor(c.r, c.g, c.b, 30);
+         ofSetColor(col.r, col.g, col.b, 40);
          ofNoFill();
-         ofCircle(px, pz, 22 * perspScale);
+         ofCircle(px, pz, radius + 14);
       }
-      // Occlusion warning
+      // Occlusion X
       if (src.occlusion > 0.5f || src.z < -100.0f)
       {
-         ofSetColor(255, 60, 60, 120);
-         ofLine(px - 5, pz - 5, px + 5, pz + 5);
-         ofLine(px + 5, pz - 5, px - 5, pz + 5);
+         ofSetColor(255, 60, 60, 150);
+         ofLine(px - 6, pz - 6, px + 6, pz + 6);
+         ofLine(px + 6, pz - 6, px - 6, pz + 6);
       }
    }
 
-   mFBO->End();
+   ofPopStyle();
+   mFBO->Unbind();
 }
