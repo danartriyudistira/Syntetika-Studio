@@ -2,6 +2,7 @@
 
 #include "IAudioProcessor.h"
 #include "IDrawableModule.h"
+#include "IVisualSource.h"
 #include "Slider.h"
 #include "Checkbox.h"
 #include "DropdownList.h"
@@ -11,8 +12,9 @@
 #include <mutex>
 
 class SpatialSource;
+class VisualFBO;
 
-class SpatialRender : public IAudioProcessor, public IDrawableModule, public IFloatSliderListener, public IDropdownListener, public IAudioPoller
+class SpatialRender : public IAudioProcessor, public IDrawableModule, public IVisualSource, public IFloatSliderListener, public IDropdownListener, public IAudioPoller
 {
 public:
    SpatialRender();
@@ -43,6 +45,13 @@ public:
 
    void LoadLayout(const ofxJSONElement& moduleInfo) override;
    void SetUpFromSaveData() override;
+
+   void SaveState(FileStreamOut& out) override;
+   void LoadState(FileStreamIn& in, int rev) override;
+   int GetModuleSaveStateRev() const override { return 1; }
+
+   VisualFBO* GetFBO() override { return mFBO; }
+   void PostRender() override;
 
    bool IsEnabled() const override { return mEnabled; }
    void SetEnabled(bool enabled) override { mEnabled = enabled; }
@@ -167,4 +176,6 @@ private:
 
    float mModuleWidth{ 520 };
    float mModuleHeight{ 520 };
+
+   VisualFBO* mFBO{ nullptr };
 };

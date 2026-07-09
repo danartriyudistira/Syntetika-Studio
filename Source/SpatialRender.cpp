@@ -4,6 +4,8 @@
 #include "Profiler.h"
 #include "SynthGlobals.h"
 #include "PatchCableSource.h"
+#include "FileStream.h"
+#include "VisualFBO.h"
 #include <algorithm>
 #include <cmath>
 
@@ -42,6 +44,9 @@ SpatialRender::~SpatialRender()
 void SpatialRender::CreateUIControls()
 {
    IDrawableModule::CreateUIControls();
+
+   mFBO = new VisualFBO();
+   mFBO->SetDimensions(400, 300);
    mRoomWidthSlider = new FloatSlider(this, "room w (cm)", 5, kRow1Y, 110, 15, &mRoomWidth, 100, 2000);
    mRoomDepthSlider = new FloatSlider(this, "room d (cm)", 120, kRow1Y, 110, 15, &mRoomDepth, 100, 2000);
    mRoomHeightSlider = new FloatSlider(this, "room h (cm)", 235, kRow1Y, 110, 15, &mRoomHeight, 50, 1000);
@@ -224,14 +229,15 @@ void SpatialRender::Process(double time)
           float dx = src.x - userX;
           float dy = src.y - userY;
            float dz = src.z - mUserZ;
-          float dist = std::sqrt(dx * dx + dy * dy + dz * dz);
-          float distAttn = 1.0f / (1.0f + dist * 0.002f);
-          float objAngle = std::atan2(dy, dx);
-          float splGainVal = std::pow(10.0f, (spl - 85.0f) / 20.0f);
+           float dist = std::sqrt(dx * dx + dy * dy + dz * dz);
+           float distAttn = 1.0f / (1.0f + dist * 0.002f);
+           float occlusionGain = 1.0f - src.occlusion * 0.8f;
+           float objAngle = std::atan2(dy, dx);
+           float splGainVal = std::pow(10.0f, (spl - 85.0f) / 20.0f);
 
-          for (int s = 0; s < bufferSize; ++s)
-          {
-             float sample = src.audioBuffer[s];
+           for (int s = 0; s < bufferSize; ++s)
+           {
+              float sample = src.audioBuffer[s] * src.volume * distAttn * occlusionGain;
 
              bool routeToDirect = (directSrc == -1 || directSrc == si);
              if (routeToDirect)
@@ -1305,4 +1311,213 @@ void SpatialRender::SetUpFromSaveData()
 
    UpdateDropdownPositions();
    UpdateCablePositions();
+}
+
+void SpatialRender::SaveState(FileStreamOut& out)
+{
+   IDrawableModule::SaveState(out);
+
+   out << mNumSpeakers;
+   out << mRoomWidth << mRoomDepth << mRoomHeight;
+   out << mUserX << mUserY << mUserZ;
+   out << mSPL;
+   out << mRoomEffectEnabled << mReverbMix;
+   out << mHRTFEnabled << mHeadRadius << mHRTFQuality;
+   out << mModuleWidth << mModuleHeight;
+
+   {
+      std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
+      int numSrc = (int)mSources.size();
+      out << numSrc;
+      for (auto& src : mSources)
+      {
+         out << src.baseX << src.baseY << src.baseZ;
+         out << src.volume << src.occlusion << src.colorHue;
+         out << src.animMode << src.animRate << src.animDepth;
+         out << src.animPhase;
+      }
+   }
+
+   for (int i = 0; i < 16; ++i)
+   {
+      out << mSpeakerSources[i];
+      out << mSpeakerChannels[i];
+   }
+   out << mDirectSource << mBinauralSource;
+}
+
+void SpatialRender::LoadState(FileStreamIn& in, int rev)
+{
+   IDrawableModule::LoadState(in, rev);
+   if (rev < 1) return;
+
+   in >> mNumSpeakers;
+   in >> mRoomWidth >> mRoomDepth >> mRoomHeight;
+   in >> mUserX >> mUserY >> mUserZ;
+   in >> mSPL;
+   in >> mRoomEffectEnabled >> mReverbMix;
+   in >> mHRTFEnabled >> mHeadRadius >> mHRTFQuality;
+   in >> mModuleWidth >> mModuleHeight;
+
+   int numSrc = 0;
+   in >> numSrc;
+   for (int i = 0; i < numSrc; ++i)
+   {
+      float bx, by, bz, vol, occ;
+      int ch, am;
+      float ar, ad, ap;
+      in >> bx >> by >> bz >> vol >> occ >> ch >> am >> ar >> ad >> ap;
+      // Restore properties to registered sources by index
+      if (i < (int)mSources.size())
+      {
+         auto& src = mSources[i];
+         src.baseX = src.x = bx;
+         src.baseY = src.y = by;
+         src.baseZ = src.z = bz;
+         src.volume = vol;
+         src.occlusion = occ;
+         src.colorHue = ch;
+         src.animMode = am;
+         src.animRate = ar;
+         src.animDepth = ad;
+         src.animPhase = ap;
+         if (src.src)
+            src.src->SetPosition(bx, by, bz);
+      }
+   }
+
+   for (int i = 0; i < 16; ++i)
+   {
+      in >> mSpeakerSources[i];
+      in >> mSpeakerChannels[i];
+   }
+   in >> mDirectSource >> mBinauralSource;
+
+   mReverbIdx = 0;
+   RebuildSpeakers();
+   UpdateDropdownPositions();
+   UpdateCablePositions();
+}
+
+void SpatialRender::PostRender()
+{
+   if (!mFBO)
+      return;
+
+   int bufferSize = gBufferSize;
+   float w = (float)mFBO->GetWidth();
+   float h = (float)mFBO->GetHeight();
+
+   mFBO->Begin();
+   ofClear(10, 12, 20, 255);
+
+   float groundY = h * 0.65f;
+   float horizonY = h * 0.4f;
+
+   for (int py = 0; py < (int)h; ++py)
+   {
+      float t = (py - horizonY) / (h - horizonY);
+      t = ofClamp(t, 0, 1);
+      if (py < horizonY)
+      {
+         int b = (int)(20 + t * 30);
+         ofSetColor(10, 12, b);
+      }
+      else
+      {
+         int g = (int)(25 + t * 15);
+         ofSetColor(g, g + 5, g);
+      }
+      ofLine(0, py, w, py);
+   }
+
+   ofSetColor(30, 35, 55, 120);
+   for (float gx = 0; gx < w; gx += 25)
+   {
+      float t = gx / w;
+      float x = w / 2 + (gx - w / 2) * (1 - t * 0.7f);
+      ofLine(x, horizonY, x, groundY);
+   }
+   for (float gy = horizonY; gy < groundY; gy += 20)
+      ofLine(0, gy, w, gy);
+
+   float scale = 0.45f;
+   float groundW = std::max(mRoomWidth, mRoomDepth) + 600.0f;
+   float halfRange = groundW * 0.5f;
+   float cxc = w * 0.5f;
+
+   typedef struct { int index; float y; } ObjSort;
+   ObjSort sorted[32];
+   int numSorted = 0;
+   {
+      std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
+      for (int i = 0; i < (int)mSources.size() && numSorted < 32; ++i)
+      {
+         if (mSources[i].hasAudio)
+         {
+            sorted[numSorted].index = i;
+            sorted[numSorted].y = mSources[i].y;
+            ++numSorted;
+         }
+      }
+   }
+   std::sort(sorted, sorted + numSorted, [](const ObjSort& a, const ObjSort& b) { return a.y > b.y; });
+
+   for (int si = 0; si < numSorted; ++si)
+   {
+      const auto& src = mSources[sorted[si].index];
+      float ox = src.x, oy = src.y, oz = src.z;
+      float depthT = (oy + halfRange) / (halfRange * 2);
+      float perspScale = 1.0f - depthT * 0.6f;
+      float px = cxc + ox * scale * perspScale;
+      float py = groundY - depthT * (groundY - horizonY);
+      float pz = py - oz * 0.5f * perspScale;
+
+      ofColor c;
+      if (src.colorHue < 0)
+         c = ofColor(180, 180, 180);
+      else
+         c = ofColor::fromHsb(src.colorHue % 360, 200, 240);
+
+      // Shadow
+      ofSetColor(0, 0, 0, 60);
+      ofEllipse(px, py, 18 * perspScale, 5 * perspScale);
+      // Drop line
+      ofSetColor(c.r * 0.3f, c.g * 0.3f, c.b * 0.3f, 50);
+      ofLine(px, pz, px, py);
+      // Glow
+      ofSetColor(c.r, c.g, c.b, 40);
+      ofCircle(px, pz, 14 * perspScale);
+      // Sphere
+      ofSetColor(c);
+      ofFill();
+      ofCircle(px, pz, 8 * perspScale);
+      // Highlight
+      ofSetColor(255, 255, 255, 80);
+      ofCircle(px - 2 * perspScale, pz - 2 * perspScale, 3 * perspScale);
+      // Wireframe
+      ofSetColor(c.r / 2, c.g / 2, c.b / 2);
+      ofNoFill();
+      ofCircle(px, pz, 8 * perspScale);
+      // Label
+      ofSetColor(255, 255, 255);
+      const char* name = src.src ? src.src->Name() : "S";
+      DrawTextNormal(name, (int)px - 12, (int)pz - 20);
+      // Orbit ring for animated
+      if (src.animMode > 0)
+      {
+         ofSetColor(c.r, c.g, c.b, 30);
+         ofNoFill();
+         ofCircle(px, pz, 22 * perspScale);
+      }
+      // Occlusion warning
+      if (src.occlusion > 0.5f || src.z < -100.0f)
+      {
+         ofSetColor(255, 60, 60, 120);
+         ofLine(px - 5, pz - 5, px + 5, pz + 5);
+         ofLine(px + 5, pz - 5, px - 5, pz + 5);
+      }
+   }
+
+   mFBO->End();
 }
