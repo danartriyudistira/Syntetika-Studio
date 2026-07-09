@@ -27,6 +27,7 @@ void SpatialSource::CreateUIControls()
    UIBLOCK_SHIFTRIGHT();
    FLOATSLIDER(mAnimRateSlider, "rate", &mAnimRate, 0, 5);
    FLOATSLIDER(mAnimDepthSlider, "depth", &mAnimDepth, 0, 1);
+   CHECKBOX(mOrbitInvertCheckbox, "invert", &mOrbitInvert);
    UIBLOCK_NEWLINE();
    DROPDOWN(mColorDropdown, "color", &mColorHue, 60);
    ENDUIBLOCK0();
@@ -64,8 +65,8 @@ void SpatialSource::Process(double time)
    {
       float* audioIn = GetBuffer()->GetChannel(0);
       mRegisteredRender->AcceptSourceAudio(this, audioIn, bufferSize);
-      mRegisteredRender->SetSourceProperties(this, mVolume, mOcclusion, mColorHue,
-                                              mAnimMode, mAnimRate, mAnimDepth);
+   mRegisteredRender->SetSourceProperties(this, mVolume, mOcclusion, mColorHue,
+                                            mAnimMode, mAnimRate, mAnimDepth, mOrbitInvert);
    }
 
    GetBuffer()->Reset();
@@ -120,6 +121,7 @@ void SpatialSource::DrawModule()
    mAnimModeDropdown->Draw();
    mAnimRateSlider->Draw();
    mAnimDepthSlider->Draw();
+   mOrbitInvertCheckbox->Draw();
    mColorDropdown->Draw();
 }
 
@@ -141,6 +143,7 @@ void SpatialSource::SaveState(FileStreamOut& out)
    out << mAnimMode;
    out << mAnimRate;
    out << mAnimDepth;
+   out << mOrbitInvert;
 }
 
 void SpatialSource::LoadState(FileStreamIn& in, int rev)
@@ -156,6 +159,7 @@ void SpatialSource::LoadState(FileStreamIn& in, int rev)
    in >> mAnimMode;
    in >> mAnimRate;
    in >> mAnimDepth;
+   if (rev >= 2) in >> mOrbitInvert;
 }
 
 void SpatialSource::LoadLayout(const ofxJSONElement& moduleInfo)

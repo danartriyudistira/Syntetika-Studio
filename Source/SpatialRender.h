@@ -37,7 +37,7 @@ public:
    void NotifySourceMoved(SpatialSource* src);
    void AcceptSourceAudio(SpatialSource* src, float* buffer, int bufferSize);
    void SetSourceProperties(SpatialSource* src, float volume, float occlusion, int colorHue,
-                            int animMode, float animRate, float animDepth);
+                             int animMode, float animRate, float animDepth, bool orbitInvert = false);
 
    void FloatSliderUpdated(FloatSlider* slider, float oldVal, double time) override;
    void DropdownUpdated(DropdownList* list, int oldVal, double time) override;
@@ -48,7 +48,7 @@ public:
 
    void SaveState(FileStreamOut& out) override;
    void LoadState(FileStreamIn& in, int rev) override;
-   int GetModuleSaveStateRev() const override { return 1; }
+   int GetModuleSaveStateRev() const override { return 2; }
 
    VisualFBO* GetFBO() override { return mFBO; }
    void PostRender() override;
@@ -102,6 +102,7 @@ private:
        float animRate{ 0.5f };
        float animDepth{ 0.5f };
        float animPhase{ 0 };
+       bool orbitInvert{ false };
        bool hasAudio{ false };
 
        struct HRTFState

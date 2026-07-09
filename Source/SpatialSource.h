@@ -4,6 +4,7 @@
 #include "IDrawableModule.h"
 #include "Slider.h"
 #include "DropdownList.h"
+#include "Checkbox.h"
 
 class SpatialRender;
 
@@ -31,7 +32,7 @@ public:
 
    void SaveState(FileStreamOut& out) override;
    void LoadState(FileStreamIn& in, int rev) override;
-   int GetModuleSaveStateRev() const override { return 1; }
+   int GetModuleSaveStateRev() const override { return 2; }
 
    void LoadLayout(const ofxJSONElement& moduleInfo) override;
    void SetUpFromSaveData() override;
@@ -58,6 +59,7 @@ private:
    int   mAnimMode{ 0 };
    float mAnimRate{ 0.5f };
    float mAnimDepth{ 0.5f };
+   bool  mOrbitInvert{ false };
    bool  mEnabled{ true };
 
    SpatialRender* mRegisteredRender{ nullptr };
@@ -70,5 +72,6 @@ private:
    DropdownList* mAnimModeDropdown{ nullptr };
    FloatSlider* mAnimRateSlider{ nullptr };
    FloatSlider* mAnimDepthSlider{ nullptr };
+   Checkbox*    mOrbitInvertCheckbox{ nullptr };
    DropdownList* mColorDropdown{ nullptr };
 };

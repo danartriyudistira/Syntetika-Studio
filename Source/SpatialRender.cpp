@@ -205,10 +205,13 @@ void SpatialRender::Process(double time)
              float p = src.animPhase;
              switch (src.animMode)
              {
-             case 1: // orbit (X-Y circle, top-down visible)
-                src.x = src.baseX + cosf(p) * d * 500;
-                src.y = src.baseY + sinf(p) * d * 500;
-                break;
+            case 1: // orbit (X-Y circle, top-down visible)
+               {
+                  float dir = src.orbitInvert ? -1.0f : 1.0f;
+                  src.x = src.baseX + cosf(p) * d * 500 * dir;
+                  src.y = src.baseY + sinf(p) * d * 500;
+               }
+               break;
             case 2: // lfo x
                src.x = src.baseX + sinf(p) * d * 300;
                break;
@@ -577,7 +580,7 @@ void SpatialRender::AcceptSourceAudio(SpatialSource* src, float* buffer, int buf
 }
 
 void SpatialRender::SetSourceProperties(SpatialSource* src, float volume, float occlusion, int colorHue,
-                                        int animMode, float animRate, float animDepth)
+                                         int animMode, float animRate, float animDepth, bool orbitInvert)
 {
    std::lock_guard<std::recursive_mutex> lock(mSourceMutex);
    for (auto& s : mSources)
@@ -587,10 +590,11 @@ void SpatialRender::SetSourceProperties(SpatialSource* src, float volume, float 
          s.volume = volume;
          s.occlusion = occlusion;
          s.colorHue = colorHue;
-         s.animMode = animMode;
-         s.animRate = animRate;
-         s.animDepth = animDepth;
-         return;
+          s.animMode = animMode;
+          s.animRate = animRate;
+          s.animDepth = animDepth;
+          s.orbitInvert = orbitInvert;
+          return;
       }
    }
 }
@@ -1333,6 +1337,7 @@ void SpatialRender::SaveState(FileStreamOut& out)
          out << src.baseX << src.baseY << src.baseZ;
          out << src.volume << src.occlusion << src.colorHue;
          out << src.animMode << src.animRate << src.animDepth;
+         out << src.orbitInvert;
          out << src.animPhase;
       }
    }
@@ -1365,7 +1370,9 @@ void SpatialRender::LoadState(FileStreamIn& in, int rev)
       float bx, by, bz, vol, occ;
       int ch, am;
       float ar, ad, ap;
+      bool oi = false;
       in >> bx >> by >> bz >> vol >> occ >> ch >> am >> ar >> ad >> ap;
+      if (rev >= 2) in >> oi;
       // Restore properties to registered sources by index
       if (i < (int)mSources.size())
       {
@@ -1380,6 +1387,7 @@ void SpatialRender::LoadState(FileStreamIn& in, int rev)
          src.animRate = ar;
          src.animDepth = ad;
          src.animPhase = ap;
+         src.orbitInvert = oi;
          if (src.src)
             src.src->SetPosition(bx, by, bz);
       }
