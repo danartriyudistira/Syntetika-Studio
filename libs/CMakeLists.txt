@@ -60,37 +60,4 @@ else()
   message(STATUS "Using system provided tuning-library")
 endif()
 add_subdirectory(xwax EXCLUDE_FROM_ALL)
-
-# foleys_video_engine wrapper (bypass submodule CMakeLists.txt)
-# Single-translation-unit static lib, FOLEYS_USE_OPENGL=0, local FFmpeg
-if(EXISTS "${CMAKE_SOURCE_DIR}/../ffmpeg_dev/ffmpeg-master-latest-win64-gpl-shared")
-  set(FFMPEG_ROOT "${CMAKE_SOURCE_DIR}/../ffmpeg_dev/ffmpeg-master-latest-win64-gpl-shared")
-else()
-  set(FFMPEG_ROOT "${CMAKE_SOURCE_DIR}/../ffmpeg_dev/ffmpeg-master-latest-win64-gpl-shared")
-endif()
-if(EXISTS "${FFMPEG_ROOT}/include")
-  add_library(foleys_video_engine STATIC foleys_video_engine/foleys_video_engine.cpp)
-  target_include_directories(foleys_video_engine PUBLIC
-    foleys_video_engine
-    ${FFMPEG_ROOT}/include
-  )
-  target_compile_definitions(foleys_video_engine PRIVATE
-    FOLEYS_USE_OPENGL=0
-    JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1
-    JUCE_MODAL_LOOPS_PERMITTED=1
-    JUCE_STRICT_REFCOUNTEDPOINTER=1
-  )
-  target_link_libraries(foleys_video_engine PUBLIC
-    juce::juce_core
-    juce::juce_gui_basics
-    juce::juce_opengl
-    ${FFMPEG_ROOT}/lib/avcodec.lib
-    ${FFMPEG_ROOT}/lib/avformat.lib
-    ${FFMPEG_ROOT}/lib/avutil.lib
-    ${FFMPEG_ROOT}/lib/swresample.lib
-    ${FFMPEG_ROOT}/lib/swscale.lib
-  )
-  message(STATUS "foleys_video_engine: using local FFmpeg at ${FFMPEG_ROOT}")
-else()
-  message(WARNING "FFmpeg not found at ${FFMPEG_ROOT} — foleys_video_engine disabled")
-endif()
+add_subdirectory(foleys_video_engine EXCLUDE_FROM_ALL)
