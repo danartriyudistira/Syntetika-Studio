@@ -1,0 +1,95 @@
+name: Build Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  build-windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - uses: lukka/get-cmake@latest
+
+      - name: Configure
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DSYNTETIKA_PORTABLE=True
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Prepare payload
+        shell: powershell
+        run: |
+          $rel = "build\Source\Syntetika_artefacts\Release"
+          $pl = "$env:RUNNER_TEMP\payload"
+          mkdir $pl -Force | Out-Null
+          cp "$rel\Syntetika.exe" $pl
+          cp "$rel\python3.dll" $pl -ErrorAction SilentlyContinue
+          cp "$rel\python313.dll" $pl -ErrorAction SilentlyContinue
+          cp -Recurse "$rel\python" $pl -ErrorAction SilentlyContinue
+          cp -Recurse "$rel\resource" $pl
+          Compress-Archive -Path "$pl\*" -DestinationPath "$env:RUNNER_TEMP\ss.zip" -Force
+
+      - name: Build installer EXE
+        shell: powershell
+        run: |
+          $wd = "$env:RUNNER_TEMP\inst"
+          mkdir $wd -Force | Out-Null
+          cp "$env:RUNNER_TEMP\ss.zip" "$wd\ss.zip"
+          $ps1 = @'
+          $ErrorActionPreference = "Stop"
+          $d = Split-Path -Parent $MyInvocation.MyCommand.Path
+          $z = Join-Path $d "ss.zip"
+          $i = Join-Path $env:LOCALAPPDATA "Programs\Syntetika Studio"
+          $s = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Syntetika Studio"
+          $lnk = Join-Path ([Environment]::GetFolderPath("Desktop")) "Syntetika Studio.lnk"
+          $sl = Join-Path $s "Syntetika Studio.lnk"
+          $e = Join-Path $i "Syntetika.exe"
+          if (Test-Path $i) { ri -LiteralPath $i -Recurse -Force }
+          mkdir $i -Force | Out-Null
+          Expand-Archive -LiteralPath $z -DestinationPath $i -Force
+          mkdir $s -Force | Out-Null
+          $w = New-Object -ComObject WScript.Shell
+          $c = $w.CreateShortcut($sl); $c.TargetPath = $e; $c.WorkingDirectory = $i; $c.Description = "Syntetika Studio"; $c.Save()
+          $c = $w.CreateShortcut($lnk); $c.TargetPath = $e; $c.WorkingDirectory = $i; $c.Description = "Syntetika Studio"; $c.Save()
+          Write-Host "Installed to $i"
+          '@
+          Set-Content "$wd\i.ps1" -Value $ps1
+          $cmd = '@echo off' + "`r`n" + 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0i.ps1"' + "`r`n" + 'if errorlevel 1 (echo.&echo Failed.&pause&exit /b 1)' + "`r`n" + 'exit /b 0'
+          Set-Content "$wd\i.cmd" -Value $cmd
+          $sed = @(
+            "[Version]", "Class=IEXPRESS", "SEDVersion=3",
+            "[Options]", "PackagePurpose=InstallApp", "ShowInstallProgramWindow=1",
+            "HideExtractAnimation=1", "UseLongFileName=1", "InsideCompressed=0",
+            "CAB_FixedSize=0", "CAB_ResvCodeSigning=0", "RebootMode=N",
+            "InstallPrompt=", "DisplayLicense=",
+            "FinishMessage=Syntetika Studio installed.",
+            "TargetName=$env:RUNNER_TEMP\setup.exe",
+            "FriendlyName=Syntetika Studio Setup",
+            "AppLaunched=i.cmd", "PostInstallCmd=<None>",
+            "AdminQuietInstCmd=i.cmd", "UserQuietInstCmd=i.cmd",
+            "SourceFiles=SourceFiles",
+            "[Strings]", 'FILE0="ss.zip"', 'FILE1="i.ps1"', 'FILE2="i.cmd"',
+            "[SourceFiles]", "SourceFiles0=$wd",
+            "[SourceFiles0]", "%FILE0%=", "%FILE1%=", "%FILE2%="
+          ) -join "`r`n"
+          Set-Content "$wd\i.sed" -Value $sed
+          & "$env:WINDIR\System32\iexpress.exe" /N /Q "$wd\i.sed"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Syntetika-Studio-Setup
+          path: ${{ runner.temp }}/setup.exe
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ runner.temp }}/setup.exe
+          generate_release_notes: true
