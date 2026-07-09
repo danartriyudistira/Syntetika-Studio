@@ -206,9 +206,9 @@ void SpatialRender::Process(double time)
             float p = src.animPhase;
             switch (src.animMode)
             {
-            case 1: // orbit
+            case 1: // orbit (X-Y circle, visible in top-down)
                src.x = src.baseX + cosf(p) * d * 300;
-               src.z = src.baseZ + sinf(p) * d * 300;
+               src.y = src.baseY + sinf(p) * d * 300;
                break;
             case 2: // lfo x
                src.x = src.baseX + sinf(p) * d * 300;
