@@ -318,8 +318,8 @@ target_sources(Syntetika PRIVATE
     LFO.h
     VideoDrumSampler.cpp
     VideoDrumSampler.h
-    VideoPlayerModule.cpp
-    VideoPlayerModule.h
+    $<$<NOT:$<BOOL:${SYNTETIKA_DISABLE_FOLEYS}>>:VideoPlayerModule.cpp>
+    $<$<NOT:$<BOOL:${SYNTETIKA_DISABLE_FOLEYS}>>:VideoPlayerModule.h>
     LFOController.cpp
     LFOController.h
     LaunchpadInterpreter.cpp
@@ -860,7 +860,6 @@ endif()
 target_include_directories(Syntetika PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${Python_INCLUDE_DIRS}
-    ${CMAKE_SOURCE_DIR}/libs/signalsmith-stretch
     )
 
 target_compile_definitions(Syntetika PRIVATE
@@ -1009,7 +1008,7 @@ target_link_libraries(Syntetika PRIVATE
     syntetika::pybind11
     syntetika::tinyobjloader
     syntetika::keyfinder
-    foleys_video_engine
+    $<$<NOT:$<BOOL:${SYNTETIKA_DISABLE_FOLEYS}>>:foleys_video_engine>
     syntetika::spoutlibrary
     syntetika::xwax
 

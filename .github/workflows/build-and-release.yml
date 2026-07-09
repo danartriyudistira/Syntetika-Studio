@@ -20,7 +20,7 @@ jobs:
         run: vcpkg install fftw3:x64-windows
 
       - name: Configure
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DSYNTETIKA_PORTABLE=True -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DSYNTETIKA_PORTABLE=True -DSYNTETIKA_DISABLE_FOLEYS=True -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
 
       - name: Build
         run: cmake --build build --config Release --parallel
