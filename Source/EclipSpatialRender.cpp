@@ -98,7 +98,7 @@ void EclipSpatialRender::Process(double time)
    int bufferSize = GetBuffer()->BufferSize();
    int numChannels = GetNumOutputChannels();
 
-   target->GetBuffer()->SetNumActiveChannels(numChannels);
+   SyncOutputBuffer(numChannels);
 
    std::vector<float*> outputs(numChannels);
    for (int ch = 0; ch < numChannels; ++ch)
