@@ -27,7 +27,7 @@ jobs:
         uses: lukka/get-cmake@latest
 
       - name: Configure CMake
-          run: cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DSYNTETIKA_PORTABLE=True
+        run: cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DSYNTETIKA_PORTABLE=True
 
       - name: Build
         run: cmake --build build --config Release --parallel
