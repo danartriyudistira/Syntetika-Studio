@@ -39,14 +39,13 @@ SpatialRender::~SpatialRender()
             s.src->mRegisteredRender = nullptr;
       }
    }
+   delete mFBO;
 }
 
 void SpatialRender::CreateUIControls()
 {
    IDrawableModule::CreateUIControls();
 
-   mFBO = new VisualFBO();
-   mFBO->Create(400, 300);
    mRoomWidthSlider = new FloatSlider(this, "room w (cm)", 5, kRow1Y, 110, 15, &mRoomWidth, 100, 2000);
    mRoomDepthSlider = new FloatSlider(this, "room d (cm)", 120, kRow1Y, 110, 15, &mRoomDepth, 100, 2000);
    mRoomHeightSlider = new FloatSlider(this, "room h (cm)", 235, kRow1Y, 110, 15, &mRoomHeight, 50, 1000);
@@ -1401,6 +1400,18 @@ void SpatialRender::LoadState(FileStreamIn& in, int rev)
 
 void SpatialRender::PostRender()
 {
+   if (!mEnabled)
+      return;
+
+   if (!mFBO || !mFBO->IsValid() ||
+       mFBO->GetWidth() != 400 ||
+       mFBO->GetHeight() != 300)
+   {
+      delete mFBO;
+      mFBO = new VisualFBO();
+      mFBO->Create(400, 300);
+   }
+
    if (!mFBO || !mFBO->IsValid())
       return;
 
