@@ -2,7 +2,29 @@ add_subdirectory(tinyobjloader EXCLUDE_FROM_ALL)
 add_subdirectory(Spout2 EXCLUDE_FROM_ALL)
 add_subdirectory(exprtk EXCLUDE_FROM_ALL)
 add_subdirectory(freeverb EXCLUDE_FROM_ALL)
-add_subdirectory(libkeyfinder EXCLUDE_FROM_ALL)
+
+# libkeyfinder: custom wrapper (bypass submodule CMakeLists.txt)
+add_library(syntetika_keyfinder STATIC
+  libkeyfinder/src/audiodata.cpp
+  libkeyfinder/src/chromagram.cpp
+  libkeyfinder/src/chromatransform.cpp
+  libkeyfinder/src/chromatransformfactory.cpp
+  libkeyfinder/src/fftadapter.cpp
+  libkeyfinder/src/keyclassifier.cpp
+  libkeyfinder/src/keyfinder.cpp
+  libkeyfinder/src/lowpassfilter.cpp
+  libkeyfinder/src/lowpassfilterfactory.cpp
+  libkeyfinder/src/spectrumanalyser.cpp
+  libkeyfinder/src/temporalwindowfactory.cpp
+  libkeyfinder/src/toneprofiles.cpp
+  libkeyfinder/src/windowfunctions.cpp
+  libkeyfinder/src/workspace.cpp
+  libkeyfinder/src/constants.cpp
+)
+target_include_directories(syntetika_keyfinder PUBLIC libkeyfinder/src)
+target_link_libraries(syntetika_keyfinder PUBLIC FFTW3::fftw3)
+add_library(syntetika::keyfinder ALIAS syntetika_keyfinder)
+
 if(NOT SYNTETIKA_SYSTEM_JSONCPP)
   add_subdirectory(json EXCLUDE_FROM_ALL)
   message(STATUS "Using bundled jsoncpp")
