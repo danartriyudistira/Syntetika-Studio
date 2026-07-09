@@ -835,6 +835,10 @@ if(NOT SYNTETIKA_DISABLE_FOLEYS)
     VideoPlayerModule.cpp
     VideoPlayerModule.h
     )
+else()
+  target_compile_definitions(Syntetika PRIVATE
+    SYNTETIKA_DISABLE_FOLEYS=1
+    )
 endif()
 
 if(SYNTETIKA_NIGHTLY)

@@ -55,8 +55,10 @@
 #include "Looper.h"
 #include "Rewriter.h"
 #include "MeshInstances3D.h"
+#ifndef SYNTETIKA_DISABLE_FOLEYS
 #include "VideoDrumSampler.h"
 #include "VideoPlayerModule.h"
+#endif
 #include "Metronome.h"
 #include "NoteRouter.h"
 #include "NoteLooper.h"
@@ -357,10 +359,12 @@ ModuleFactory::ModuleFactory()
      REGISTER(Lissajous, lissajous, kModuleCategory_Audio);
      REGISTER(TriggerWaveEffect, triggerwave, kModuleCategory_Audio);
      REGISTER(EclipSpatialRender, eclipspatialrender, kModuleCategory_Audio);
-     REGISTER(EclipSpatialSource, eclipspatialsource, kModuleCategory_Audio);
-      REGISTER(VideoDrumSampler, videodrumsampler, kModuleCategory_Audio);
-      REGISTER(VideoPlayerModule, videoplayer, kModuleCategory_Audio);
-      REGISTER(TrigMatrixFX, trigmatrixfx, kModuleCategory_Visual);
+      REGISTER(EclipSpatialSource, eclipspatialsource, kModuleCategory_Audio);
+#ifndef SYNTETIKA_DISABLE_FOLEYS
+       REGISTER(VideoDrumSampler, videodrumsampler, kModuleCategory_Audio);
+       REGISTER(VideoPlayerModule, videoplayer, kModuleCategory_Audio);
+#endif
+       REGISTER(TrigMatrixFX, trigmatrixfx, kModuleCategory_Visual);
     REGISTER(TimerDisplay, timerdisplay, kModuleCategory_Other);
    REGISTER(DrumSynth, drumsynth, kModuleCategory_Synth);
    //REGISTER(EigenChorder, eigenchorder, kModuleCategory_Note);
