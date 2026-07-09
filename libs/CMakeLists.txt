@@ -73,6 +73,7 @@ if(EXISTS "${FFMPEG_ROOT}/include")
   target_include_directories(foleys_video_engine PUBLIC
     foleys_video_engine
     ${FFMPEG_ROOT}/include
+    ${SYNTETIKA_JUCE_LOCATION}/modules
   )
   target_compile_definitions(foleys_video_engine PRIVATE FOLEYS_USE_OPENGL=0)
   target_link_libraries(foleys_video_engine PUBLIC
