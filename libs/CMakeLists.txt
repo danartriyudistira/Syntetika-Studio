@@ -2,28 +2,7 @@ add_subdirectory(tinyobjloader EXCLUDE_FROM_ALL)
 add_subdirectory(Spout2 EXCLUDE_FROM_ALL)
 add_subdirectory(exprtk EXCLUDE_FROM_ALL)
 add_subdirectory(freeverb EXCLUDE_FROM_ALL)
-
-# libkeyfinder: custom wrapper (bypass submodule CMakeLists.txt)
-# Local fftadapter.cpp uses custom radix-2 FFT (no FFTW3 needed)
-add_library(syntetika_keyfinder STATIC
-  libkeyfinder/src/audiodata.cpp
-  libkeyfinder/src/chromagram.cpp
-  libkeyfinder/src/chromatransform.cpp
-  libkeyfinder/src/chromatransformfactory.cpp
-  libkeyfinder/src/fftadapter.cpp
-  libkeyfinder/src/keyclassifier.cpp
-  libkeyfinder/src/keyfinder.cpp
-  libkeyfinder/src/lowpassfilter.cpp
-  libkeyfinder/src/lowpassfilterfactory.cpp
-  libkeyfinder/src/spectrumanalyser.cpp
-  libkeyfinder/src/temporalwindowfactory.cpp
-  libkeyfinder/src/toneprofiles.cpp
-  libkeyfinder/src/windowfunctions.cpp
-  libkeyfinder/src/workspace.cpp
-  libkeyfinder/src/constants.cpp
-)
-target_include_directories(syntetika_keyfinder PUBLIC libkeyfinder/src)
-add_library(syntetika::keyfinder ALIAS syntetika_keyfinder)
+add_subdirectory(libkeyfinder EXCLUDE_FROM_ALL)
 
 if(NOT SYNTETIKA_SYSTEM_JSONCPP)
   add_subdirectory(json EXCLUDE_FROM_ALL)
@@ -60,3 +39,18 @@ else()
   message(STATUS "Using system provided tuning-library")
 endif()
 add_subdirectory(xwax EXCLUDE_FROM_ALL)
+
+option(SYNTETIKA_DISABLE_FOLEYS "Disable foleys_video_engine (skip VideoPlayer/DrumSampler)" OFF)
+if(NOT SYNTETIKA_DISABLE_FOLEYS)
+    set(FFMPEG_ROOT "${CMAKE_SOURCE_DIR}/../ffmpeg_dev/ffmpeg-master-latest-win64-gpl-shared")
+    if(EXISTS "${FFMPEG_ROOT}/include")
+        add_subdirectory(foleys_video_engine EXCLUDE_FROM_ALL)
+    else()
+        set(SYNTETIKA_DISABLE_FOLEYS TRUE CACHE BOOL "FFmpeg not found, auto-disabled" FORCE)
+        message(WARNING "FFmpeg not found at ${FFMPEG_ROOT}. "
+                "foleys_video_engine disabled. "
+                "Set -DSYNTETIKA_DISABLE_FOLEYS=OFF to require it.")
+    endif()
+else()
+    message(STATUS "foleys_video_engine: skipped (SYNTETIKA_DISABLE_FOLEYS=True)")
+endif()
