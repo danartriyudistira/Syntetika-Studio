@@ -1008,7 +1008,6 @@ target_link_libraries(Syntetika PRIVATE
     syntetika::pybind11
     syntetika::tinyobjloader
     syntetika::keyfinder
-    $<$<NOT:$<BOOL:${SYNTETIKA_DISABLE_FOLEYS}>>:foleys_video_engine>
     syntetika::spoutlibrary
     syntetika::xwax
 
@@ -1037,6 +1036,10 @@ target_link_libraries(Syntetika PRIVATE
     ${Python_LIBRARIES}
     $<$<BOOL:${MINGW}>:dbghelp>
     )
+
+if(NOT SYNTETIKA_DISABLE_FOLEYS)
+  target_link_libraries(Syntetika PRIVATE foleys_video_engine)
+endif()
 
 syntetika_copy_resource_dir(Syntetika)
 syntetika_make_portable(Syntetika)
