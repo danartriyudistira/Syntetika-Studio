@@ -828,18 +828,12 @@ target_sources(Syntetika PRIVATE
     ofxJSONElement.h
     )
 
-if(NOT SYNTETIKA_DISABLE_FOLEYS)
-  target_sources(Syntetika PRIVATE
-    VideoDrumSampler.cpp
-    VideoDrumSampler.h
-    VideoPlayerModule.cpp
-    VideoPlayerModule.h
-    )
-else()
-  target_compile_definitions(Syntetika PRIVATE
-    SYNTETIKA_DISABLE_FOLEYS=1
-    )
-endif()
+target_sources(Syntetika PRIVATE
+  VideoDrumSampler.cpp
+  VideoDrumSampler.h
+  VideoPlayerModule.cpp
+  VideoPlayerModule.h
+  )
 
 if(SYNTETIKA_NIGHTLY)
     target_compile_definitions(Syntetika PRIVATE
@@ -1046,9 +1040,7 @@ target_link_libraries(Syntetika PRIVATE
     $<$<BOOL:${MINGW}>:dbghelp>
     )
 
-if(NOT SYNTETIKA_DISABLE_FOLEYS)
-  target_link_libraries(Syntetika PRIVATE foleys_video_engine)
-endif()
+target_link_libraries(Syntetika PRIVATE foleys_video_engine)
 
 syntetika_copy_resource_dir(Syntetika)
 syntetika_make_portable(Syntetika)
