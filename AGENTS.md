@@ -115,6 +115,20 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, LissajousOut, Trigge
 - Bugfix: SetPosition + loop resets mPlayStartTime formula (gTime - mPlayhead/mSpeed)
 - VideoPlayerModule builds with foleys video engine
 
+### v1.1.3 Video Build Stabilization (session 2026-07-10)
+- **libs/CMakeLists.txt**: duplicate foleys_video_engine block removed (was add_subdirectory 2x)
+- **libs/CMakeLists.txt**: JUCE_FOUND=TRUE set before foleys subdirectory — prevents foleys's bundled FindJUCE.cmake from FetchContent-downloading JUCE 6 (project uses JUCE 7.0.12)
+- **libs/CMakeLists.txt**: local FFmpeg path check now creates ffmpeg::ffmpeg imported target — foleys's find_package(ffmpeg) succeeds without FetchContent download
+- **libs/foleys_video_engine/CMakeLists.txt**: guarded find_package(JUCE) and find_package(ffmpeg) behind target existence checks
+- **Source/CMakeLists.txt**: FFmpeg DLL copy guarded behind SYNTETIKA_DISABLE_FOLEYS; explicit include dir for foleys headers; runtime warning if DLLs missing
+- **libs/foleys_video_engine/ReadWrite/FFmpeg/foleys_FFmpegHelpers.h**: removed `avresample.lib` pragma, added explicit `#include <libavcodec/avcodec.h>`, migrated `swr_alloc_set_opts` → `swr_alloc_set_opts2` (FFmpeg 7.x API)
+- **libs/foleys_video_engine/ReadWrite/FFmpeg/foleys_FFmpegReader.cpp**: migrated `channel_layout`→`ch_layout`, `channels`→`ch_layout.nb_channels`, `pkt_duration`→`duration`, `swr_alloc_set_opts`→`swr_alloc_set_opts2` (FFmpeg 5.x+/7.x API)
+- **libs/foleys_video_engine/foleys_video_engine.cpp**: excluded FFmpegWriter (+ stubs), ProcessorController, ParameterAutomation, Widgets, ClipRenderer, ComposedClip, ClipDescriptor — not needed for playback-only modules
+- **libs/foleys_video_engine/ReadWrite/FFmpeg/foleys_FFmpegWriter.h**: added explicit destructor declaration for Pimpl pattern
+- **Source/VideoPlayerModule.cpp**: NVG image leak fixed — old handle deleted before FBO recreation on dimension change (was deleting after Bind() on new context)
+- **Source/VideoPlayerModule.cpp**: mSpeedRange bounds-clamped in LoadState (prevents OOB on corrupted saves)
+- **Source/VideoDrumSampler.cpp**: ConsolidateAll() system() return code checked, error logged via ofLog()
+
 ## Known Issues
 - tinygltf removed from build (missing nlohmann json.hpp dependency); only OBJ loading supported
 - InstanceData struct uses float arrays, sizeof(InstanceData) must remain stable for GPU buffer upload
@@ -123,7 +137,8 @@ Build audio-reactive 3D/2D visual modules (MeshInstances3D, LissajousOut, Trigge
 - Camera update via mCameraAzimuth/mCameraAltitude/mCameraDistance sliders only (no interactive orbit yet)
 - TriggerWaveEffect beat detection is mono (channel 0 only)
 - TriggerWaveEffect uses energy-based detection, no FFT/spectral flux analysis yet
-- VideoDrumSampler still uses ffmpeg.exe subprocess (foleys migration pending)
+- VideoDrumSampler ConsolidateAll() still uses ffmpeg.exe subprocess via system() (foleys migration pending)
+- FFmpeg dev libraries must be placed at ../ffmpeg_dev/ffmpeg-master-latest-win64-gpl-shared/ for video support
 
 ## Key Decisions
 - **Elements on the right**: element area occupies a vertical strip to the right of pattern slots, spanning the same Y range as tracks; each grid type (rotary/slider/button) occupies a column band with R/S/B header labels

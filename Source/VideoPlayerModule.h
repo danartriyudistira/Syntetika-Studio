@@ -7,7 +7,6 @@
 #include "Slider.h"
 #include "ClickButton.h"
 #include "Checkbox.h"
-#include "DropdownList.h"
 #include "PatchCableSource.h"
 #include "foleys_video_engine.h"
 
@@ -23,7 +22,6 @@ class VideoPlayerModule : public IAudioSource,
                           public IVisualSource,
                           public IFloatSliderListener,
                           public IButtonListener,
-                          public IDropdownListener,
                           public INoteReceiver
 {
 public:
@@ -45,11 +43,10 @@ public:
    void ButtonClicked(ClickButton* button, double time) override;
    void FloatSliderUpdated(FloatSlider* slider, float oldVal, double time) override;
    void CheckboxUpdated(Checkbox* checkbox, double time) override;
-   void DropdownUpdated(DropdownList* list, int oldVal, double time) override;
 
    void SaveState(FileStreamOut& out) override;
    void LoadState(FileStreamIn& in, int rev) override;
-   int GetModuleSaveStateRev() const override { return 3; }
+   int GetModuleSaveStateRev() const override { return 5; }
 
    VisualFBO* GetFBO() override;
    void PostRender() override;
@@ -57,7 +54,7 @@ public:
     bool IsEnabled() const override { return mEnabled; }
     bool IsResizable() const override { return true; }
     void Resize(float width, float height) override;
-    bool ShouldSuppressAutomaticOutputCable() override { return true; } 
+    bool ShouldSuppressAutomaticOutputCable() override { return true; }
 
 private:
    void DrawModule() override;
@@ -94,21 +91,14 @@ private:
    float mPlayheadFloat{ 0 };
    double mPlayStartTime{ 0 };
    bool mLoop{ false };
-
-   float mSpeed{ 1.0f };
-   float mTempo{ 120.0f };
-   float mBaseBPM{ 120.0f };
-   bool mSync{ false };
    double mCuePoint{ 0 };
-   bool mHasCue{ false };
+    bool mHasCue{ false };
+    std::string mStatusMsg;
+    double mStatusTime{ 0 };
 
-   double mLoopIn{ -1 };
-   double mLoopOut{ -1 };
-   bool mLoopSectionActive{ false };
-
-   enum { kSpeedRange_1x, kSpeedRange_2x, kSpeedRange_4x, kSpeedRange_8x };
-   int mSpeedRange{ kSpeedRange_1x };
-   float mSpeedRangeValues[4]{ 1.0f, 2.0f, 4.0f, 8.0f };
+   double mTrimIn{ -1 };
+   double mTrimOut{ -1 };
+   bool mTrimActive{ false };
 
    enum { kCueMode_Jump, kCueMode_Set };
    int mCueMode{ kCueMode_Jump };
@@ -123,6 +113,7 @@ private:
    ClickButton* mHotcueButton[kNumHotcues]{};
 
    bool mScrubbing{ false };
+   bool mCueDragging{ false };
    float mLastMouseX{ 0 };
    float mLastMouseY{ 0 };
    double mLastClickTime{ 0 };
@@ -143,18 +134,16 @@ private:
    ClickButton* mPauseButton{ nullptr };
    ClickButton* mStopButton{ nullptr };
    ClickButton* mCueButton{ nullptr };
-   ClickButton* mNudgeLeftButton{ nullptr };
+   ClickButton* mCueModeButton{ nullptr };
+    ClickButton* mCueClearButton{ nullptr };
+    ClickButton* mConvertButton{ nullptr };
+    ClickButton* mNudgeLeftButton{ nullptr };
    ClickButton* mNudgeRightButton{ nullptr };
-   ClickButton* mLoopInButton{ nullptr };
-   ClickButton* mLoopOutButton{ nullptr };
-   ClickButton* mLoopClearButton{ nullptr };
+   ClickButton* mTrimInButton{ nullptr };
+   ClickButton* mTrimOutButton{ nullptr };
+   ClickButton* mTrimClearButton{ nullptr };
    Checkbox* mLoopCheckbox{ nullptr };
-   FloatSlider* mSpeedSlider{ nullptr };
-   FloatSlider* mTempoSlider{ nullptr };
    FloatSlider* mPositionSlider{ nullptr };
-   DropdownList* mSpeedRangeDropdown{ nullptr };
-   Checkbox* mSyncCheckbox{ nullptr };
-   DropdownList* mCueModeDropdown{ nullptr };
 
    float mWidth{ 460 };
    float mHeight{ 260 };

@@ -39,30 +39,34 @@ else()
   message(STATUS "Using system provided tuning-library")
 endif()
 option(SYNTETIKA_DISABLE_FOLEYS "Disable foleys_video_engine (skip VideoPlayer/DrumSampler)" OFF)
-if(NOT SYNTETIKA_DISABLE_FOLEYS)
-    set(FFMPEG_ROOT "${CMAKE_SOURCE_DIR}/../ffmpeg_dev/ffmpeg-master-latest-win64-gpl-shared")
-    if(EXISTS "${FFMPEG_ROOT}/include")
-        add_subdirectory(foleys_video_engine EXCLUDE_FROM_ALL)
-    else()
-        set(SYNTETIKA_DISABLE_FOLEYS TRUE CACHE BOOL "FFmpeg not found, auto-disabled" FORCE)
-        message(WARNING "FFmpeg not found at ${FFMPEG_ROOT}. foleys disabled.")
-    endif()
-else()
-    message(STATUS "foleys_video_engine: skipped")
-endif()
-add_subdirectory(xwax EXCLUDE_FROM_ALL)
 
-option(SYNTETIKA_DISABLE_FOLEYS "Disable foleys_video_engine (skip VideoPlayer/DrumSampler)" OFF)
 if(NOT SYNTETIKA_DISABLE_FOLEYS)
+    # Prevent foleys's bundled FindJUCE.cmake from downloading JUCE 6 via FetchContent.
+    # JUCE 7.0.12 is already loaded via add_subdirectory() from the top-level CMakeLists.
+    # Setting JUCE_FOUND=TRUE causes CMake to skip find_package(JUCE 6) entirely.
+    set(JUCE_FOUND TRUE CACHE BOOL "JUCE already loaded by parent project" FORCE)
+
     set(FFMPEG_ROOT "${CMAKE_SOURCE_DIR}/../ffmpeg_dev/ffmpeg-master-latest-win64-gpl-shared")
     if(EXISTS "${FFMPEG_ROOT}/include")
+        message(STATUS "Local FFmpeg found at ${FFMPEG_ROOT}")
+        # Create ffmpeg::ffmpeg imported target so foleys's find_package(ffmpeg) is satisfied.
+        # Setting ffmpeg_FOUND=TRUE causes CMake to skip foleys's Findffmpeg.cmake (FetchContent).
+        if(NOT TARGET ffmpeg::ffmpeg)
+            add_library(ffmpeg_imported INTERFACE IMPORTED)
+            target_include_directories(ffmpeg_imported INTERFACE "${FFMPEG_ROOT}/include")
+            file(GLOB FFMPEG_LIBS "${FFMPEG_ROOT}/lib/*.lib")
+            target_link_libraries(ffmpeg_imported INTERFACE ${FFMPEG_LIBS})
+            add_library(ffmpeg::ffmpeg ALIAS ffmpeg_imported)
+        endif()
+        set(ffmpeg_FOUND TRUE CACHE BOOL "FFmpeg found locally" FORCE)
         add_subdirectory(foleys_video_engine EXCLUDE_FROM_ALL)
     else()
         set(SYNTETIKA_DISABLE_FOLEYS TRUE CACHE BOOL "FFmpeg not found, auto-disabled" FORCE)
         message(WARNING "FFmpeg not found at ${FFMPEG_ROOT}. "
-                "foleys_video_engine disabled. "
-                "Set -DSYNTETIKA_DISABLE_FOLEYS=OFF to require it.")
+                "foleys_video_engine + VideoPlayer/DrumSampler disabled. "
+                "Place a BtbN FFmpeg shared build at that path to enable video.")
     endif()
 else()
-    message(STATUS "foleys_video_engine: skipped (SYNTETIKA_DISABLE_FOLEYS=True)")
+    message(STATUS "foleys_video_engine: skipped (SYNTETIKA_DISABLE_FOLEYS=ON)")
 endif()
+add_subdirectory(xwax EXCLUDE_FROM_ALL)

@@ -2051,6 +2051,8 @@ void ModularSynth::AudioOut(float* const* output, int bufferSize, int nChannels)
 
    int oversampling = UserPrefs.oversampling.Get();
 
+   mIOBufferSize = gBufferSize;
+
    assert(bufferSize * oversampling == mIOBufferSize);
    assert(nChannels == (int)mOutputBuffers.size());
    assert(mIOBufferSize == gBufferSize); //need to be the same for now
@@ -2061,7 +2063,7 @@ void ModularSynth::AudioOut(float* const* output, int bufferSize, int nChannels)
       for (size_t i = 0; i < mOutputBuffers.size(); ++i)
          Clear(mOutputBuffers[i], mIOBufferSize);
 
-      double elapsed = gInvSampleRateMs * mIOBufferSize;
+      double elapsed = gInvSampleRateMs * gBufferSize;
       gTime += elapsed;
       TheTransport->Advance(elapsed);
 

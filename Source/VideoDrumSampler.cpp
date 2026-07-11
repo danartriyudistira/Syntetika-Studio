@@ -71,16 +71,17 @@ void VideoDrumSampler::CreateUIControls()
    mPlayPadButton = new ClickButton(this, "play pad", 5, ey3);
    mStopPadButton = new ClickButton(this, "stop", 70, ey3);
    mLoadVideoButton = new ClickButton(this, "load video", 120, ey3);
-   mClearPadButton = new ClickButton(this, "clear", 195, ey3);
-   mConsolidateButton = new ClickButton(this, "consolidate", 260, ey3);
+    mClearPadButton = new ClickButton(this, "clear", 195, ey3);
+    mConsolidateButton = new ClickButton(this, "consolidate", 260, ey3);
+    mOptimizeButton = new ClickButton(this, "optimize", 340, ey3);
 
    AddUIControl(mEditVolSlider); AddUIControl(mEditSpeedSlider);
    AddUIControl(mEditPanSlider); AddUIControl(mEditFpsSlider);
    AddUIControl(mEditTrimStartSlider); AddUIControl(mEditTrimEndSlider);
    AddUIControl(mEditLoopCheckbox);
-   AddUIControl(mPlayPadButton); AddUIControl(mStopPadButton);
-   AddUIControl(mLoadVideoButton); AddUIControl(mClearPadButton);
-   AddUIControl(mConsolidateButton);
+    AddUIControl(mPlayPadButton); AddUIControl(mStopPadButton);
+    AddUIControl(mLoadVideoButton); AddUIControl(mClearPadButton);
+    AddUIControl(mConsolidateButton); AddUIControl(mOptimizeButton);
 
    // Cables — right side, clearly separated
    mOutputCable = new PatchCableSource(this, kConnectionType_Audio);
@@ -289,8 +290,8 @@ void VideoDrumSampler::DrawEditPanel()
    mEditTrimStartSlider->Draw(); mEditTrimEndSlider->Draw();
    mEditLoopCheckbox->Draw();
    mPlayPadButton->Draw(); mStopPadButton->Draw();
-   mLoadVideoButton->Draw(); mClearPadButton->Draw();
-   mConsolidateButton->Draw();
+    mLoadVideoButton->Draw(); mClearPadButton->Draw();
+    mConsolidateButton->Draw(); mOptimizeButton->Draw();
 }
 
 void VideoDrumSampler::DrawWaveformTimeline()
@@ -346,6 +347,12 @@ void VideoDrumSampler::PostRender()
 
    if (!mFBO) mFBO = new VisualFBO();
    if (!mFBO->IsValid() || mFBO->GetWidth() != targetW || mFBO->GetHeight() != targetH) {
+      for (auto& pad : mPads) {
+         if (pad.mNvgHandle >= 0) {
+            NVGcontext* oldNVG = mFBO->IsValid() ? mFBO->GetNVGContext() : nullptr;
+            if (oldNVG) { nvgDeleteImage(oldNVG, pad.mNvgHandle); pad.mNvgHandle = -1; }
+         }
+      }
       delete mFBO;
       mFBO = new VisualFBO();
       mFBO->Create(targetW, targetH);
@@ -359,10 +366,13 @@ void VideoDrumSampler::PostRender()
       if (!pad.mLoaded || !pad.mActive) continue;
 
       // image: hold single frame for half-second then deactivate
-      if (pad.mIsImage) {
-         double elapsed = gTime * 0.001 - pad.mStartTime;
-         if (elapsed > 0.5 && !pad.mLooping) { pad.mActive = false; continue; }
-         if (pad.mNvgHandle >= 0) {
+       if (pad.mIsImage) {
+          double elapsed = gTime * 0.001 - pad.mStartTime;
+          if (elapsed > 0.5 && !pad.mLooping) { pad.mActive = false; continue; }
+          if (pad.mNvgHandle < 0 && !pad.mImageData.empty() && pad.mCachedW > 0 && pad.mCachedH > 0) {
+             pad.mNvgHandle = nvgCreateImageRGBA(gNanoVG, pad.mCachedW, pad.mCachedH, 0, pad.mImageData.data());
+          }
+          if (pad.mNvgHandle >= 0) {
             float dx, dy, dw, dh;
             float ir = (float)pad.mCachedW / pad.mCachedH;
             if (mDisplayMode == kDisplay_Fill) { dx = 0; dy = 0; dw = fbw; dh = fbh; }
@@ -411,30 +421,28 @@ void VideoDrumSampler::RenderPadFrame(Pad& pad, double playheadSec, float fbw, f
 {
    if (!pad.mClip || !pad.mClip->hasVideo()) return;
 
-   // try to get frame; if invalid or same timecode, still draw cached texture
-   bool refreshTexture = false;
    int iw = pad.mCachedW, ih = pad.mCachedH;
 
-   foleys::VideoFrame& frame = pad.mClip->getFrame(playheadSec);
-   if (frame.image.isValid() && frame.timecode != pad.mLastTimecode) {
-      pad.mLastTimecode = frame.timecode;
-      refreshTexture = true;
-      iw = frame.image.getWidth(); ih = frame.image.getHeight();
+   if (pad.mClip->isFrameAvailable(playheadSec))
+   {
+      foleys::VideoFrame& frame = pad.mClip->getFrame(playheadSec);
+      if (frame.image.isValid() && frame.timecode != pad.mLastTimecode) {
+         pad.mLastTimecode = frame.timecode;
+         iw = frame.image.getWidth(); ih = frame.image.getHeight();
+
+         juce::Image::BitmapData bmp(frame.image, juce::Image::BitmapData::readOnly);
+         const uint8_t* sd = (const uint8_t*)bmp.data;
+         size_t sz = (size_t)iw * ih * 4; if (mConvertBuffer.size() < sz) mConvertBuffer.resize(sz);
+         for (int y = 0; y < ih; ++y) { const uint8_t* s = sd + (size_t)y * bmp.lineStride; uint8_t* d = mConvertBuffer.data() + (size_t)y * iw * 4; for (int x = 0; x < iw; ++x) { d[x*4+0]=s[x*4+2]; d[x*4+1]=s[x*4+1]; d[x*4+2]=s[x*4+0]; d[x*4+3]=s[x*4+3]; } }
+
+         NVGcontext* nvg = mFBO ? mFBO->GetNVGContext() : gNanoVG;
+         if (pad.mNvgHandle >= 0) { nvgDeleteImage(nvg, pad.mNvgHandle); pad.mNvgHandle = -1; }
+         pad.mNvgHandle = nvgCreateImageRGBA(nvg, iw, ih, 0, mConvertBuffer.data());
+         pad.mCachedW = iw; pad.mCachedH = ih;
+      }
    }
 
    if (iw <= 0 || ih <= 0) return;
-
-   if (refreshTexture) {
-      juce::Image::BitmapData bmp(frame.image, juce::Image::BitmapData::readOnly);
-      const uint8_t* sd = (const uint8_t*)bmp.data;
-      size_t sz = (size_t)iw * ih * 4; if (mConvertBuffer.size() < sz) mConvertBuffer.resize(sz);
-      for (int y = 0; y < ih; ++y) { const uint8_t* s = sd + (size_t)y * bmp.lineStride; uint8_t* d = mConvertBuffer.data() + (size_t)y * iw * 4; for (int x = 0; x < iw; ++x) { d[x*4+0]=s[x*4+2]; d[x*4+1]=s[x*4+1]; d[x*4+2]=s[x*4+0]; d[x*4+3]=s[x*4+3]; } }
-
-      NVGcontext* nvg = mFBO ? mFBO->GetNVGContext() : gNanoVG;
-      if (pad.mNvgHandle >= 0) { nvgDeleteImage(nvg, pad.mNvgHandle); pad.mNvgHandle = -1; }
-      pad.mNvgHandle = nvgCreateImageRGBA(nvg, iw, ih, 0, mConvertBuffer.data());
-      pad.mCachedW = iw; pad.mCachedH = ih;
-   }
 
    if (pad.mNvgHandle >= 0) {
       float dx, dy, dw, dh;
@@ -467,7 +475,41 @@ void VideoDrumSampler::ButtonClicked(ClickButton* button, double time)
       if (chooser.browseForFileToOpen()) { mPads[mEditIndex].mVideoPath = chooser.getResult().getFullPathName().toStdString(); LoadPadVideo(mEditIndex); }
    }
    else if (button == mClearPadButton && mEditIndex >= 0 && mEditIndex < kNumPads) ClearPad(mEditIndex);
-   else if (button == mConsolidateButton) ConsolidateAll();
+    else if (button == mConsolidateButton) ConsolidateAll();
+    else if (button == mOptimizeButton && mEditIndex >= 0 && mEditIndex < kNumPads)
+    {
+       auto& pad = mPads[mEditIndex];
+       if (!pad.mLoaded || pad.mIsImage || pad.mVideoPath.empty()) return;
+       std::string inPath = pad.mVideoPath;
+       std::string outPath = inPath;
+       size_t dot = outPath.rfind('.');
+       if (dot != std::string::npos) outPath.insert(dot, "_opt");
+       else outPath += "_opt.mp4";
+
+       juce::File exeDir = juce::File::getSpecialLocation(juce::File::currentExecutableFile).getParentDirectory();
+       juce::File converter = exeDir.getChildFile("syntetikaconvert.exe");
+       if (!converter.existsAsFile())
+       {
+          ofLog() << "VideoDrumSampler optimize: syntetikaconvert.exe not found";
+          return;
+       }
+
+       juce::String cmd = converter.getFullPathName() + " \"" + inPath + "\" \"" + outPath + "\"";
+       juce::ChildProcess proc;
+       if (proc.start(cmd))
+       {
+          proc.waitForProcessToFinish(60000);
+          if (proc.getExitCode() == 0 && juce::File(outPath).existsAsFile())
+          {
+             pad.mVideoPath = outPath;
+             LoadPadVideo(mEditIndex);
+          }
+          else
+             ofLog() << "VideoDrumSampler optimize pad " << (mEditIndex + 1) << " failed (exit " << proc.getExitCode() << ")";
+       }
+       else
+          ofLog() << "VideoDrumSampler optimize: failed to start process";
+    }
 }
 
 void VideoDrumSampler::FloatSliderUpdated(FloatSlider* slider, float oldVal, double time)
@@ -476,7 +518,7 @@ void VideoDrumSampler::FloatSliderUpdated(FloatSlider* slider, float oldVal, dou
    auto& pad = mPads[mEditIndex];
 
    if (slider == mEditVolSlider) pad.mVol = mEditVol;
-   else if (slider == mEditSpeedSlider) pad.mSpeed = mEditSpeed;
+    else if (slider == mEditSpeedSlider) pad.mSpeed = ofClamp(mEditSpeed, 0.1f, 4.0f);
    else if (slider == mEditPanSlider) pad.mPan = mEditPan;
    else if (slider == mEditFpsSlider) pad.mFps = mEditFps;
    else if (slider == mEditTrimStartSlider || slider == mEditTrimEndSlider) {
@@ -551,32 +593,31 @@ void VideoDrumSampler::LoadPadVideo(int index)
    if (pad.mVideoPath.empty()) return;
    juce::File f(pad.mVideoPath); if (!f.existsAsFile()) return;
 
-   // detect image files (static, single frame)
-   juce::String ext = f.getFileExtension().toLowerCase();
-   if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".webp") {
-      juce::Image img = juce::ImageFileFormat::loadFrom(f);
-      if (!img.isValid()) return;
-      if (!mFBO) { mFBO = new VisualFBO(); mFBO->Create(512, 512); }
-      int w = img.getWidth(), h = img.getHeight();
-      juce::Image::BitmapData bmp(img, juce::Image::BitmapData::readOnly);
-      const uint8_t* sd = (const uint8_t*)bmp.data;
-      size_t sz = (size_t)w * h * 4; if (mConvertBuffer.size() < sz) mConvertBuffer.resize(sz);
-      for (int y = 0; y < h; ++y) { const uint8_t* s = sd + (size_t)y * bmp.lineStride; uint8_t* d = mConvertBuffer.data() + (size_t)y * w * 4; for (int x = 0; x < w; ++x) { d[x*4+0]=s[x*4+2]; d[x*4+1]=s[x*4+1]; d[x*4+2]=s[x*4+0]; d[x*4+3]=s[x*4+3]; } }
-      NVGcontext* nvg = mFBO->GetNVGContext();
-      pad.mNvgHandle = nvgCreateImageRGBA(nvg, w, h, 0, mConvertBuffer.data());
-      pad.mCachedW = w; pad.mCachedH = h;
-      pad.mIsImage = true; pad.mLoaded = true;
-      pad.mTrimStart = 0; pad.mTrimEnd = 1; pad.mFps = 30.0f;
-      if (mEditIndex == index) SyncEditVars();
-      return;
-   }
+    // detect image files (static, single frame)
+    juce::String ext = f.getFileExtension().toLowerCase();
+    if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".bmp" || ext == ".webp") {
+       juce::Image img = juce::ImageFileFormat::loadFrom(f);
+       if (!img.isValid()) return;
+       int w = img.getWidth(), h = img.getHeight();
+       juce::Image::BitmapData bmp(img, juce::Image::BitmapData::readOnly);
+       const uint8_t* sd = (const uint8_t*)bmp.data;
+       size_t sz = (size_t)w * h * 4;
+       pad.mImageData.resize(sz);
+       for (int y = 0; y < h; ++y) { const uint8_t* s = sd + (size_t)y * bmp.lineStride; uint8_t* d = pad.mImageData.data() + (size_t)y * w * 4; for (int x = 0; x < w; ++x) { d[x*4+0]=s[x*4+2]; d[x*4+1]=s[x*4+1]; d[x*4+2]=s[x*4+0]; d[x*4+3]=s[x*4+3]; } }
+       pad.mIsImage = true; pad.mLoaded = true;
+       pad.mTrimStart = 0; pad.mTrimEnd = 1; pad.mFps = 30.0f;
+       pad.mCachedW = w; pad.mCachedH = h;
+       if (mEditIndex == index) SyncEditVars();
+       return;
+    }
 
    // video/GIF via MovieClip
    auto clip = mVideoEngine.createClipFromFile(juce::URL(f));
    pad.mClip = std::dynamic_pointer_cast<foleys::MovieClip>(clip);
    if (!pad.mClip) return;
 
-   pad.mClip->prepareToPlay(1024, gSampleRate);
+   double sr = gSampleRate > 0 ? gSampleRate : 44100.0;
+   pad.mClip->prepareToPlay(gBufferSize, sr);
    foleys::Size sz = pad.mClip->getVideoSize();
    pad.mLoaded = sz.width > 0 && sz.height > 0;
    double dur = pad.mClip->getLengthInSeconds();
@@ -597,9 +638,9 @@ void VideoDrumSampler::ClearPad(int index)
    if (index < 0 || index >= kNumPads) return;
    auto& pad = mPads[index];
    if (mFBO) { NVGcontext* n = mFBO->GetNVGContext(); if (n && pad.mNvgHandle >= 0) { nvgDeleteImage(n, pad.mNvgHandle); pad.mNvgHandle = -1; } }
-   pad.mClip.reset(); pad.mLoaded = false; pad.mActive = false; pad.mIsImage = false;
-   pad.mTrimStart = 0; pad.mTrimEnd = 0; pad.mCachedW = 0; pad.mCachedH = 0;
-   pad.mTriggerFlashTime = 0;
+    pad.mClip.reset(); pad.mLoaded = false; pad.mActive = false; pad.mIsImage = false;
+    pad.mTrimStart = 0; pad.mTrimEnd = 0; pad.mCachedW = 0; pad.mCachedH = 0;
+    pad.mImageData.clear(); pad.mTriggerFlashTime = 0;
 }
 
 std::string VideoDrumSampler::FindFFmpeg()
@@ -652,8 +693,10 @@ void VideoDrumSampler::ConsolidateAll()
 
       std::string cmd = "\"" + ffmpeg + "\" -y -i \"" + pad.mVideoPath + "\" -ss " +
          juce::String(startSec, 3).toStdString() + " -to " + juce::String(endSec, 3).toStdString() +
-         " -c copy \"" + dst.getFullPathName().toStdString() + "\" 2>nul";
-      system(cmd.c_str());
+         " -c copy \"" + dst.getFullPathName().toStdString() + "\"";
+      int ret = std::system(cmd.c_str());
+      if (ret != 0)
+         ofLog() << "consolidate pad " << (i + 1) << " failed (exit " << ret << ")";
 
       if (dst.existsAsFile() && dst.getSize() > 0) {
          pad.mVideoPath = dst.getFullPathName().toStdString();

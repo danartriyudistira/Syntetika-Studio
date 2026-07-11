@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.3] - 2026-07-11
+
+### Fixed
+- **VideoPlayerModule**: Video playback 2x speed — root cause was `gSampleRate`/`gBufferSize` mismatched between user preferences and actual audio device. After `AudioDeviceManager::initialise()`, globals now sync from actual device values instead of preferences only.
+- **ModularSynth**: `mIOBufferSize` now syncs from `gBufferSize` every audio callback to prevent loop iteration mismatch. `elapsed` uses `gBufferSize` instead of `mIOBufferSize` for correct per-iteration time advancement.
+- **VideoPlayerModule**: Removed feedback loop where `FloatSliderUpdated` triggered `SetPosition()` every frame during playback, causing unnecessary seek + FIFO clear.
+- **VideoPlayerModule**: Removed double-seek in `SetPosition()` — direct `setNextReadPosition` call removed, only atomic pending flag used.
+- **MovieClip::isFrameAvailable**: Removed broken bounds check that mixed native sample rate with time_base units, causing premature frame availability.
+- **FFmpegReader::setPosition**: `av_seek_frame` now receives timestamps in stream time_base units via `av_rescale_q` instead of raw samples.
+- **CMake**: Duplicate foleys_video_engine block removed from `libs/CMakeLists.txt` — `add_subdirectory()` was called twice
+- **CMake**: JUCE version conflict resolved — foleys's bundled `FindJUCE.cmake` would download JUCE 6 via FetchContent, conflicting with the project's JUCE 7.0.12
+- **CMake**: FFmpeg integration aligned — local FFmpeg path check now creates `ffmpeg::ffmpeg` imported target so foleys's `find_package(ffmpeg)` succeeds without FetchContent download
+- **FFmpeg DLL copy**: Guarded behind `SYNTETIKA_DISABLE_FOLEYS` check; warning emitted if DLLs missing at runtime
+- **VideoPlayerModule**: NVG image leak fixed — old NanoVG image handle now properly deleted before FBO recreation on dimension change
+- **VideoPlayerModule**: `mSpeedRange` bounds clamped in LoadState to prevent OOB array access on corrupted save files
+- **VideoDrumSampler**: Consolidate `system()` call now checks return code and displays error to info label
+
 ## [1.1.2] - 2026-07-09
 
 ### Added

@@ -835,6 +835,9 @@ if(NOT SYNTETIKA_DISABLE_FOLEYS)
     VideoPlayerModule.cpp
     VideoPlayerModule.h
     )
+  target_include_directories(Syntetika PRIVATE
+    "${CMAKE_SOURCE_DIR}/libs/foleys_video_engine"
+    )
 else()
   target_compile_definitions(Syntetika PRIVATE SYNTETIKA_DISABLE_FOLEYS=1)
 endif()
@@ -851,16 +854,24 @@ if(SYNTETIKA_PORTABLE)
         )
 endif()
 
-if(WIN32)
+if(WIN32 AND NOT SYNTETIKA_DISABLE_FOLEYS)
     set(FFMPEG_BIN "${CMAKE_SOURCE_DIR}/../ffmpeg_dev/ffmpeg-master-latest-win64-gpl-shared/bin")
     if(EXISTS "${FFMPEG_BIN}")
         file(GLOB FFMPEG_DLLS "${FFMPEG_BIN}/*.dll")
         if(FFMPEG_DLLS)
             add_custom_command(TARGET Syntetika POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FFMPEG_DLLS} "$<TARGET_FILE_DIR:Syntetika>"
-                COMMENT "Copying FFmpeg DLLs to output..."
+                COMMENT "Copying FFmpeg DLLs to output directory..."
             )
         endif()
+        if(EXISTS "${FFMPEG_BIN}/ffmpeg.exe")
+            add_custom_command(TARGET Syntetika POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different "${FFMPEG_BIN}/ffmpeg.exe" "$<TARGET_FILE_DIR:Syntetika>"
+                COMMENT "Copying ffmpeg.exe to output directory..."
+            )
+        endif()
+    else()
+        message(WARNING "FFmpeg dev not found at ${FFMPEG_BIN}. Video modules may fail at runtime.")
     endif()
 endif()
 
@@ -1067,6 +1078,30 @@ if (APPLE)
              POST_BUILD
              COMMAND ${CMAKE_SOURCE_DIR}/scripts/installer_macOS/make_installer.sh "${output_dir}" "${CMAKE_SOURCE_DIR}/scripts/installer_macOS" "${SYNTETIKA_NIGHTLY_DIR}" "${CMAKE_PROJECT_VERSION}"
              )
+endif()
+
+# ── SyntetikaConvert — standalone video converter ──
+if(NOT SYNTETIKA_DISABLE_FOLEYS)
+  add_executable(syntetikaconvert
+    SyntetikaConvert.cpp
+    )
+  if(WIN32)
+    set_target_properties(syntetikaconvert PROPERTIES
+      WIN32_EXECUTABLE FALSE
+      )
+    # Copy ffmpeg.exe + DLLs from Syntetika output to syntetikaconvert output
+    if(EXISTS "${CMAKE_SOURCE_DIR}/../ffmpeg_dev/ffmpeg-master-latest-win64-gpl-shared/bin")
+      file(GLOB FFMPEG_DLLS "${CMAKE_SOURCE_DIR}/../ffmpeg_dev/ffmpeg-master-latest-win64-gpl-shared/bin/*.dll")
+      add_custom_command(TARGET syntetikaconvert POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+          "${CMAKE_SOURCE_DIR}/../ffmpeg_dev/ffmpeg-master-latest-win64-gpl-shared/bin/ffmpeg.exe"
+          "$<TARGET_FILE_DIR:syntetikaconvert>"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FFMPEG_DLLS}
+          "$<TARGET_FILE_DIR:syntetikaconvert>"
+        COMMENT "Copying ffmpeg.exe + DLLs for syntetikaconvert..."
+        )
+    endif()
+  endif()
 endif()
 
 # CI Pipeline {{{

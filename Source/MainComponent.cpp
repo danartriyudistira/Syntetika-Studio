@@ -272,15 +272,28 @@ public:
             ofLog() << "warning: requested input device '" << inputDevice << "' not found, using '"
                     << loadedSetup.inputDeviceName << "' instead";
          }
-         else if (loadedSetup.bufferSize != gBufferSize / UserPrefs.oversampling.Get())
+
          {
-            ofLog() << "warning: requested buffer size " << (gBufferSize / UserPrefs.oversampling.Get())
-                    << " not available, using " << loadedSetup.bufferSize;
-         }
-         else if (loadedSetup.sampleRate != gSampleRate / UserPrefs.oversampling.Get())
-         {
-            ofLog() << "warning: requested sample rate " << (gSampleRate / UserPrefs.oversampling.Get())
-                    << " not available, using " << loadedSetup.sampleRate;
+            bool needsGlobalsUpdate = false;
+            int actualRate = (int)loadedSetup.sampleRate;
+            int actualSize = (int)loadedSetup.bufferSize;
+
+            if (actualSize != gBufferSize / UserPrefs.oversampling.Get())
+            {
+               ofLog() << "warning: requested buffer size " << (gBufferSize / UserPrefs.oversampling.Get())
+                       << " not available, using " << actualSize << " - adjusting";
+               needsGlobalsUpdate = true;
+            }
+
+            if (actualRate != gSampleRate / UserPrefs.oversampling.Get())
+            {
+               ofLog() << "warning: requested sample rate " << (gSampleRate / UserPrefs.oversampling.Get())
+                       << " not available, using " << actualRate << " - adjusting";
+               needsGlobalsUpdate = true;
+            }
+
+            if (needsGlobalsUpdate)
+               SetGlobalSampleRateAndBufferSize(actualRate, actualSize);
          }
 
          ofLog() << "output: " << loadedSetup.outputDeviceName << "   input: " << loadedSetup.inputDeviceName;

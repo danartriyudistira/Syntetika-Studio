@@ -5,7 +5,6 @@
 #include "ModularSynth.h"
 #include "Profiler.h"
 #include "IAudioReceiver.h"
-#include "Transport.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include <algorithm>
@@ -52,7 +51,11 @@ void VideoPlayerModule::CreateUIControls()
    mStopButton = new ClickButton(this, "stop", x, kControlY); x += 42;
    AddUIControl(mStopButton);
 
-   // Row 2: nudge + cue + loop + speed
+   x += 4;
+   mConvertButton = new ClickButton(this, "convert", x, kControlY);
+   AddUIControl(mConvertButton);
+
+   // Row 2: nudge + cue group + trim/loop
    x = 3;
    mNudgeLeftButton = new ClickButton(this, "<", x, kRow2Y); x += 22;
    AddUIControl(mNudgeLeftButton);
@@ -63,42 +66,27 @@ void VideoPlayerModule::CreateUIControls()
    mCueButton = new ClickButton(this, "cue", x, kRow2Y); x += 38;
    AddUIControl(mCueButton);
 
+   mCueModeButton = new ClickButton(this, "jump", x, kRow2Y); x += 36;
+   AddUIControl(mCueModeButton);
+
+   mCueClearButton = new ClickButton(this, "X", x, kRow2Y); x += 20;
+   AddUIControl(mCueClearButton);
+
+   x += 2;
    mLoopCheckbox = new Checkbox(this, "loop", x, kRow2Y, &mLoop); x += 46;
    AddUIControl(mLoopCheckbox);
 
-   mLoopInButton = new ClickButton(this, "in", x, kRow2Y); x += 30;
-   AddUIControl(mLoopInButton);
+   mTrimInButton = new ClickButton(this, "trim A", x, kRow2Y); x += 46;
+   AddUIControl(mTrimInButton);
 
-   mLoopOutButton = new ClickButton(this, "out", x, kRow2Y); x += 36;
-   AddUIControl(mLoopOutButton);
+   mTrimOutButton = new ClickButton(this, "trim B", x, kRow2Y); x += 46;
+   AddUIControl(mTrimOutButton);
 
-   mLoopClearButton = new ClickButton(this, "clr", x, kRow2Y); x += 32;
-   AddUIControl(mLoopClearButton);
+   mTrimClearButton = new ClickButton(this, "clr", x, kRow2Y); x += 32;
+   AddUIControl(mTrimClearButton);
 
-   x += 2;
-   mSpeedSlider = new FloatSlider(this, "spd", x, kRow2Y, 80, kControlH, &mSpeed, 0.1f, 8.0f, 2);
-   AddUIControl(mSpeedSlider);
-
-   // Row 3: dropdowns + BPM sync + hotcues
-   mSpeedRangeDropdown = new DropdownList(this, "range", 3, kRow3Y, (int*)&mSpeedRange);
-   mSpeedRangeDropdown->AddLabel("1x", kSpeedRange_1x);
-   mSpeedRangeDropdown->AddLabel("2x", kSpeedRange_2x);
-   mSpeedRangeDropdown->AddLabel("4x", kSpeedRange_4x);
-   mSpeedRangeDropdown->AddLabel("8x", kSpeedRange_8x);
-   AddUIControl(mSpeedRangeDropdown);
-
-   mCueModeDropdown = new DropdownList(this, "cue mode", 80, kRow3Y, (int*)&mCueMode);
-   mCueModeDropdown->AddLabel("jump", kCueMode_Jump);
-   mCueModeDropdown->AddLabel("set", kCueMode_Set);
-   AddUIControl(mCueModeDropdown);
-
-   mTempoSlider = new FloatSlider(this, "bpm", 160, kRow3Y, 55, kControlH, &mTempo, 40.0f, 250.0f, 1);
-   AddUIControl(mTempoSlider);
-
-   mSyncCheckbox = new Checkbox(this, "sync", 220, kRow3Y, &mSync);
-   AddUIControl(mSyncCheckbox);
-
-   float hx = 250;
+   // Row 3: hotcues
+   float hx = 3;
    for (int i = 0; i < kNumHotcues; ++i)
    {
       mHotcuePosition[i] = -1;
@@ -122,8 +110,6 @@ void VideoPlayerModule::CreateUIControls()
    mVisualCable->SetManualPosition(mWidth, mHeight - 10);
    mVisualCable->SetManualSide(PatchCableSource::Side::kRight);
    AddPatchCableSource(mVisualCable);
-
-   mSpeedSlider->SetExtents(0.05f, mSpeedRangeValues[mSpeedRange]);
 }
 
 void VideoPlayerModule::Process(double time)
@@ -135,7 +121,6 @@ void VideoPlayerModule::Process(double time)
       if (mClip)
       {
          mClip->setNextReadPosition((int64_t)(mSeekTarget * mClip->getSampleRate()));
-         mClip->waitForSamplesReady(512, 30);
       }
    }
 
@@ -180,15 +165,15 @@ void VideoPlayerModule::PlayNote(double time, int pitch, int velocity, int voice
 
    if (velocity > 0)
    {
-      if (mHotcuePosition[slot] >= 0)
+      if (mCueMode == kCueMode_Set || mHotcuePosition[slot] < 0)
+      {
+         mHotcuePosition[slot] = mPlayhead;
+      }
+      else
       {
          if (!mPlaying)
             mPlaying = true;
          SetPosition(mHotcuePosition[slot]);
-      }
-      else
-      {
-         mHotcuePosition[slot] = mPlayhead;
       }
    }
 }
@@ -197,132 +182,175 @@ void VideoPlayerModule::ButtonClicked(ClickButton* button, double time)
 {
    if (button == mOpenButton)
       LoadFile();
-    else if (button == mPlayButton)
+    else if (button == mConvertButton)
     {
-       if (mHasVideo)
+       if (mHasVideo && !mVideoPath.empty())
        {
-          if (mPlayhead >= mDuration)
-             SetPosition(0);
-          mPlaying = true;
-          mPlayStartTime = gTime * 0.001 - mPlayhead / mSpeed;
-          mSeekTarget = mPlayhead;
-          mSeekPending.store(true, std::memory_order_release);
-          mLastFrameTimecode = -1;
+          std::string outPath = mVideoPath;
+          size_t dot = outPath.rfind('.');
+          if (dot != std::string::npos) outPath.insert(dot, "_opt");
+          else outPath += "_opt.mp4";
+
+          juce::File exeDir = juce::File::getSpecialLocation(juce::File::currentExecutableFile).getParentDirectory();
+          juce::File converter = exeDir.getChildFile("syntetikaconvert.exe");
+          if (!converter.existsAsFile())
+          {
+             mStatusMsg = "syntetikaconvert.exe missing";
+             ofLog() << "VideoPlayer convert: syntetikaconvert.exe not found";
+             return;
+          }
+
+          mStatusMsg = "Converting...";
+          juce::String cmd = converter.getFullPathName() + " \"" + mVideoPath + "\" \"" + outPath + "\"";
+          juce::ChildProcess proc;
+          if (proc.start(cmd))
+          {
+             proc.waitForProcessToFinish(60000);
+             int exitCode = proc.getExitCode();
+             if (exitCode == 0 && juce::File(outPath).existsAsFile())
+             {
+                mStatusMsg = "Done!";
+                LoadFromPath(outPath);
+             }
+             else
+             {
+                mStatusMsg = "Convert failed (exit " + juce::String(exitCode).toStdString() + ")";
+                ofLog() << "VideoPlayer convert failed (exit " << exitCode << ")";
+             }
+          }
+          else
+          {
+             mStatusMsg = "Convert failed to start";
+             ofLog() << "VideoPlayer convert: failed to start process";
+          }
        }
     }
+   else if (button == mPlayButton)
+   {
+      if (mHasVideo)
+      {
+         if (mTrimActive)
+            SetPosition(mTrimIn);
+         else if (mPlayhead >= mDuration)
+            SetPosition(0);
+          mPlaying = true;
+          mPlayStartTime = gTime * 0.001 - mPlayhead;
+          mSeekTarget = mPlayhead;
+          mSeekPending.store(true, std::memory_order_release);
+         mLastFrameTimecode = -1;
+      }
+   }
    else if (button == mPauseButton)
       mPlaying = false;
    else if (button == mStopButton)
    {
       mPlaying = false;
-      SetPosition(0);
+      SetPosition(mTrimActive ? mTrimIn : 0);
    }
-    else if (button == mCueButton)
-    {
-       if (mHasCue)
-       {
-          SetPosition(mCuePoint);
-       }
-       else
-       {
-          mHasCue = true;
-          mCuePoint = mPlayhead;
-       }
-    }
-    else if (button == mNudgeLeftButton)
-    {
-       double nudgeSec = mDuration > 0 ? 0.1 : 0.05;
-       SetPosition(mPlayhead - nudgeSec);
-    }
-    else if (button == mNudgeRightButton)
-    {
-       double nudgeSec = mDuration > 0 ? 0.1 : 0.05;
-       SetPosition(mPlayhead + nudgeSec);
-    }
-   else if (button == mLoopInButton)
+   else if (button == mCueButton)
    {
-      if (mLoopOut >= 0 && mPlayhead > mLoopOut)
-         mLoopIn = mLoopOut;
+      if (mHasCue)
+      {
+         SetPosition(mCuePoint);
+      }
       else
-         mLoopIn = mPlayhead;
-      if (mLoopIn >= 0 && mLoopOut >= 0 && mLoopOut > mLoopIn)
-         mLoopSectionActive = true;
+      {
+         mHasCue = true;
+         mCuePoint = mPlayhead;
+      }
    }
-   else if (button == mLoopOutButton)
+   else if (button == mCueModeButton)
    {
-      if (mLoopIn >= 0 && mPlayhead < mLoopIn)
-         mLoopOut = mLoopIn;
-      else
-         mLoopOut = mPlayhead;
-      if (mLoopIn >= 0 && mLoopOut >= 0 && mLoopOut > mLoopIn)
-         mLoopSectionActive = true;
+      mCueMode = (mCueMode == kCueMode_Jump) ? kCueMode_Set : kCueMode_Jump;
+      mCueModeButton->SetLabel(mCueMode == kCueMode_Jump ? "jump" : "set");
    }
-    else if (button == mLoopClearButton)
-    {
-       mLoopIn = -1;
-       mLoopOut = -1;
-       mLoopSectionActive = false;
-    }
-    else
-    {
-        for (int i = 0; i < kNumHotcues; ++i)
-        {
-           if (button == mHotcueButton[i])
-           {
-              if (!mHasVideo)
-                 return;
-              if (mHotcuePosition[i] < 0)
-              {
-                 mHotcuePosition[i] = mPlayhead;
-              }
-              else
-              {
-                 if (!mPlaying)
-                    mPlaying = true;
-                 SetPosition(mHotcuePosition[i]);
-              }
-              return;
-           }
-        }
-    }
+   else if (button == mCueClearButton)
+   {
+      mHasCue = false;
+      mCuePoint = 0;
+   }
+   else if (button == mNudgeLeftButton)
+   {
+      double nudgeSec = mDuration > 0 ? 0.1 : 0.05;
+      SetPosition(mPlayhead - nudgeSec);
+   }
+   else if (button == mNudgeRightButton)
+   {
+      double nudgeSec = mDuration > 0 ? 0.1 : 0.05;
+      SetPosition(mPlayhead + nudgeSec);
+   }
+   else if (button == mTrimInButton)
+   {
+      if (mTrimOut >= 0 && mPlayhead > mTrimOut)
+         mTrimIn = mTrimOut;
+      else
+         mTrimIn = mPlayhead;
+      if (mTrimIn >= 0 && mTrimOut >= 0 && mTrimOut > mTrimIn)
+         mTrimActive = true;
+      else if (mTrimOut >= 0 && mPlayhead > mTrimOut)
+      {
+         mTrimOut = mPlayhead;
+         mTrimActive = true;
+      }
+   }
+   else if (button == mTrimOutButton)
+   {
+      if (mTrimIn >= 0 && mPlayhead < mTrimIn)
+         mTrimOut = mTrimIn;
+      else
+         mTrimOut = mPlayhead;
+      if (mTrimIn >= 0 && mTrimOut >= 0 && mTrimOut > mTrimIn)
+         mTrimActive = true;
+      else if (mTrimIn >= 0 && mPlayhead < mTrimIn)
+      {
+         mTrimIn = mPlayhead;
+         mTrimActive = true;
+      }
+   }
+   else if (button == mTrimClearButton)
+   {
+      mTrimIn = -1;
+      mTrimOut = -1;
+      mTrimActive = false;
+   }
+   else
+   {
+      for (int i = 0; i < kNumHotcues; ++i)
+      {
+         if (button == mHotcueButton[i])
+         {
+            if (!mHasVideo)
+               return;
+            if (mCueMode == kCueMode_Set)
+            {
+               mHotcuePosition[i] = mPlayhead;
+            }
+            else if (mHotcuePosition[i] >= 0)
+            {
+               if (!mPlaying)
+                  mPlaying = true;
+               SetPosition(mHotcuePosition[i]);
+            }
+            else
+            {
+               mHotcuePosition[i] = mPlayhead;
+            }
+            return;
+         }
+      }
+   }
 }
 
 void VideoPlayerModule::FloatSliderUpdated(FloatSlider* slider, float oldVal, double time)
 {
-   if (slider == mPositionSlider && !mScrubbing)
+   if (slider == mPositionSlider && !mScrubbing && !mPlaying)
    {
       SetPosition(mPlayheadFloat * mDuration);
-   }
-
-   if (slider == mSpeedSlider)
-   {
-      if (mPlaying)
-         mPlayStartTime = gTime * 0.001 - mPlayhead / mSpeed;
-   }
-
-   if (slider == mTempoSlider)
-   {
-      if (!mSync)
-      {
-         mBaseBPM = mTempo;
-      }
    }
 }
 
 void VideoPlayerModule::CheckboxUpdated(Checkbox* checkbox, double time)
 {
-}
-
-void VideoPlayerModule::DropdownUpdated(DropdownList* list, int oldVal, double time)
-{
-   if (list == mSpeedRangeDropdown)
-   {
-      float maxSpd = mSpeedRangeValues[mSpeedRange];
-      mSpeedSlider->SetExtents(0.1f, maxSpd);
-      mSpeed = ofClamp(mSpeed, 0.1f, maxSpd);
-      if (mPlaying)
-         mPlayStartTime = gTime * 0.001 - mPlayhead / mSpeed;
-   }
 }
 
 void VideoPlayerModule::GetModuleDimensions(float& width, float& height)
@@ -334,7 +362,7 @@ void VideoPlayerModule::GetModuleDimensions(float& width, float& height)
 void VideoPlayerModule::Resize(float width, float height)
 {
    mWidth = ofClamp(width, 380, 9999);
-   mHeight = ofClamp(height, 200, 9999);
+   mHeight = ofClamp(height, 180, 9999);
 
    if (mPositionSlider)
       mPositionSlider->SetDimensions((int)mWidth - 6, kControlH);
@@ -360,7 +388,6 @@ void VideoPlayerModule::DrawModule()
    if (Minimized() || !IsVisible())
       return;
 
-   // ── dark background behind all controls ──
    ofPushStyle();
    ofSetColor(25, 25, 35);
    ofFill();
@@ -371,23 +398,21 @@ void VideoPlayerModule::DrawModule()
    mPlayButton->Draw();
    mPauseButton->Draw();
    mStopButton->Draw();
+   mConvertButton->Draw();
    mNudgeLeftButton->Draw();
    mNudgeRightButton->Draw();
    mCueButton->Draw();
-   mSpeedSlider->Draw();
+   mCueModeButton->Draw();
+   mCueClearButton->Draw();
    mLoopCheckbox->Draw();
-   mLoopInButton->Draw();
-   mLoopOutButton->Draw();
-   mLoopClearButton->Draw();
+   mTrimInButton->Draw();
+   mTrimOutButton->Draw();
+   mTrimClearButton->Draw();
    mPositionSlider->Draw();
-    mSpeedRangeDropdown->Draw();
-    mCueModeDropdown->Draw();
-    mTempoSlider->Draw();
-    mSyncCheckbox->Draw();
-    for (int i = 0; i < kNumHotcues; ++i)
-       mHotcueButton[i]->Draw();
+   for (int i = 0; i < kNumHotcues; ++i)
+      mHotcueButton[i]->Draw();
 
-    if (!mHasVideo)
+   if (!mHasVideo)
    {
       ofPushStyle();
       ofSetColor(80, 80, 100);
@@ -396,7 +421,7 @@ void VideoPlayerModule::DrawModule()
       return;
    }
 
-   // ── info bar ──
+   // info bar
    ofPushStyle();
    ofFill();
    ofSetColor(0, 0, 0, 200);
@@ -406,123 +431,123 @@ void VideoPlayerModule::DrawModule()
    std::string info = std::string(TimeStr(mPlayhead)) + " / " + std::string(TimeStr(mDuration))
       + "  " + ofToString((int)(mFps + 0.5f)) + "fps"
       + "  f" + ofToString(currentFrame);
-    if (mPlaying)
-       info += "  [PLAY]";
-    else
-       info += "  [STOP]";
-    if (mSync)
-       info += "  [SYNC " + ofToString((int)(mTempo + 0.5f)) + "bpm]";
-    if (mLoop)
+   if (mPlaying)
+      info += "  [PLAY]";
+   else
+      info += "  [STOP]";
+   if (mLoop)
       info += "  [LOOP]";
-   if (mLoopSectionActive)
-      info += "  [A-LOOP " + std::string(TimeStr(mLoopIn)) + "-" + std::string(TimeStr(mLoopOut)) + "]";
+   if (mTrimActive)
+      info += "  [TRIM " + std::string(TimeStr(mTrimIn)) + "-" + std::string(TimeStr(mTrimOut)) + "]";
    if (mHasCue)
       info += "  [CUE " + std::string(TimeStr(mCuePoint)) + "]";
-   if (mClip && mClip->hasAudio())
-      info += "  [AUDIO]";
-   DrawTextNormal(info, kMargin + 3, kInfoY + 4, 8);
+    if (mClip && mClip->hasAudio())
+       info += "  [AUDIO]";
+    if (!mStatusMsg.empty())
+       info += "  " + mStatusMsg;
+    DrawTextNormal(info, kMargin + 3, kInfoY + 4, 8);
    ofPopStyle();
 
-    // ── single zoomable waveform timeline ──
-    float tw = mWidth - kMargin * 2;
-    float tY = kTimelineY;
-    float tH = kTimelineH;
-    ofPushStyle();
-    ofSetColor(20, 20, 30);
-    ofFill();
-    ofRect(kMargin, tY, tw, tH);
-    ofSetColor(50, 50, 60);
-    ofNoFill();
-    ofRect(kMargin, tY, tw, tH);
+   // waveform timeline
+   float tw = mWidth - kMargin * 2;
+   float tY = kTimelineY;
+   float tH = kTimelineH;
+   ofPushStyle();
+   ofSetColor(20, 20, 30);
+   ofFill();
+   ofRect(kMargin, tY, tw, tH);
+   ofSetColor(50, 50, 60);
+   ofNoFill();
+   ofRect(kMargin, tY, tw, tH);
 
-    double zs = mTimelineViewStart;
-    double dur = mScrollZoomSeconds;
-    if (zs + dur > mDuration) dur = mDuration - zs;
-    if (dur <= 0) dur = mScrollZoomSeconds;
+   double zs = mTimelineViewStart;
+   double dur = mScrollZoomSeconds;
+   if (zs + dur > mDuration) dur = mDuration - zs;
+   if (dur <= 0) dur = mScrollZoomSeconds;
 
-    if (mClip && mClip->hasAudio() && !mWaveformOverview.empty())
-    {
-       double ratio = (double)mWaveformOverview.size() / mDuration;
-       ofPushStyle();
-       ofSetColor(80, 160, 255, 150);
-       float cy = tY + tH / 2;
-       float maxH = (tH - 6) / 2;
-       for (int px = 0; px < (int)tw; ++px)
-       {
-          double t = zs + px * dur / tw;
-          int idx = (int)(t * ratio);
-          if (idx < 0) idx = 0;
-          if (idx >= (int)mWaveformOverview.size()) idx = (int)mWaveformOverview.size() - 1;
-          float h = mWaveformOverview[idx] * maxH;
-          if (h > 0.5f)
-             ofLine(kMargin + px, cy - h, kMargin + px, cy + h);
-       }
-       ofPopStyle();
-    }
+   if (mClip && mClip->hasAudio() && !mWaveformOverview.empty())
+   {
+      double ratio = (double)mWaveformOverview.size() / mDuration;
+      ofPushStyle();
+      ofSetColor(80, 160, 255, 150);
+      float cy = tY + tH / 2;
+      float maxH = (tH - 6) / 2;
+      for (int px = 0; px < (int)tw; ++px)
+      {
+         double t = zs + px * dur / tw;
+         int idx = (int)(t * ratio);
+         if (idx < 0) idx = 0;
+         if (idx >= (int)mWaveformOverview.size()) idx = (int)mWaveformOverview.size() - 1;
+         float h = mWaveformOverview[idx] * maxH;
+         if (h > 0.5f)
+            ofLine(kMargin + px, cy - h, kMargin + px, cy + h);
+      }
+      ofPopStyle();
+   }
 
-    // playhead
-    float phPx = SecondsToPixel(mPlayhead);
-    ofSetColor(255, 200, 50);
-    ofSetLineWidth(2);
-    ofLine(phPx, tY, phPx, tY + tH);
+   // playhead
+   float phPx = SecondsToPixel(mPlayhead);
+   ofSetColor(255, 200, 50);
+   ofSetLineWidth(2);
+   ofLine(phPx, tY, phPx, tY + tH);
 
-    // loop markers
-    if (mLoopIn >= 0)
-    {
-       ofSetColor(0, 200, 100);
-       ofLine(SecondsToPixel(mLoopIn), tY, SecondsToPixel(mLoopIn), tY + tH);
-    }
-    if (mLoopOut >= 0)
-    {
-       ofSetColor(200, 50, 50);
-       ofLine(SecondsToPixel(mLoopOut), tY, SecondsToPixel(mLoopOut), tY + tH);
-    }
-    if (mLoopSectionActive && mLoopIn >= 0 && mLoopOut >= 0)
-    {
-       float lx = SecondsToPixel(mLoopIn);
-       float rx = SecondsToPixel(mLoopOut);
-       ofSetColor(0, 200, 100, 40);
-       ofFill();
-       ofRect(lx, tY, rx - lx, tH);
-    }
-    if (mHasCue)
-    {
-       float cx = SecondsToPixel(mCuePoint);
-       ofSetColor(100, 200, 255);
-       ofTriangle(cx - 5, tY + tH, cx + 5, tY + tH, cx, tY + tH - 10);
-    }
+   // trim markers
+   if (mTrimIn >= 0)
+   {
+      ofSetColor(0, 200, 100);
+      ofLine(SecondsToPixel(mTrimIn), tY, SecondsToPixel(mTrimIn), tY + tH);
+   }
+   if (mTrimOut >= 0)
+   {
+      ofSetColor(200, 50, 50);
+      ofLine(SecondsToPixel(mTrimOut), tY, SecondsToPixel(mTrimOut), tY + tH);
+   }
+   if (mTrimActive && mTrimIn >= 0 && mTrimOut >= 0)
+   {
+      float lx = SecondsToPixel(mTrimIn);
+      float rx = SecondsToPixel(mTrimOut);
+      ofSetColor(0, 200, 100, 40);
+      ofFill();
+      ofRect(lx, tY, rx - lx, tH);
+   }
+   if (mHasCue)
+   {
+      float cx = SecondsToPixel(mCuePoint);
+      ofSetColor(100, 200, 255);
+      ofTriangle(cx - 5, tY + tH, cx + 5, tY + tH, cx, tY + tH - 10);
+   }
 
-    // hotcue markers
-    ofColor hotColors[8] = {
-       ofColor(255,100,100), ofColor(255,180,60), ofColor(255,255,60),
-       ofColor(100,255,100), ofColor(60,220,255), ofColor(100,120,255),
-       ofColor(220,100,255), ofColor(255,255,255)
-    };
-    for (int i = 0; i < kNumHotcues; ++i)
-    {
-       if (mHotcuePosition[i] >= 0)
-       {
-          float hx = SecondsToPixel(mHotcuePosition[i]);
-          ofSetColor(hotColors[i]);
-          ofTriangle(hx - 4, tY, hx + 4, tY, hx, tY + 8);
-          DrawTextNormal(ofToString(i + 1), hx - 2, tY - 1, 8);
-       }
-    }
-    ofPopStyle();
+   // hotcue markers
+   ofColor hotColors[8] = {
+      ofColor(255,100,100), ofColor(255,180,60), ofColor(255,255,60),
+      ofColor(100,255,100), ofColor(60,220,255), ofColor(100,120,255),
+      ofColor(220,100,255), ofColor(255,255,255)
+   };
+   for (int i = 0; i < kNumHotcues; ++i)
+   {
+      if (mHotcuePosition[i] >= 0)
+      {
+         float hx = SecondsToPixel(mHotcuePosition[i]);
+         ofSetColor(hotColors[i]);
+         ofTriangle(hx - 4, tY, hx + 4, tY, hx, tY + 8);
+         DrawTextNormal(ofToString(i + 1), hx - 2, tY - 1, 8);
+      }
+   }
+   ofPopStyle();
 
-    // ── video preview below timeline ──
-    float previewTop = tY + tH + 2;
-    float previewH = mHeight - previewTop - kMargin;
-    if (mFBO && mFBO->IsValid() && previewH > 10)
-    {
-       ofPushStyle();
-       ofSetColor(50, 50, 60);
-       ofNoFill();
-       ofRect(kMargin - 1, previewTop - 1, mWidth - kMargin * 2 + 2, previewH + 2);
-       ofPopStyle();
-       mFBO->ReleaseDisplayImage();
-       mFBO->Draw(kMargin, previewTop, mWidth - kMargin * 2, previewH);
-    }
+   // video preview below timeline
+   float previewTop = tY + tH + 2;
+   float previewH = mHeight - previewTop - kMargin;
+   if (mFBO && mFBO->IsValid() && previewH > 10)
+   {
+      ofPushStyle();
+      ofSetColor(50, 50, 60);
+      ofNoFill();
+      ofRect(kMargin - 1, previewTop - 1, mWidth - kMargin * 2 + 2, previewH + 2);
+      ofPopStyle();
+      mFBO->ReleaseDisplayImage();
+      mFBO->Draw(kMargin, previewTop, mWidth - kMargin * 2, previewH);
+   }
 }
 
 void VideoPlayerModule::PostRender()
@@ -532,37 +557,50 @@ void VideoPlayerModule::PostRender()
 
    double t = gTime * 0.001;
 
-   if (mSync && TheTransport)
+   if (!mStatusMsg.empty())
    {
-      mTempo = TheTransport->GetTempo();
-      mSpeed = ofClamp(mTempo / mBaseBPM, 0.1f, 8.0f);
+      if (mStatusTime == 0) mStatusTime = t;
+      else if (t - mStatusTime > 3.0)
+         mStatusMsg.clear();
+   }
+   else
+   {
+      mStatusTime = 0;
    }
 
    if (mPlaying)
    {
-      double elapsed = t - mPlayStartTime;
-      mPlayhead = elapsed * mSpeed;
+      double elapsed = gTime * 0.001 - mPlayStartTime;
+      mPlayhead = elapsed;
 
-      if (mLoopSectionActive && mLoopIn >= 0 && mLoopOut >= 0 && mLoopOut > mLoopIn)
+      if (mTrimActive && mTrimIn >= 0 && mTrimOut >= 0 && mTrimOut > mTrimIn)
       {
-         if (mPlayhead >= mLoopOut)
+         if (mPlayhead >= mTrimOut)
          {
-            mPlayhead = mLoopIn;
-            mPlayStartTime = t - mPlayhead / mSpeed;
-            mSeekTarget = mPlayhead;
-            mSeekPending.store(true, std::memory_order_release);
-            mLastFrameTimecode = -1;
+            if (mLoop)
+            {
+               mPlayhead = mTrimIn;
+               mPlayStartTime = gTime * 0.001 - mPlayhead;
+               mSeekTarget = mPlayhead;
+               mSeekPending.store(true, std::memory_order_release);
+               mLastFrameTimecode = -1;
+            }
+            else
+            {
+               mPlayhead = mTrimOut;
+               mPlaying = false;
+            }
          }
       }
-      if (mLoop && mPlayhead >= mDuration)
+      else if (mLoop && mPlayhead >= mDuration)
       {
          mPlayhead = 0;
-         mPlayStartTime = t - mPlayhead / mSpeed;
+         mPlayStartTime = gTime * 0.001 - mPlayhead;
          mSeekTarget = mPlayhead;
          mSeekPending.store(true, std::memory_order_release);
          mLastFrameTimecode = -1;
       }
-      if (mPlayhead >= mDuration)
+      else if (!mLoop && mPlayhead >= mDuration)
       {
          mPlayhead = mDuration;
          mPlaying = false;
@@ -571,7 +609,7 @@ void VideoPlayerModule::PostRender()
       mPlayheadFloat = (float)(mDuration > 0 ? mPlayhead / mDuration : 0);
    }
 
-   // sync playhead from slider drag (slider directly writes mPlayheadFloat)
+   // sync playhead from slider drag
    if (!mPlaying && mDuration > 0)
    {
       double sliderPosition = (double)mPlayheadFloat * mDuration;
@@ -582,7 +620,7 @@ void VideoPlayerModule::PostRender()
       }
    }
 
-   // ── compute visible timeline window ──
+   // compute visible timeline window
    {
       double zs = mPlayhead - mScrollZoomSeconds / 2.0;
       double ze = mPlayhead + mScrollZoomSeconds / 2.0;
@@ -612,7 +650,6 @@ void VideoPlayerModule::PostRender()
       }
       else
       {
-         // paused scrubbing: use thumbnail reader for instant frame (no FIFO clear)
          if (mLastFrameTimecode < 0)
          {
             foleys::Size sz = mClip->getVideoSize();
@@ -627,15 +664,22 @@ void VideoPlayerModule::PostRender()
 
       if (newFrame)
       {
-          int w = img.getWidth();
-          int h = img.getHeight();
+         int w = img.getWidth();
+         int h = img.getHeight();
 
-          if (!mFBO || !mFBO->IsValid() || mFBO->GetWidth() != w || mFBO->GetHeight() != h)
-          {
-             delete mFBO;
-             mFBO = new VisualFBO();
-             mFBO->Create(std::max(64, w), std::max(64, h));
-          }
+         if (!mFBO || !mFBO->IsValid() || mFBO->GetWidth() != w || mFBO->GetHeight() != h)
+         {
+            if (mCurrentFrameHandle >= 0 && mFBO && mFBO->IsValid())
+            {
+               NVGcontext* oldNVG = mFBO->GetNVGContext();
+               if (oldNVG)
+                  nvgDeleteImage(oldNVG, mCurrentFrameHandle);
+               mCurrentFrameHandle = -1;
+            }
+            delete mFBO;
+            mFBO = new VisualFBO();
+            mFBO->Create(std::max(64, w), std::max(64, h));
+         }
 
          juce::Image::BitmapData bmp(img, juce::Image::BitmapData::readOnly);
          const uint8_t* srcData = (const uint8_t*)bmp.data;
@@ -707,7 +751,6 @@ void VideoPlayerModule::LoadFromPath(const std::string& path)
       return;
    }
 
-   // Metadata
    foleys::Size size = mClip->getVideoSize();
    mVideoW = size.width;
    mVideoH = size.height;
@@ -716,20 +759,22 @@ void VideoPlayerModule::LoadFromPath(const std::string& path)
    mFps = mClip->getFrameDurationInSeconds() > 0
       ? 1.0 / mClip->getFrameDurationInSeconds() : 30.0;
 
-    // Audio setup
-    mClip->prepareToPlay(1024, gSampleRate);
-    if (mClip->hasAudio())
-    {
-       mClip->setNextReadPosition(0);
-       ComputeWaveform();
-    }
+   double sr = gSampleRate > 0 ? gSampleRate : 44100.0;
+   mClip->prepareToPlay(gBufferSize, sr);
+   if (mClip->hasAudio())
+   {
+      mClip->setNextReadPosition(0);
+      ComputeWaveform();
+   }
 
    mHasVideo = true;
    mPlaying = false;
+   mStatusMsg.clear();
+   mStatusTime = 0;
    SetPosition(0);
-   mLoopIn = -1;
-   mLoopOut = -1;
-   mLoopSectionActive = false;
+   mTrimIn = -1;
+   mTrimOut = -1;
+   mTrimActive = false;
    mHasCue = false;
 }
 
@@ -747,9 +792,9 @@ void VideoPlayerModule::UnloadVideo()
    mClip.reset();
    mWaveformOverview.clear();
    mHasVideo = false;
-   mPlaying = false;
-   mPlayhead = 0;
-   mDuration = 0;
+    mPlaying = false;
+    mPlayhead = 0;
+    mDuration = 0;
    mVideoW = 0;
    mVideoH = 0;
    mFps = 30.0;
@@ -765,7 +810,7 @@ void VideoPlayerModule::SetPosition(double seconds)
    mPlayheadFloat = (float)(mDuration > 0 ? mPlayhead / mDuration : 0);
    if (mPlaying)
    {
-      mPlayStartTime = gTime * 0.001 - mPlayhead / mSpeed;
+      mPlayStartTime = gTime * 0.001 - mPlayhead;
       mSeekTarget = mPlayhead;
       mSeekPending.store(true, std::memory_order_release);
    }
@@ -786,7 +831,8 @@ void VideoPlayerModule::ComputeWaveform()
    if (!reader || !reader->isOpenedOk() || !reader->hasAudio())
       return;
 
-   reader->setOutputSampleRate(gSampleRate);
+   double sr = gSampleRate > 0 ? gSampleRate : 44100.0;
+   reader->setOutputSampleRate(sr);
    double totalSamples = (double)reader->getTotalLength();
    if (totalSamples <= 0)
       return;
@@ -800,10 +846,9 @@ void VideoPlayerModule::ComputeWaveform()
    foleys::VideoFifo tempVidFifo(2);
    foleys::AudioFifo tempAudFifo(65536);
    tempAudFifo.setNumChannels(numChannels);
-   tempAudFifo.setSampleRate((double)gSampleRate);
+   tempAudFifo.setSampleRate((double)sr);
    tempAudFifo.setNumSamples(48000);
 
-   // stride-based: read limited samples per pixel to avoid freeze on long videos
    const int maxSamplesPerPixel = 512;
    double stride = totalSamples / numPixels;
    if (stride > maxSamplesPerPixel)
@@ -886,6 +931,12 @@ void VideoPlayerModule::OnClicked(float x, float y, bool right)
 
    if (y >= kTimelineY && y < kTimelineY + kTimelineH)
    {
+      if (mHasCue && std::abs(x - SecondsToPixel(mCuePoint)) < 8)
+      {
+         mCueDragging = true;
+         return;
+      }
+
       if (dc)
       {
          mHasCue = true;
@@ -909,6 +960,12 @@ bool VideoPlayerModule::MouseMoved(float x, float y)
 
    if (!mHasVideo)
       return false;
+
+   if (mCueDragging)
+   {
+      mCuePoint = ofClamp(PixelToSeconds(x), 0.0, mDuration);
+      return true;
+   }
 
    if (mScrubbing && y >= kTimelineY && y < kTimelineY + kTimelineH)
    {
@@ -941,6 +998,7 @@ bool VideoPlayerModule::MouseScrolled(float x, float y, float scrollX, float scr
 void VideoPlayerModule::MouseReleased()
 {
    mScrubbing = false;
+   mCueDragging = false;
    IDrawableModule::MouseReleased();
 }
 
@@ -949,21 +1007,16 @@ void VideoPlayerModule::SaveState(FileStreamOut& out)
    IDrawableModule::SaveState(out);
    out << mVideoPath;
    out << mPlayhead;
-   out << mSpeed;
    out << mLoop;
-   out << mSpeedRange;
-   out << mCueMode;
-   out << mTempo;
-   out << mBaseBPM;
-   out << mSync;
    out << mHasCue;
    if (mHasCue)
       out << mCuePoint;
-   out << mLoopIn;
-   out << mLoopOut;
-   out << mLoopSectionActive;
+   out << mTrimIn;
+   out << mTrimOut;
+   out << mTrimActive;
    for (int i = 0; i < kNumHotcues; ++i)
       out << mHotcuePosition[i];
+   out << mCueMode;
 }
 
 void VideoPlayerModule::LoadState(FileStreamIn& in, int rev)
@@ -971,37 +1024,63 @@ void VideoPlayerModule::LoadState(FileStreamIn& in, int rev)
    IDrawableModule::LoadState(in, rev);
    in >> mVideoPath;
    in >> mPlayhead;
-   in >> mSpeed;
-   in >> mLoop;
-   if (rev >= 1)
-   {
-      in >> mSpeedRange;
-      in >> mCueMode;
-   }
-   if (rev >= 3)
-   {
-      in >> mTempo;
-      in >> mBaseBPM;
-      in >> mSync;
-   }
-   in >> mHasCue;
-   if (mHasCue)
-      in >> mCuePoint;
-   in >> mLoopIn;
-   in >> mLoopOut;
-   in >> mLoopSectionActive;
 
-   if (rev >= 2)
+   if (rev < 5)
    {
+      if (rev <= 3)
+      {
+         float dummySpeed; in >> dummySpeed;
+         in >> mLoop;
+         int dummyRange = 0, dummyCue = 0;
+         if (rev >= 1) { in >> dummyRange; in >> dummyCue; }
+         float dummyTempo = 0, dummyBase = 0; bool dummySync = false;
+         if (rev >= 3) { in >> dummyTempo; in >> dummyBase; in >> dummySync; }
+      }
+      else // rev == 4
+      {
+         in >> mLoop;
+         bool dummySync; in >> dummySync;
+      }
+
+      in >> mHasCue;
+      if (mHasCue) in >> mCuePoint;
+
+      if (rev >= 2)
+      {
+         double oldLoopIn; in >> oldLoopIn; mTrimIn = oldLoopIn;
+         double oldLoopOut; in >> oldLoopOut; mTrimOut = oldLoopOut;
+         bool oldActive; in >> oldActive; mTrimActive = oldActive;
+         for (int i = 0; i < kNumHotcues; ++i)
+            in >> mHotcuePosition[i];
+      }
+      else
+      {
+         double dummyTrimIn, dummyTrimOut; bool dummyTrimActive;
+         in >> dummyTrimIn; in >> dummyTrimOut; in >> dummyTrimActive;
+      }
+
+      if (rev >= 4)
+      {
+         float dummyBPM; in >> dummyBPM;
+         in >> mCueMode;
+      }
+      else
+      {
+         mCueMode = kCueMode_Jump;
+      }
+   }
+   else
+   {
+      in >> mLoop;
+      in >> mHasCue;
+      if (mHasCue) in >> mCuePoint;
+      in >> mTrimIn;
+      in >> mTrimOut;
+      in >> mTrimActive;
       for (int i = 0; i < kNumHotcues; ++i)
          in >> mHotcuePosition[i];
+      in >> mCueMode;
    }
-
-    if (rev >= 1 && mSpeedSlider)
-    {
-       mSpeedSlider->SetExtents(0.1f, mSpeedRangeValues[mSpeedRange]);
-       mSpeed = ofClamp(mSpeed, 0.1f, mSpeedRangeValues[mSpeedRange]);
-    }
 
    if (!mVideoPath.empty())
    {

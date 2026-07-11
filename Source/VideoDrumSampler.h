@@ -83,17 +83,17 @@ private:
       int mTrimStart{ 0 }, mTrimEnd{ 0 };
       float mStartOffset{ 0 };
 
-      std::shared_ptr<foleys::MovieClip> mClip;
-      bool mLoaded{ false };
-      bool mIsImage{ false };
-      int mNvgHandle{ -1 };
-      int mLastTimecode{ -1 };
-      int mCachedW{ 0 }, mCachedH{ 0 };
+       std::shared_ptr<foleys::MovieClip> mClip;
+       bool mLoaded{ false };
+       bool mIsImage{ false };
+       int mNvgHandle{ -1 };
+       int mLastTimecode{ -1 };
+       int mCachedW{ 0 }, mCachedH{ 0 };
+       std::vector<uint8_t> mImageData;
 
-      bool mActive{ false };
-      double mStartTime{ 0 };
-      double mTriggerFlashTime{ 0 };
-      int mCurrentFrame{ 0 };
+       bool mActive{ false };
+       double mStartTime{ 0 };
+       double mTriggerFlashTime{ 0 };
    };
 
    void OnClicked(float x, float y, bool right) override;
@@ -136,12 +136,12 @@ private:
    int mPianoRootNote{ 36 };
 
    FloatSlider* mEditVolSlider{ nullptr }, *mEditSpeedSlider{ nullptr }, *mEditPanSlider{ nullptr };
-   FloatSlider* mEditFpsSlider{ nullptr }, *mEditTrimStartSlider{ nullptr }, *mEditTrimEndSlider{ nullptr };
-   FloatSlider* mEditStartOffsetSlider{ nullptr };
-   Checkbox* mEditLoopCheckbox{ nullptr };
-   ClickButton* mLoadVideoButton{ nullptr }, *mClearPadButton{ nullptr };
-   ClickButton* mPlayPadButton{ nullptr }, *mStopPadButton{ nullptr };
-   ClickButton* mConsolidateButton{ nullptr };
+    FloatSlider* mEditFpsSlider{ nullptr }, *mEditTrimStartSlider{ nullptr }, *mEditTrimEndSlider{ nullptr };
+    Checkbox* mEditLoopCheckbox{ nullptr };
+    ClickButton* mLoadVideoButton{ nullptr }, *mClearPadButton{ nullptr };
+    ClickButton* mPlayPadButton{ nullptr }, *mStopPadButton{ nullptr };
+    ClickButton* mConsolidateButton{ nullptr };
+    ClickButton* mOptimizeButton{ nullptr };
 
    float mEditVol{ 1 }, mEditSpeed{ 1 }, mEditPan{ 0 }, mEditFps{ 30 };
    float mEditTrimStart{ 0 }, mEditTrimEnd{ 1 };
